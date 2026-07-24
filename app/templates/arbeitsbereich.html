@@ -2,42 +2,17 @@
 {% block titel %}Arbeitsbereich – A+ SmartDocs{% endblock %}
 {% block inhalt %}
 <section class="seitenrahmen">
-  <div class="seitenkopf">
-    <div><span class="uebertitel">Ihr Arbeitsbereich</span><h1>Guten Abend, Hossein.</h1><p>Alle Vorlagen, Dokumente und Nutzungswerte auf einen Blick.</p></div>
-    <a href="/vorlagen/neu" class="schaltflaeche primaer">Neue Vorlage <span>＋</span></a>
-  </div>
-
+  <div class="seitenkopf"><div><span class="uebertitel">Ihr Arbeitsbereich</span><h1>Guten Tag, {{ mitglied.name.split(' ')[0] }}.</h1><p>Vorlagen, Dokumente und Verbrauch Ihres Unternehmens auf einen Blick.</p></div><div class="seitenaktionen"><a href="/vorlagen/neu" class="schaltflaeche primaer">Neue Vorlage <span>＋</span></a></div></div>
   <div class="kennzahlenraster">
-    <article class="kennzahlkarte hervorgehoben"><div class="kartenzeichen">▧</div><div><small>Erstellte Dokumente</small><strong>{{ kennzahlen.dokumente }}</strong><span class="entwicklung positiv">↗ 18,4 % gegenüber Vormonat</span></div></article>
-    <article class="kennzahlkarte"><div class="kartenzeichen">◫</div><div><small>Aktive Vorlagen</small><strong>{{ vorlagen_liste|length }}</strong><span>davon 3 gemeinsam genutzt</span></div></article>
-    <article class="kennzahlkarte"><div class="kartenzeichen">⌁</div><div><small>Gesparte Arbeitszeit</small><strong>47,5 Std.</strong><span class="entwicklung positiv">↗ 9,2 Std. in diesem Monat</span></div></article>
-    <article class="kennzahlkarte"><div class="kartenzeichen">◎</div><div><small>Monatliche Nutzung</small><strong>68 %</strong><span>342 von 500 Dokumenten</span></div><div class="kreisfortschritt" style="--wert:68"><i>68</i></div></article>
+    <article class="kennzahlkarte hervorgehoben"><div class="kartenzeichen">▧</div><div><small>Erstellte Dokumente</small><strong>{{ kennzahlen.dokumente }}</strong><span class="entwicklung positiv">{{ kennzahlen.ausgaben }} Dateien im Archiv</span></div></article>
+    <article class="kennzahlkarte"><div class="kartenzeichen">◫</div><div><small>Aktive Vorlagen</small><strong>{{ kennzahlen.vorlagen }}</strong><span>von {{ kennzahlen.abonnement.vorlagen_limit }} möglichen Vorlagen</span></div></article>
+    <article class="kennzahlkarte"><div class="kartenzeichen">◎</div><div><small>Teammitglieder</small><strong>{{ kennzahlen.mitglieder }}</strong><span>einschließlich Kontoinhaber</span></div></article>
+    <article class="kennzahlkarte"><div class="kartenzeichen">↗</div><div><small>Monatliche Nutzung</small><strong>{{ kennzahlen.verbrauch_prozent }} %</strong><span>{{ kennzahlen.dokumente }} von {{ kennzahlen.dokument_limit }} Dokumenten</span></div><div class="kreisfortschritt" style="--wert:{{ kennzahlen.verbrauch_prozent }}"><i>{{ kennzahlen.verbrauch_prozent }}</i></div></article>
   </div>
-
+  <div class="schnellstart"><div><span class="schnellzeichen">✦</span><div><strong>Neue Dokumentart automatisieren</strong><p>Laden Sie ein vorhandenes Muster hoch und lassen Sie veränderliche Felder erkennen.</p></div></div><a href="/vorlagen/neu">Vorlage analysieren →</a></div>
   <div class="hauptgitter">
-    <section class="inhaltskarte breite-karte">
-      <div class="kartenkopf"><div><h2>Ihre Dokumentvorlagen</h2><p>Zuletzt bearbeitet und sofort einsatzbereit</p></div><a href="/vorlagen/neu">Alle Vorlagen anzeigen →</a></div>
-      <div class="vorlagenliste">
-        {% for eintrag in vorlagen_liste %}
-        <article class="vorlagenzeile">
-          <div class="dateizeichen pdf">PDF</div>
-          <div class="vorlageninfo"><strong>{{ eintrag.name }}</strong><small>{{ eintrag.seiten }} Seiten · {{ eintrag.erkannte_felder }} Felder · {{ eintrag.status }}</small></div>
-          <span class="zustandsmarke {% if eintrag.status == 'bereit' %}bereit{% endif %}">{{ eintrag.status }}</span>
-          <button class="mehrknopf" aria-label="Weitere Aktionen">•••</button>
-        </article>
-        {% endfor %}
-      </div>
-    </section>
-
-    <aside class="inhaltskarte aktivitaetskarte">
-      <div class="kartenkopf"><div><h2>Letzte Aktivitäten</h2><p>Was in Ihrem Konto passiert ist</p></div></div>
-      <div class="aktivitaetsliste">
-        <article><span class="aktivitaetszeichen gruen">✓</span><div><strong>Abnahmeprotokoll erstellt</strong><small>Heute, 17:42 Uhr · durch Sie</small></div></article>
-        <article><span class="aktivitaetszeichen violett">✦</span><div><strong>Vorlage vollständig analysiert</strong><small>Heute, 14:08 Uhr · 18 Felder</small></div></article>
-        <article><span class="aktivitaetszeichen blau">＋</span><div><strong>Neues Unterkonto eingeladen</strong><small>Gestern, 11:26 Uhr</small></div></article>
-        <article><span class="aktivitaetszeichen orange">↻</span><div><strong>Tarif automatisch verlängert</strong><small>22. Juli 2026 · 69,00 €</small></div></article>
-      </div>
-    </aside>
+    <section class="inhaltskarte breite-karte"><div class="kartenkopf"><div><h2>Ihre Dokumentvorlagen</h2><p>Zuletzt bearbeitet und sofort einsatzbereit</p></div><a href="/vorlagen">Alle Vorlagen anzeigen →</a></div><div class="vorlagenliste">{% for eintrag in vorlagen_liste %}<article class="vorlagenzeile"><div class="dateizeichen pdf">PDF</div><div class="vorlageninfo"><strong>{{ eintrag.name }}</strong><small>{{ eintrag.seiten }} Seite{% if eintrag.seiten != 1 %}n{% endif %} · {{ eintrag.erkannte_felder }} Felder · {{ eintrag.status }}</small></div><span class="zustandsmarke {% if eintrag.status == 'bereit' %}bereit{% endif %}">{{ eintrag.status }}</span><a class="zeilenaktion" href="/vorlagen/{{ eintrag.id }}">Öffnen</a></article>{% else %}<div class="leerzustand klein"><i>◫</i><strong>Noch keine Vorlage</strong><p>Erstellen Sie Ihre erste intelligente Dokumentvorlage.</p><a href="/vorlagen/neu">Jetzt starten</a></div>{% endfor %}</div></section>
+    <aside class="inhaltskarte aktivitaetskarte"><div class="kartenkopf"><div><h2>Letzte Dokumente</h2><p>Direkt erneut herunterladen</p></div></div><div class="aktivitaetsliste">{% for dokument in dokumente_liste %}<article><span class="aktivitaetszeichen gruen">✓</span><div><strong>{{ dokument.titel }}</strong><small>{{ dokument.erstellt_am|datum }} · {{ dokument.dateigroesse|dateigroesse }}</small></div><a href="/dokumente/{{ dokument.id }}/herunterladen">↓</a></article>{% else %}<div class="leerzustand mini"><i>▧</i><p>Noch keine PDF-Ausgabe erstellt.</p></div>{% endfor %}</div></aside>
   </div>
 </section>
 {% endblock %}

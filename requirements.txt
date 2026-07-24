@@ -10,3 +10,4 @@ pypdf==5.8.0
 pillow==11.3.0
 reportlab==4.4.2
 itsdangerous==2.2.0
+httpx==0.28.1

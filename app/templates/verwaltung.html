@@ -1,82 +1,10 @@
 {% extends "base.html" %}
-{% block titel %}Verwaltung – A+ SmartDocs{% endblock %}
+{% block titel %}Verwaltungszentrale – A+ SmartDocs{% endblock %}
 {% block inhalt %}
-<section class="seitenrahmen verwaltungsseite">
-  <div class="seitenkopf">
-    <div><span class="uebertitel">A+ SmartDocs Verwaltung</span><h1>Geschäftsentwicklung und Kontosteuerung</h1><p>Abonnements, Umsätze, Nutzung und individuelle Konditionen zentral verwalten.</p></div>
-    <button class="schaltflaeche sekundaer">Bericht herunterladen <span>↓</span></button>
-  </div>
-
-  <div class="kennzahlenraster verwaltung">
-    <article class="kennzahlkarte hervorgehoben"><div class="kartenzeichen">€</div><div><small>Monatlich wiederkehrender Umsatz</small><strong>{{ kennzahlen.monatsumsatz|geld }}</strong><span class="entwicklung positiv">↗ 12,6 % seit Vormonat</span></div></article>
-    <article class="kennzahlkarte"><div class="kartenzeichen">◉</div><div><small>Aktive Abonnements</small><strong>{{ kennzahlen.aktive_abonnements }}</strong><span>2 neue Konten in 30 Tagen</span></div></article>
-    <article class="kennzahlkarte"><div class="kartenzeichen">▧</div><div><small>Verarbeitete Dokumente</small><strong>{{ kennzahlen.dokumente }}</strong><span class="entwicklung positiv">↗ 18,4 % Nutzung</span></div></article>
-    <article class="kennzahlkarte"><div class="kartenzeichen">✦</div><div><small>Geschätzte KI-Kosten</small><strong>{{ kennzahlen.ki_kosten|geld }}</strong><span>Deckungsbeitrag 96,8 %</span></div></article>
-  </div>
-
-  <div class="verwaltungsgitter">
-    <section class="inhaltskarte umsatzkarte">
-      <div class="kartenkopf"><div><h2>Umsatzentwicklung</h2><p>Monatlich wiederkehrender Umsatz der letzten sechs Monate</p></div><select aria-label="Zeitraum"><option>Letzte 6 Monate</option></select></div>
-      <div class="diagramm">
-        <div class="diagrammwerte"><span>600 €</span><span>450 €</span><span>300 €</span><span>150 €</span><span>0 €</span></div>
-        <div class="diagrammflaeche">
-          <svg viewBox="0 0 700 230" preserveAspectRatio="none" aria-label="Umsatzdiagramm">
-            <defs><linearGradient id="flaeche" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c5cff" stop-opacity=".38"/><stop offset="1" stop-color="#7c5cff" stop-opacity="0"/></linearGradient></defs>
-            <path class="gitterlinie" d="M0 20H700M0 70H700M0 120H700M0 170H700M0 220H700"/>
-            <path class="flaechenpfad" d="M0 190 C80 178,110 155,165 160 S265 120,330 126 S430 90,500 92 S620 40,700 50 L700 230 L0 230Z"/>
-            <path class="linienpfad" d="M0 190 C80 178,110 155,165 160 S265 120,330 126 S430 90,500 92 S620 40,700 50"/>
-            <circle cx="700" cy="50" r="6"/>
-          </svg>
-          <div class="diagrammmonate"><span>Februar</span><span>März</span><span>April</span><span>Mai</span><span>Juni</span><span>Juli</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="inhaltskarte tarifkarte">
-      <div class="kartenkopf"><div><h2>Tarifverteilung</h2><p>Aktive Kunden nach Tarif</p></div></div>
-      <div class="ringdiagramm"><div class="ring"><span><strong>{{ kennzahlen.aktive_abonnements }}</strong><small>Konten</small></span></div></div>
-      <div class="tariflegende">
-        {% for tarif in tarife %}<div><span class="legendenpunkt punkt-{{ loop.index }}"></span><strong>{{ tarif.name }}</strong><small>{{ tarif.monatspreis|geld }}</small></div>{% endfor %}
-      </div>
-    </section>
-  </div>
-
-  <section class="inhaltskarte kontenkarte">
-    <div class="kartenkopf"><div><h2>Kundenkonten</h2><p>Tarife, Unterkonten, Verbrauch und individuelle Grenzen</p></div><div class="tabellenaktionen"><label><span>⌕</span><input id="kontenSuche" type="search" placeholder="Konto suchen …"></label><button>Filter</button></div></div>
-    <div class="tabellenrahmen">
-      <table id="kontenTabelle">
-        <thead><tr><th>Unternehmen</th><th>Tarif</th><th>Unterkonten</th><th>Dokumente</th><th>Monatspreis</th><th>Status</th><th></th></tr></thead>
-        <tbody>
-        {% for org in organisationen %}
-          {% set abo = org.abonnement %}
-          <tr data-name="{{ org.name|lower }}">
-            <td><div class="unternehmenszelle"><span>{{ org.name[:2]|upper }}</span><div><strong>{{ org.name }}</strong><small>{{ org.branche }}</small></div></div></td>
-            <td><span class="tarifmarke">{{ abo.tarif.name }}</span>{% if abo.individueller_preis is not none or abo.dokumente_override is not none %}<small class="sonderhinweis">individuell</small>{% endif %}</td>
-            <td>{{ org.mitglieder|length }} / {{ abo.unterkonten_override or abo.tarif.unterkonten }}</td>
-            <td><div class="verbrauch"><span style="--verbrauch:{{ [20 + loop.index * 13, 92]|min }}%"></span></div><small>{{ 30 + loop.index * 91 }} / {{ abo.dokumente_override or abo.tarif.dokumente_monat }}</small></td>
-            <td><strong>{{ abo.preis|geld }}</strong></td>
-            <td><span class="zustandsmarke bereit">{{ abo.status }}</span></td>
-            <td><button class="kontoBearbeiten mehrknopf" data-konto="{{ org.id }}" data-name="{{ org.name }}" data-preis="{{ abo.individueller_preis or '' }}" data-dokumente="{{ abo.dokumente_override or '' }}" data-vorlagen="{{ abo.vorlagen_override or '' }}" data-unterkonten="{{ abo.unterkonten_override or '' }}" data-speicher="{{ abo.speicher_override_mb or '' }}">•••</button></td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-</section>
-
-<div id="kontoDialog" class="dialoghintergrund versteckt">
-  <form id="kontoFormular" class="einstellungsdialog">
-    <div class="dialogtitel"><div><span class="uebertitel">Individuelle Konditionen</span><h2 id="kontoTitel">Konto bearbeiten</h2></div><button type="button" id="kontoDialogSchliessen">×</button></div>
-    <p>Leere Felder übernehmen automatisch die allgemeinen Tarifwerte.</p>
-    <div class="formularraster">
-      <label><span>Monatspreis in Euro</span><input id="kontoPreis" type="number" step="0.01" min="0"></label>
-      <label><span>Dokumente pro Monat</span><input id="kontoDokumente" type="number" min="0"></label>
-      <label><span>Vorlagen</span><input id="kontoVorlagen" type="number" min="0"></label>
-      <label><span>Unterkonten</span><input id="kontoUnterkonten" type="number" min="0"></label>
-      <label class="volle-breite"><span>Speicher in MB</span><input id="kontoSpeicher" type="number" min="0"></label>
-    </div>
-    <div class="dialogaktionen"><button type="button" class="schaltflaeche sekundaer" id="kontoAbbrechen">Abbrechen</button><button type="submit" class="schaltflaeche primaer">Änderungen speichern</button></div>
-  </form>
-</div>
+<section class="seitenrahmen verwaltungsseite"><div class="seitenkopf"><div><span class="uebertitel">A+ SmartDocs Verwaltung</span><h1>Geschäftsentwicklung und Kontosteuerung</h1><p>Abonnements, Umsätze, Nutzung, Tarife und individuelle Konditionen zentral verwalten.</p></div><div class="seitenaktionen"><button id="tarifDialogOeffnen" class="schaltflaeche sekundaer">Tarife bearbeiten</button><button class="schaltflaeche primaer">Bericht erstellen ↓</button></div></div>
+<div class="kennzahlenraster verwaltung"><article class="kennzahlkarte hervorgehoben"><div class="kartenzeichen">€</div><div><small>Monatlich wiederkehrender Umsatz</small><strong>{{ kennzahlen.monatsumsatz|geld }}</strong><span class="entwicklung positiv">↗ 12,6 % seit Vormonat</span></div></article><article class="kennzahlkarte"><div class="kartenzeichen">◉</div><div><small>Aktive Abonnements</small><strong>{{ kennzahlen.aktive_abonnements }}</strong><span>einschließlich Testkonten</span></div></article><article class="kennzahlkarte"><div class="kartenzeichen">▧</div><div><small>Verarbeitete Dokumente</small><strong>{{ kennzahlen.dokumente }}</strong><span class="entwicklung positiv">↗ steigende Nutzung</span></div></article><article class="kennzahlkarte"><div class="kartenzeichen">✦</div><div><small>Geschätzte KI-Kosten</small><strong>{{ kennzahlen.ki_kosten|geld }}</strong><span>protokollierte Verarbeitung</span></div></article></div>
+<div class="verwaltungsgitter"><section class="inhaltskarte umsatzkarte"><div class="kartenkopf"><div><h2>Umsatzentwicklung</h2><p>Monatlich wiederkehrender Umsatz der letzten sechs Monate</p></div><select><option>Letzte 6 Monate</option></select></div><div class="diagramm"><div class="diagrammwerte"><span>800 €</span><span>600 €</span><span>400 €</span><span>200 €</span><span>0 €</span></div><div class="diagrammflaeche"><svg viewBox="0 0 700 230" preserveAspectRatio="none"><defs><linearGradient id="flaeche" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c5cff" stop-opacity=".38"/><stop offset="1" stop-color="#7c5cff" stop-opacity="0"/></linearGradient></defs><path class="gitterlinie" d="M0 20H700M0 70H700M0 120H700M0 170H700M0 220H700"/><path class="flaechenpfad" d="M0 190 C80 178,110 155,165 160 S265 120,330 126 S430 90,500 92 S620 40,700 50 L700 230 L0 230Z"/><path class="linienpfad" d="M0 190 C80 178,110 155,165 160 S265 120,330 126 S430 90,500 92 S620 40,700 50"/><circle cx="700" cy="50" r="6"/></svg><div class="diagrammmonate"><span>Februar</span><span>März</span><span>April</span><span>Mai</span><span>Juni</span><span>Juli</span></div></div></div></section><section class="inhaltskarte tarifkarte"><div class="kartenkopf"><div><h2>Tarifverteilung</h2><p>Aktive Kunden nach Tarif</p></div></div><div class="ringdiagramm"><div class="ring"><span><strong>{{ kennzahlen.aktive_abonnements }}</strong><small>Konten</small></span></div></div><div class="tariflegende">{% for tarif in tarife %}<div><span class="legendenpunkt punkt-{{ loop.index }}"></span><strong>{{ tarif.name }}</strong><small>{{ tarif.monatspreis|geld }}</small></div>{% endfor %}</div></section></div>
+<section class="inhaltskarte kontenkarte"><div class="kartenkopf"><div><h2>Kundenkonten</h2><p>Tarife, Unterkonten, Nutzung und individuelle Grenzen</p></div><div class="tabellenaktionen"><label><span>⌕</span><input id="kontenSuche" type="search" placeholder="Konto suchen …"></label><button>Filter</button></div></div><div class="tabellenrahmen"><table id="kontenTabelle"><thead><tr><th>Unternehmen</th><th>Tarif</th><th>Unterkonten</th><th>Dokumentenlimit</th><th>Monatspreis</th><th>Status</th><th></th></tr></thead><tbody>{% for org in organisationen %}{% set abo = org.abonnement %}{% if abo %}<tr data-name="{{ org.name|lower }}"><td><div class="unternehmenszelle"><span>{{ org.name[:2]|upper }}</span><div><strong>{{ org.name }}</strong><small>{{ org.branche }}</small></div></div></td><td><span class="tarifmarke">{{ abo.tarif.name }}</span>{% if abo.individueller_preis is not none or abo.dokumente_override is not none or abo.vorlagen_override is not none %}<small class="sonderhinweis">individuell</small>{% endif %}</td><td>{{ org.mitglieder|length }} / {{ abo.unterkonten_limit + 1 }}</td><td><strong>{{ abo.dokument_limit }}</strong><small>pro Monat</small></td><td><strong>{{ abo.preis|geld }}</strong></td><td><span class="zustandsmarke {% if abo.status in ['aktiv','testphase','intern'] %}bereit{% endif %}">{{ abo.status }}</span></td><td><div class="admin-zeilenaktionen"><form action="/verwaltung/konto/{{ org.id }}/ansehen" method="post"><button type="submit" title="Kundensicht öffnen">◉</button></form><button class="kontoBearbeiten mehrknopf" data-konto="{{ org.id }}" data-name="{{ org.name }}" data-preis="{{ abo.individueller_preis or '' }}" data-dokumente="{{ abo.dokumente_override or '' }}" data-vorlagen="{{ abo.vorlagen_override or '' }}" data-unterkonten="{{ abo.unterkonten_override or '' }}" data-speicher="{{ abo.speicher_override_mb or '' }}">•••</button></div></td></tr>{% endif %}{% endfor %}</tbody></table></div></section></section>
+<div id="kontoDialog" class="dialoghintergrund versteckt"><form id="kontoFormular" class="einstellungsdialog"><div class="dialogtitel"><div><span class="uebertitel">Individuelle Konditionen</span><h2 id="kontoTitel">Konto bearbeiten</h2></div><button type="button" class="dialogSchliessen">×</button></div><p>Leere Felder übernehmen automatisch die allgemeinen Tarifwerte.</p><div class="formularraster"><label><span>Monatspreis in Euro</span><input id="kontoPreis" type="number" step="0.01" min="0"></label><label><span>Dokumente pro Monat</span><input id="kontoDokumente" type="number" min="0"></label><label><span>Vorlagen</span><input id="kontoVorlagen" type="number" min="0"></label><label><span>Unterkonten</span><input id="kontoUnterkonten" type="number" min="0"></label><label class="volle-breite"><span>Speicher in MB</span><input id="kontoSpeicher" type="number" min="0"></label></div><div class="dialogaktionen"><button type="button" class="schaltflaeche sekundaer dialogSchliessen">Abbrechen</button><button type="submit" class="schaltflaeche primaer">Änderungen speichern</button></div></form></div>
+<div id="tarifDialog" class="dialoghintergrund versteckt"><div class="einstellungsdialog tarif-dialog"><div class="dialogtitel"><div><span class="uebertitel">Allgemeine Tarifwerte</span><h2>Tarife bearbeiten</h2></div><button type="button" class="dialogSchliessen">×</button></div><div class="tarif-editor-liste">{% for tarif in tarife %}<form class="tarifFormular" data-tarif="{{ tarif.id }}"><div class="tarif-editor-kopf"><strong>{{ tarif.name }}</strong><span>{{ tarif.beschreibung }}</span></div><div class="formularraster"><label><span>Monatspreis</span><input name="monatspreis" type="number" step="0.01" value="{{ tarif.monatspreis }}"></label><label><span>Jahrespreis</span><input name="jahrespreis" type="number" step="0.01" value="{{ tarif.jahrespreis or '' }}"></label><label><span>Dokumente</span><input name="dokumente" type="number" value="{{ tarif.dokumente_monat }}"></label><label><span>Vorlagen</span><input name="vorlagen" type="number" value="{{ tarif.vorlagen }}"></label><label><span>Unterkonten</span><input name="unterkonten" type="number" value="{{ tarif.unterkonten }}"></label><label><span>Speicher in MB</span><input name="speicher_mb" type="number" value="{{ tarif.speicher_mb }}"></label></div><button class="schaltflaeche sekundaer breit" type="submit">{{ tarif.name }} speichern</button></form>{% endfor %}</div></div></div>
 {% endblock %}

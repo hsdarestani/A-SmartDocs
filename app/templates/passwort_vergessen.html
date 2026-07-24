@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block titel %}Passwort zurücksetzen – A+ SmartDocs{% endblock %}
+{% block oeffentlicher_inhalt %}<section class="zentrierte-auth"><div class="auth-box kompakt"><div class="auth-symbol">↺</div><span class="uebertitel">Zugang wiederherstellen</span><h2>Passwort zurücksetzen</h2><p>Wir senden einen sicheren Link an Ihre registrierte E-Mail-Adresse.</p><form action="/passwort-vergessen" method="post" class="formular-stapel"><label><span>E-Mail-Adresse</span><input type="email" name="email" placeholder="name@unternehmen.de" required></label><button class="schaltflaeche primaer breit" type="submit">Link anfordern</button></form><p class="auth-wechsel"><a href="/anmelden">← Zurück zur Anmeldung</a></p></div></section>{% endblock %}
