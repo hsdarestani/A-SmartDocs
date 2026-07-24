@@ -2,10 +2,15 @@ from __future__ import annotations
 
 import os
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
 
+
+PROJEKTWURZEL = Path(__file__).resolve().parents[1]
+if str(PROJEKTWURZEL) not in sys.path:
+    sys.path.insert(0, str(PROJEKTWURZEL))
 
 TEST_DB = Path("/tmp/a-smartdocs-pytest.sqlite3")
 TEST_DATA = Path("/tmp/a-smartdocs-pytest-daten")
