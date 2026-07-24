@@ -2,6 +2,10 @@
 
 A+ SmartDocs ist eine mandantenfähige Plattform zur intelligenten Erkennung, Korrektur, Wiederverwendung und Ausgabe beliebiger Geschäftsdokumente.
 
+## Vorführfassung
+
+Der aktuelle Stand bildet den vollständigen Weg vom öffentlichen Produktauftritt über Registrierung und Firmenkonto bis zur wiederverwendbaren Dokumentvorlage und erzeugten PDF-Ausgabe ab. Zusätzlich steht eine getrennte A+ Verwaltungszentrale zur Verfügung.
+
 ## Enthaltene Produktbereiche
 
 - öffentliche deutschsprachige Produkt- und Preisseiten,
