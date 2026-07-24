@@ -1,0 +1,122 @@
+name: Bereitstellung auf dem Produktivserver
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: produktivbereitstellung
+  cancel-in-progress: true
+
+jobs:
+  pruefen:
+    name: Anwendung prüfen
+    runs-on: ubuntu-latest
+    steps:
+      - name: Quelltext laden
+        uses: actions/checkout@v4
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Python-Dateien prüfen
+        run: python -m compileall app
+      - name: Container-Konfiguration prüfen
+        run: |
+          cp .env.example .env
+          docker compose config
+        env:
+          POSTGRES_DB: smartdocs
+          POSTGRES_USER: smartdocs
+          POSTGRES_PASSWORD: pruefwert
+          DOMAIN: smartdocs.aplus-solution.de
+          DATABASE_URL: postgresql+psycopg://smartdocs:pruefwert@datenbank:5432/smartdocs
+
+  bereitstellen:
+    name: Produktivsystem aktualisieren
+    needs: pruefen
+    runs-on: ubuntu-latest
+    environment: produktiv
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAIAPI }}
+    steps:
+      - name: Über SSH bereitstellen
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.HOST }}
+          username: root
+          password: ${{ secrets.PASS }}
+          envs: OPENAI_API_KEY
+          script_stop: true
+          script: |
+            set -eu
+            export DEBIAN_FRONTEND=noninteractive
+
+            apt-get update
+            apt-get install -y ca-certificates curl git openssl python3
+
+            if ! command -v docker >/dev/null 2>&1; then
+              install -m 0755 -d /etc/apt/keyrings
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+              chmod a+r /etc/apt/keyrings/docker.asc
+              . /etc/os-release
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable" > /etc/apt/sources.list.d/docker.list
+              apt-get update
+              apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            fi
+
+            mkdir -p /opt/a-smartdocs
+            if [ ! -d /opt/a-smartdocs/.git ]; then
+              git clone https://github.com/hsdarestani/A-SmartDocs.git /opt/a-smartdocs
+            else
+              git -C /opt/a-smartdocs fetch origin main
+              git -C /opt/a-smartdocs reset --hard origin/main
+            fi
+
+            cd /opt/a-smartdocs
+            if [ ! -f .env ]; then
+              DATENBANK_PASSWORT=$(openssl rand -hex 24)
+              APP_GEHEIMNIS=$(openssl rand -hex 32)
+              cat > .env <<UMGEBUNG
+            DOMAIN=smartdocs.aplus-solution.de
+            POSTGRES_DB=smartdocs
+            POSTGRES_USER=smartdocs
+            POSTGRES_PASSWORD=${DATENBANK_PASSWORT}
+            DATABASE_URL=postgresql+psycopg://smartdocs:${DATENBANK_PASSWORT}@datenbank:5432/smartdocs
+            APP_SECRET=${APP_GEHEIMNIS}
+            OPENAI_MODEL=gpt-4.1-mini
+            MAX_UPLOAD_MB=20
+            UMGEBUNG
+            fi
+
+            python3 - <<'PY'
+            from pathlib import Path
+            import os
+            pfad = Path('.env')
+            zeilen = pfad.read_text().splitlines()
+            schluessel = 'OPENAI_API_KEY'
+            wert = os.environ.get(schluessel, '')
+            neu = []
+            gefunden = False
+            for zeile in zeilen:
+                if zeile.startswith(schluessel + '='):
+                    neu.append(f'{schluessel}={wert}')
+                    gefunden = True
+                else:
+                    neu.append(zeile)
+            if not gefunden:
+                neu.append(f'{schluessel}={wert}')
+            pfad.write_text('\n'.join(neu) + '\n')
+            PY
+
+            docker compose pull
+            docker compose up -d --build --remove-orphans
+            docker image prune -f
+            sleep 8
+            docker compose ps
+            curl --fail --silent --show-error http://127.0.0.1/api/status >/dev/null || true
