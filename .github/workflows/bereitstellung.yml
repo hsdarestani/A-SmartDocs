@@ -52,7 +52,11 @@ jobs:
       - name: Integrations- und Berechtigungsprüfungen ausführen
         run: |
           mkdir -p testberichte
-          pytest -q tests --junitxml=testberichte/pytest.xml
+          set +e
+          pytest -q tests --junitxml=testberichte/pytest.xml 2>&1 | tee testberichte/pytest.log
+          status=${PIPESTATUS[0]}
+          set -e
+          exit "$status"
       - name: Bestehenden Vorführablauf prüfen
         run: python scripts/pruefung.py
       - name: Testbericht sichern
