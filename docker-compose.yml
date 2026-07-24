@@ -1,0 +1,55 @@
+services:
+  anwendung:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      datenbank:
+        condition: service_healthy
+    volumes:
+      - smartdocs_daten:/daten
+    networks:
+      - smartdocs
+
+  datenbank:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - smartdocs_postgres:/var/lib/postgresql/data
+    networks:
+      - smartdocs
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      - anwendung
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - smartdocs_caddy_data:/data
+      - smartdocs_caddy_config:/config
+    networks:
+      - smartdocs
+
+volumes:
+  smartdocs_daten:
+  smartdocs_postgres:
+  smartdocs_caddy_data:
+  smartdocs_caddy_config:
+
+networks:
+  smartdocs:
