@@ -3,37 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07111f">
+  <meta name="theme-color" content="#f3f1e8">
   <title>{% block titel %}A+ SmartDocs{% endblock %}</title>
-  <meta name="description" content="Dokumentvorlagen intelligent erkennen, bestätigen, ausfüllen und wiederverwenden.">
+  <meta name="description" content="Dokumentvorlagen erkennen, bestätigen, ausfüllen und als kontrollierten Arbeitsablauf wiederverwenden.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('statisch', path='/app-v2.css') }}?v=20260724-2">
-  <link rel="stylesheet" href="{{ url_for('statisch', path='/app-typography.css') }}?v=20260724-1">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('statisch', path='/editorial-system.css') }}?v=20260724-1">
 </head>
 <body class="bereich-{{ bereich|default('start') }} {% if mitglied %}angemeldet{% endif %}">
-  <div class="hintergrund-leuchten leuchten-eins"></div>
-  <div class="hintergrund-leuchten leuchten-zwei"></div>
-
   {% if mitglied %}
   <aside class="seitenleiste" id="seitenleiste">
     <a class="marke" href="/arbeitsbereich" aria-label="A+ SmartDocs Arbeitsbereich">
       <span class="marken-symbol">A+</span>
-      <span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span>
+      <span class="marken-text"><strong>SmartDocs</strong><small>Dokumentbetrieb</small></span>
     </a>
     <nav class="seitennavigation" aria-label="Produktnavigation">
       <span class="navigationsgruppe">Arbeitsbereich</span>
-      <a href="/arbeitsbereich" class="{% if bereich == 'arbeitsbereich' %}aktiv{% endif %}"><i>⌂</i><span>Übersicht</span></a>
-      <a href="/vorlagen" class="{% if bereich == 'vorlagen' %}aktiv{% endif %}"><i>◫</i><span>Dokumentvorlagen</span></a>
-      <a href="/dokumente" class="{% if bereich == 'dokumente' %}aktiv{% endif %}"><i>▧</i><span>Erstellte Dokumente</span></a>
+      <a href="/arbeitsbereich" class="{% if bereich == 'arbeitsbereich' %}aktiv{% endif %}"><i>01</i><span>Übersicht</span></a>
+      <a href="/vorlagen" class="{% if bereich == 'vorlagen' %}aktiv{% endif %}"><i>02</i><span>Dokumentvorlagen</span></a>
+      <a href="/dokumente" class="{% if bereich == 'dokumente' %}aktiv{% endif %}"><i>03</i><span>Erstellte Dokumente</span></a>
       <span class="navigationsgruppe">Unternehmen</span>
-      <a href="/team" class="{% if bereich == 'team' %}aktiv{% endif %}"><i>◎</i><span>Team und Rollen</span></a>
-      <a href="/abrechnung" class="{% if bereich == 'abrechnung' %}aktiv{% endif %}"><i>€</i><span>Tarif und Abrechnung</span></a>
-      <a href="/einstellungen" class="{% if bereich == 'einstellungen' %}aktiv{% endif %}"><i>⚙</i><span>Einstellungen</span></a>
+      <a href="/team" class="{% if bereich == 'team' %}aktiv{% endif %}"><i>04</i><span>Team und Rollen</span></a>
+      <a href="/abrechnung" class="{% if bereich == 'abrechnung' %}aktiv{% endif %}"><i>05</i><span>Tarif und Abrechnung</span></a>
+      <a href="/einstellungen" class="{% if bereich == 'einstellungen' %}aktiv{% endif %}"><i>06</i><span>Einstellungen</span></a>
       {% if mitglied.ist_superadmin %}
       <span class="navigationsgruppe">A+ Verwaltung</span>
-      <a href="/verwaltung" class="{% if bereich == 'verwaltung' %}aktiv{% endif %}"><i>✦</i><span>Verwaltungszentrale</span></a>
+      <a href="/verwaltung" class="{% if bereich == 'verwaltung' %}aktiv{% endif %}"><i>A+</i><span>Verwaltungszentrale</span></a>
       {% endif %}
     </nav>
     <div class="seitenleisten-fuss">
@@ -45,7 +41,7 @@
     <button class="menueknopf" id="menueknopf" aria-label="Navigation öffnen">☰</button>
     <div class="kopf-suche"><span>⌕</span><input type="search" placeholder="Vorlagen und Dokumente durchsuchen …"><kbd>⌘ K</kbd></div>
     <a class="kopf-neu" href="/vorlagen/neu">＋ Neue Vorlage</a>
-    <button class="symbolknopf" aria-label="Benachrichtigungen">♢<i></i></button>
+    <button class="symbolknopf" aria-label="Benachrichtigungen">□<i></i></button>
     <a class="profilchip" href="/einstellungen"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ mitglied.rolle.value|capitalize }}</small></div></a>
   </header>
   {% if rueckkehr_admin %}
@@ -54,13 +50,12 @@
   <main class="app-inhalt">{% block inhalt %}{% endblock %}</main>
   {% else %}
   <header class="oeffentliche-kopfzeile">
-    <a class="marke" href="/"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span></a>
-    <nav><a href="/#funktion">So funktioniert es</a><a href="/preise" class="{% if bereich == 'preise' %}aktiv{% endif %}">Preise</a><a href="/#sicherheit">Datenschutz</a></nav>
+    <a class="marke" href="/"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>Dokumentbetrieb</small></span></a>
+    <nav><a href="/#funktion">Arbeitsweise</a><a href="/preise" class="{% if bereich == 'preise' %}aktiv{% endif %}">Tarife</a><a href="/#sicherheit">Datenschutz</a></nav>
     <div class="oeffentliche-aktionen"><a href="/anmelden">Anmelden</a><a href="/registrieren" class="schaltflaeche primaer klein">Kostenlos testen</a></div>
   </header>
   <main>{% block oeffentlicher_inhalt %}{% endblock %}</main>
   {% endif %}
-
   {% if hinweis %}<div id="serverHinweis" class="meldung sichtbar {{ hinweis.art }}">{{ hinweis.text }}</div>{% endif %}
   <div id="meldung" class="meldung" role="status" aria-live="polite"></div>
   <script src="{{ url_for('statisch', path='/app.js') }}" defer></script>
