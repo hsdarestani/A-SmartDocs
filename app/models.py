@@ -201,6 +201,12 @@ class Einladung(Basis):
     organisation: Mapped[Organisation] = relationship(back_populates="einladungen")
 
 
+@event.listens_for(Einladung, "load")
+def einladungszeit_auf_utc_setzen(ziel: Einladung, _kontext) -> None:
+    if ziel.laeuft_ab_am and ziel.laeuft_ab_am.tzinfo is None:
+        ziel.laeuft_ab_am = ziel.laeuft_ab_am.replace(tzinfo=timezone.utc)
+
+
 class Rechnung(Basis):
     __tablename__ = "rechnungen"
 
