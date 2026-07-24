@@ -1,0 +1,336 @@
+/*
+ * A+ SmartDocs – Lesbare Typografie
+ * Diese Datei überschreibt bewusst die zu kompakte Schriftstaffel der ersten Vorführfassung.
+ */
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* Allgemeine Elemente */
+.marken-text strong { font-size: 19px; }
+.marken-text small { font-size: 10px; }
+.uebertitel { font-size: 12px; line-height: 1.5; }
+.schaltflaeche { font-size: 14px; line-height: 1.2; }
+.schaltflaeche.klein { font-size: 13px; }
+.schaltflaeche.gross { font-size: 15px; }
+
+/* Öffentliche Navigation */
+.oeffentliche-kopfzeile nav a,
+.oeffentliche-aktionen > a:first-child {
+  font-size: 14px;
+}
+
+/* Startseite */
+.hinweismarke {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.startinhalt h1 {
+  font-size: clamp(58px, 5.35vw, 88px);
+  line-height: 1.01;
+}
+
+.starttext {
+  max-width: 690px;
+  font-size: 18px;
+  line-height: 1.72;
+}
+
+.vertrauenszeile strong { font-size: 13px; }
+.vertrauenszeile small { font-size: 11px; line-height: 1.55; }
+
+.abschnittskopf > span { font-size: 12px; }
+.abschnittskopf h1,
+.abschnittskopf h2 {
+  font-size: clamp(38px, 3.7vw, 54px);
+}
+.abschnittskopf p {
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.ablaufkarten b { font-size: 12px; }
+.ablaufkarten h3 { font-size: 17px; }
+.ablaufkarten p { font-size: 13px; line-height: 1.72; }
+
+.vorteilsbereich h2 {
+  font-size: clamp(36px, 3.2vw, 48px);
+}
+.vorteilsbereich > div > p {
+  font-size: 15px;
+  line-height: 1.75;
+}
+.vorteilsraster strong { font-size: 15px; }
+.vorteilsraster p { font-size: 12px; line-height: 1.7; }
+
+.sicherheitsbereich h2 {
+  font-size: clamp(32px, 3vw, 44px);
+}
+.sicherheitsbereich p {
+  font-size: 15px;
+  line-height: 1.75;
+}
+.sicherheitswerte strong { font-size: 14px; }
+.sicherheitswerte small { font-size: 11px; }
+
+.oeffentlicher-fuss p,
+.oeffentlicher-fuss a {
+  font-size: 13px;
+}
+
+/* Die simulierte Dokumentoberfläche bleibt kompakter, wird aber nicht mikroskopisch. */
+.fensterkopf { font-size: 11px; }
+.dialogkopf strong,
+.assistentenkopf strong { font-size: 11px; }
+.dialogkopf small,
+.assistentenkopf small { font-size: 9px; }
+.dialognachricht { font-size: 10px; }
+.erkennungsliste span { font-size: 9px; }
+.dialogeingabe { font-size: 9px; }
+.statuskarte small,
+.zeitkarte small { font-size: 9px; }
+.statuskarte strong,
+.zeitkarte strong { font-size: 11px; }
+.seitenangabe { font-size: 9px; }
+
+/* Registrierung und Anmeldung */
+.auth-bild h1 {
+  font-size: clamp(52px, 5vw, 76px);
+}
+.auth-bild > div > p {
+  font-size: 16px;
+  line-height: 1.75;
+}
+.auth-zitat p { font-size: 14px !important; }
+.auth-zitat span { font-size: 11px; }
+.registrierungs-vorteile span {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.auth-box h2 { font-size: 34px; }
+.auth-box > p {
+  font-size: 13px;
+  line-height: 1.65;
+}
+.formular-stapel label > span,
+.formularraster label > span,
+.dynamisches-feld > span {
+  font-size: 12px;
+}
+.formular-stapel input,
+.formular-stapel select,
+.formularraster input,
+.formularraster select,
+.dynamisches-feld input,
+.dynamisches-feld textarea,
+.dynamisches-feld select,
+.eingabefeld input {
+  font-size: 14px;
+}
+.kontrollzeile span,
+.formular-zeile,
+.formular-zeile a,
+.auth-wechsel {
+  font-size: 12px;
+}
+.tarifauswahl legend { font-size: 12px; }
+.tarifoption strong { font-size: 14px; }
+.tarifoption small { font-size: 11px; }
+.tarifoption b { font-size: 14px; }
+.zugangshinweis strong { font-size: 13px; }
+.zugangshinweis small { font-size: 11px; }
+.trennlinie span { font-size: 11px; }
+
+/* Preisseite */
+.tarifname { font-size: 15px; }
+.preiskarte > p { font-size: 13px; line-height: 1.7; }
+.preiswert strong { font-size: 40px; }
+.preiswert small { font-size: 12px; }
+.preiskarte li { font-size: 13px; }
+.preis-hinweis strong { font-size: 16px; }
+.preis-hinweis p { font-size: 13px; }
+.abrechnungsumschalter button { font-size: 12px; }
+
+/* Angemeldete Produktoberfläche */
+.navigationsgruppe { font-size: 10px; }
+.seitennavigation a { font-size: 13px; }
+.konto-mini strong,
+.profilchip strong { font-size: 11px; }
+.konto-mini small,
+.profilchip small { font-size: 9px; }
+.kopf-suche input { font-size: 12px; }
+.kopf-suche kbd { font-size: 9px; }
+.kopf-neu { font-size: 12px; }
+.ansichtsleiste { font-size: 11px; }
+.ansichtsleiste button { font-size: 10px; }
+
+.seitenkopf h1,
+.studiokopf h1,
+.editor-kopf h1 {
+  font-size: clamp(34px, 3vw, 46px);
+}
+.seitenkopf p,
+.studiokopf p,
+.editor-kopf p {
+  font-size: 14px;
+  line-height: 1.65;
+}
+.zuruecklink { font-size: 12px; }
+
+.kennzahlkarte small { font-size: 11px; }
+.kennzahlkarte strong { font-size: 28px; }
+.kennzahlkarte span { font-size: 10px; }
+.kreisfortschritt i { font-size: 11px; }
+
+.schnellstart strong { font-size: 14px; }
+.schnellstart p { font-size: 11px; }
+.schnellstart > a { font-size: 12px; }
+
+.kartenkopf h2 { font-size: 17px; }
+.kartenkopf p { font-size: 11px; }
+.kartenkopf a { font-size: 11px; }
+
+.vorlageninfo strong { font-size: 13px; }
+.vorlageninfo small { font-size: 10px; }
+.zustandsmarke { font-size: 9px; }
+.zeilenaktion { font-size: 10px; }
+
+.aktivitaetsliste strong { font-size: 12px; }
+.aktivitaetsliste small { font-size: 9px; }
+.leerzustand.gross h2 { font-size: 22px; }
+.leerzustand.gross p { font-size: 13px; }
+.leerzustand.klein strong { font-size: 13px; }
+.leerzustand.klein p,
+.leerzustand.mini p { font-size: 10px; }
+
+.werkzeugleiste input,
+.suchfeld input,
+.tabellenaktionen input { font-size: 12px; }
+.filtergruppe button,
+.listenanzahl,
+.tabellenaktionen button { font-size: 11px; }
+
+.vorlagenkarten-inhalt h3 { font-size: 17px; }
+.vorlagenkarten-inhalt p { font-size: 12px; line-height: 1.65; }
+.dateityp,
+.vorlagenwerte,
+.vorlagenwerte span { font-size: 10px; }
+
+th { font-size: 10px; }
+td { font-size: 12px; }
+.unternehmenszelle strong,
+.dokumentzelle strong { font-size: 12px; }
+.unternehmenszelle small,
+.dokumentzelle small,
+td > small { font-size: 10px; }
+.textknopf,
+.eigenmarke,
+.rollenmarke { font-size: 10px; }
+
+.team-hinweis strong { font-size: 14px; }
+.team-hinweis small { font-size: 11px; }
+.rollenkarten strong { font-size: 14px; }
+.rollenkarten p { font-size: 11px; line-height: 1.65; }
+
+.aktuelle-tarifkarte h2 { font-size: 34px; }
+.aktuelle-tarifkarte p { font-size: 13px; }
+.tarif-preis strong { font-size: 38px; }
+.tarif-preis small,
+.testmarke { font-size: 11px; }
+.tarif-verbrauch strong { font-size: 13px; }
+.tarif-verbrauch small { font-size: 11px; }
+.wechselkarte > div span { font-size: 14px; }
+.wechselkarte > strong { font-size: 25px; }
+.wechselkarte > small { font-size: 11px; }
+
+.profil-vorschau strong { font-size: 14px; }
+.profil-vorschau small { font-size: 11px; }
+.sicherheitsoptionen strong { font-size: 13px; }
+.sicherheitsoptionen p { font-size: 11px; }
+.einstellungen-abschluss span { font-size: 11px; }
+
+/* Vorlagenstudio und Editor */
+.schrittanzeige { font-size: 11px; }
+.kontingenthinweis,
+.kontingenthinweis small { font-size: 11px; }
+.hochladebereich h2 { font-size: 20px; }
+.hochladebereich p { font-size: 13px; }
+.dateihinweise span,
+.dateihinweise small { font-size: 10px; }
+.dateikarte strong { font-size: 13px; }
+.dateikarte small { font-size: 10px; }
+.datenschutzhinweis strong { font-size: 12px; }
+.datenschutzhinweis p { font-size: 10px; }
+.assistentenkarte .dialognachricht { font-size: 12px; }
+.assistenten-checkliste span,
+.vorschlagsfragen button { font-size: 10px; }
+.assistenteneingabe textarea { font-size: 12px; }
+.ergebniskopf h2 { font-size: 28px; }
+.ergebniskopf p { font-size: 13px; }
+.feldinhalt strong { font-size: 12px; }
+.feldinhalt small { font-size: 10px; }
+.feldtyp,
+.pflichtmarke { font-size: 9px; }
+
+.editor-werkzeuge button,
+.editor-werkzeuge span,
+.seiten-fuss,
+.panel-register button,
+.panel-suche input,
+.gestrichelter-knopf { font-size: 11px; }
+.detail-felderliste strong { font-size: 12px; }
+.detail-felderliste small { font-size: 9px; }
+
+.dynamisches-feld small { font-size: 10px; }
+.formularabschluss span { font-size: 11px; }
+.vorschauwerte strong { font-size: 18px; }
+.vorschauwerte small { font-size: 10px; }
+
+/* Verwaltung */
+.diagrammwerte,
+.diagrammmonate { font-size: 10px; }
+.ring small,
+.tariflegende small { font-size: 10px; }
+.tariflegende strong { font-size: 12px; }
+.tarifmarke,
+.sonderhinweis { font-size: 10px; }
+.einstellungsdialog > p { font-size: 12px; }
+.tarif-editor-kopf strong { font-size: 15px; }
+.tarif-editor-kopf span { font-size: 11px; }
+
+@media (max-width: 900px) {
+  .startinhalt h1 { font-size: clamp(48px, 10vw, 72px); }
+  .starttext { font-size: 17px; }
+  .oeffentliche-kopfzeile nav a,
+  .oeffentliche-aktionen > a:first-child { font-size: 13px; }
+  .auth-bild > div > p { font-size: 15px; }
+}
+
+@media (max-width: 700px) {
+  body { font-size: 15px; }
+  .startinhalt h1 { font-size: clamp(43px, 13vw, 60px); }
+  .starttext { font-size: 16px; }
+  .vertrauenszeile strong { font-size: 12px; }
+  .vertrauenszeile small { font-size: 10px; }
+  .abschnittskopf h1,
+  .abschnittskopf h2 { font-size: 34px; }
+  .ablaufkarten h3 { font-size: 16px; }
+  .ablaufkarten p { font-size: 12px; }
+  .auth-bild h1 { font-size: 44px; }
+  .auth-box h2 { font-size: 29px; }
+  .seitenkopf h1,
+  .studiokopf h1,
+  .editor-kopf h1 { font-size: 31px; }
+  .seitenkopf p,
+  .studiokopf p,
+  .editor-kopf p { font-size: 13px; }
+}

@@ -32,12 +32,16 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          css = Path("app/static/app-v2.css").read_text(encoding="utf-8")
+          haupt_css = Path("app/static/app-v2.css").read_text(encoding="utf-8")
+          typografie_css = Path("app/static/app-typography.css").read_text(encoding="utf-8")
           vorlage = Path("app/templates/base.html").read_text(encoding="utf-8")
-          assert css.count("{") == css.count("}"), "Das Stylesheet enthält einen nicht geschlossenen Regelblock."
-          assert "app-v2.css" in vorlage, "Die neue Stylesheet-Version ist nicht eingebunden."
-          assert len(css) > 20000, "Das vollständige Produktoberflächen-Stylesheet fehlt."
-          print("Stylesheet-Struktur ist vollständig und ausgeglichen.")
+          assert haupt_css.count("{") == haupt_css.count("}"), "Das Hauptstylesheet enthält einen nicht geschlossenen Regelblock."
+          assert typografie_css.count("{") == typografie_css.count("}"), "Das Typografie-Stylesheet enthält einen nicht geschlossenen Regelblock."
+          assert "app-v2.css" in vorlage, "Das Hauptstylesheet ist nicht eingebunden."
+          assert "app-typography.css" in vorlage, "Das Typografie-Stylesheet ist nicht eingebunden."
+          assert len(haupt_css) > 20000, "Das vollständige Produktoberflächen-Stylesheet fehlt."
+          assert len(typografie_css) > 5000, "Die vollständige lesbare Schriftstaffel fehlt."
+          print("Stylesheets sind vollständig, eingebunden und strukturell ausgeglichen.")
           PY
       - name: Produktabläufe prüfen
         run: python scripts/pruefung.py
