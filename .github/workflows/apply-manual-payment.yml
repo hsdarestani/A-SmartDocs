@@ -1,0 +1,55 @@
+name: Manuellen Zahlungsablauf anwenden
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/apply_manual_payment.py
+      - .github/workflows/apply-manual-payment.yml
+
+permissions:
+  contents: write
+
+jobs:
+  anwenden:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Änderungen anwenden
+        run: python scripts/apply_manual_payment.py
+
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Anwendung prüfen
+        run: |
+          python -m compileall app scripts
+          python scripts/pruefung.py
+
+      - name: Einmalige Hilfsdateien entfernen
+        run: |
+          rm -f scripts/apply_manual_payment.py
+          rm -f .github/workflows/apply-manual-payment.yml
+
+      - name: Geprüften Stand veröffentlichen
+        run: |
+          git config user.name "A+ SmartDocs Automation"
+          git config user.email "automation@aplus-solution.de"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Keine Änderungen erforderlich."
+            exit 0
+          fi
+          git commit -m "Manuelle Zahlung und Admin-Freischaltung einführen"
+          git push origin main
