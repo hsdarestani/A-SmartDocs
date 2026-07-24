@@ -24,6 +24,10 @@ ERGAENZUNGEN: dict[str, list[tuple[str, str]]] = {
     ],
     "abonnements": [
         ("abrechnungszeitraum", "VARCHAR(20) DEFAULT 'monatlich'"),
+        ("angefragter_tarif_id", "INTEGER"),
+        ("angefragter_zeitraum", "VARCHAR(20)"),
+        ("zahlungshinweis", "VARCHAR(255) DEFAULT ''"),
+        ("aktiviert_am", "TIMESTAMP WITH TIME ZONE"),
         ("testphase_bis", "TIMESTAMP WITH TIME ZONE"),
         ("gekuendigt_zum", "TIMESTAMP WITH TIME ZONE"),
     ],

@@ -132,7 +132,14 @@ def weiterleitung_anmeldung(request: Request) -> RedirectResponse:
 
 
 def aktuelles_mitglied(request: Request, db: Session) -> Mitglied | None:
-    return mitglied_aus_sitzung(request, db)
+    mitglied = mitglied_aus_sitzung(request, db)
+    if not mitglied or mitglied.ist_superadmin:
+        return mitglied
+    abonnement = db.scalar(select(Abonnement).where(Abonnement.organisation_id == mitglied.organisation_id))
+    if not mitglied.organisation.aktiv or not abonnement or abonnement.status not in {"aktiv", "testphase", "intern"}:
+        request.session.clear()
+        return None
+    return mitglied
 
 
 def muss_angemeldet_sein(request: Request, db: Session) -> Mitglied:
@@ -369,10 +376,19 @@ def _organisation_kennzahlen(db: Session, organisation_id: int) -> dict[str, Any
 def _verwaltungs_kennzahlen(db: Session) -> dict[str, Any]:
     abonnements = db.scalars(select(Abonnement).options(joinedload(Abonnement.tarif))).all()
     aktive = [a for a in abonnements if a.status in {"aktiv", "testphase"}]
+    wartend = [a for a in abonnements if a.status == "wartet_auf_zahlung"]
+    tarifanfragen = [a for a in abonnements if a.angefragter_tarif_id is not None]
     monatsumsatz = sum((a.preis / 12 if a.abrechnungszeitraum == "jaehrlich" else a.preis for a in aktive), Decimal("0"))
     dokumente = db.scalar(select(func.coalesce(func.sum(Nutzungsereignis.menge), 0)).where(Nutzungsereignis.art == "dokument_erstellt")) or 0
     ki_kosten = db.scalar(select(func.coalesce(func.sum(Nutzungsereignis.kosten_euro), 0))) or Decimal("0")
-    return {"aktive_abonnements": len(aktive), "monatsumsatz": monatsumsatz, "dokumente": int(dokumente), "ki_kosten": ki_kosten}
+    return {
+        "aktive_abonnements": len(aktive),
+        "wartende_freischaltungen": len(wartend),
+        "offene_tarifanfragen": len(tarifanfragen),
+        "monatsumsatz": monatsumsatz,
+        "dokumente": int(dokumente),
+        "ki_kosten": ki_kosten,
+    }
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -405,9 +421,16 @@ def anmelden_seite(request: Request, weiter: str = "/arbeitsbereich", db: Sessio
 @app.post("/anmelden")
 def anmelden(request: Request, email: str = Form(...), passwort: str = Form(...), weiter: str = Form("/arbeitsbereich"), db: Session = Depends(datenbank_sitzung)):
     mitglied = db.scalar(select(Mitglied).where(func.lower(Mitglied.email) == email.strip().lower()))
-    if not mitglied or not passwort_pruefen(passwort, mitglied.passwort_hash) or not mitglied.aktiv:
+    if not mitglied or not passwort_pruefen(passwort, mitglied.passwort_hash):
         hinweis_setzen(request, "E-Mail-Adresse oder Passwort ist nicht korrekt.", "fehler")
         return RedirectResponse(f"/anmelden?weiter={weiter}", status_code=303)
+    if not mitglied.aktiv or not mitglied.organisation.aktiv:
+        abonnement = db.scalar(select(Abonnement).where(Abonnement.organisation_id == mitglied.organisation_id))
+        if abonnement and abonnement.status == "wartet_auf_zahlung":
+            hinweis_setzen(request, "Ihr Firmenkonto wartet noch auf die Zahlungsbestätigung und Freischaltung durch A+ Solution.")
+            return RedirectResponse("/freischaltung-ausstehend", status_code=303)
+        hinweis_setzen(request, "Dieses Firmenkonto ist derzeit nicht freigeschaltet. Bitte kontaktieren Sie A+ Solution.", "fehler")
+        return RedirectResponse("/anmelden", status_code=303)
     request.session.clear()
     request.session["mitglied_id"] = mitglied.id
     mitglied.letzter_zugriff = datetime.now(timezone.utc)
@@ -455,18 +478,49 @@ def registrieren(
     except ValueError as exc:
         hinweis_setzen(request, str(exc), "fehler")
         return RedirectResponse(f"/registrieren?tarif={tarif_id}", status_code=303)
-    organisation = Organisation(name=unternehmen.strip(), branche="Dienstleistung")
+    organisation = Organisation(name=unternehmen.strip(), branche="Dienstleistung", aktiv=False)
     db.add(organisation)
     db.flush()
-    mitglied = Mitglied(organisation_id=organisation.id, name=name.strip(), email=email, passwort_hash=passwort_hash, rolle=Kontorolle.INHABER, email_bestaetigt=True, letzter_zugriff=datetime.now(timezone.utc))
+    mitglied = Mitglied(
+        organisation_id=organisation.id,
+        name=name.strip(),
+        email=email,
+        passwort_hash=passwort_hash,
+        rolle=Kontorolle.INHABER,
+        email_bestaetigt=True,
+        aktiv=False,
+    )
     db.add(mitglied)
-    db.add(Abonnement(organisation_id=organisation.id, tarif_id=tarif.id, status="testphase", testphase_bis=datetime.now(timezone.utc) + timedelta(days=14), verlaengert_am=datetime.now(timezone.utc) + timedelta(days=14)))
+    abonnement = Abonnement(
+        organisation_id=organisation.id,
+        tarif_id=tarif.id,
+        status="wartet_auf_zahlung",
+        abrechnungszeitraum="monatlich",
+        verlaengert_am=datetime.now(timezone.utc),
+    )
+    db.add(abonnement)
+    nummer = f"ASD-{datetime.now().year}-{1000 + (db.scalar(select(func.count(Rechnung.id))) or 0) + 1}"
+    db.add(Rechnung(
+        organisation_id=organisation.id,
+        nummer=nummer,
+        betrag=tarif.monatspreis,
+        status="zahlung_ausstehend",
+        abrechnungszeitraum=f"{tarif.name} / Monatlich",
+        faellig_am=datetime.now(timezone.utc),
+    ))
     db.commit()
-    db.refresh(mitglied)
     request.session.clear()
-    request.session["mitglied_id"] = mitglied.id
-    hinweis_setzen(request, "Willkommen bei A+ SmartDocs. Ihre 14-tägige Testphase ist aktiviert.")
-    return RedirectResponse("/arbeitsbereich", status_code=303)
+    hinweis_setzen(request, "Ihre Registrierung wurde gespeichert. Das Konto wird nach Bestätigung der Offline-Zahlung durch A+ Solution freigeschaltet.")
+    return RedirectResponse("/freischaltung-ausstehend", status_code=303)
+
+
+@app.get("/freischaltung-ausstehend", response_class=HTMLResponse)
+def freischaltung_ausstehend(request: Request, db: Session = Depends(datenbank_sitzung)):
+    request.session.pop("mitglied_id", None)
+    kontext = grundkontext(request, db, "freischaltung")
+    kontext["mitglied"] = None
+    kontext["organisation"] = None
+    return vorlagen.TemplateResponse("freischaltung_ausstehend.html", kontext)
 
 
 @app.get("/passwort-vergessen", response_class=HTMLResponse)
@@ -747,7 +801,14 @@ def abrechnung(request: Request, db: Session = Depends(datenbank_sitzung)):
     rechnungen = db.scalars(select(Rechnung).where(Rechnung.organisation_id == mitglied.organisation_id).order_by(Rechnung.erstellt_am.desc())).all()
     tarife = db.scalars(select(Tarif).where(Tarif.aktiv.is_(True)).order_by(Tarif.monatspreis)).all()
     kontext = grundkontext(request, db, "abrechnung")
-    kontext.update({"abonnement": abo, "rechnungen": rechnungen, "tarife": tarife, "kennzahlen": _organisation_kennzahlen(db, mitglied.organisation_id)})
+    angefragter_tarif = db.get(Tarif, abo.angefragter_tarif_id) if abo and abo.angefragter_tarif_id else None
+    kontext.update({
+        "abonnement": abo,
+        "angefragter_tarif": angefragter_tarif,
+        "rechnungen": rechnungen,
+        "tarife": tarife,
+        "kennzahlen": _organisation_kennzahlen(db, mitglied.organisation_id),
+    })
     return vorlagen.TemplateResponse("abrechnung.html", kontext)
 
 
@@ -755,23 +816,28 @@ def abrechnung(request: Request, db: Session = Depends(datenbank_sitzung)):
 def tarif_wechseln(request: Request, tarif_id: int = Form(...), zeitraum: str = Form("monatlich"), db: Session = Depends(datenbank_sitzung)):
     mitglied = muss_angemeldet_sein(request, db)
     if mitglied.rolle != Kontorolle.INHABER:
-        hinweis_setzen(request, "Nur der Kontoinhaber kann den Tarif ändern.", "fehler")
+        hinweis_setzen(request, "Nur der Kontoinhaber kann einen Tarifwechsel anfragen.", "fehler")
         return RedirectResponse("/abrechnung", status_code=303)
     tarif = db.get(Tarif, tarif_id)
     abonnement = db.scalar(select(Abonnement).where(Abonnement.organisation_id == mitglied.organisation_id))
-    if not tarif or not abonnement:
-        hinweis_setzen(request, "Der Tarifwechsel konnte nicht durchgeführt werden.", "fehler")
+    if not tarif or not abonnement or not tarif.aktiv:
+        hinweis_setzen(request, "Die Tarifanfrage konnte nicht gespeichert werden.", "fehler")
         return RedirectResponse("/abrechnung", status_code=303)
-    abonnement.tarif_id = tarif.id
-    abonnement.abrechnungszeitraum = "jaehrlich" if zeitraum == "jaehrlich" else "monatlich"
-    abonnement.status = "aktiv"
-    abonnement.testphase_bis = None
-    abonnement.verlaengert_am = datetime.now(timezone.utc) + (timedelta(days=365) if zeitraum == "jaehrlich" else timedelta(days=30))
+    zeitraum = "jaehrlich" if zeitraum == "jaehrlich" else "monatlich"
+    abonnement.angefragter_tarif_id = tarif.id
+    abonnement.angefragter_zeitraum = zeitraum
     betrag = tarif.jahrespreis if zeitraum == "jaehrlich" and tarif.jahrespreis else tarif.monatspreis
     nummer = f"ASD-{datetime.now().year}-{1000 + (db.scalar(select(func.count(Rechnung.id))) or 0) + 1}"
-    db.add(Rechnung(organisation_id=mitglied.organisation_id, nummer=nummer, betrag=betrag, status="bezahlt", abrechnungszeitraum="Jahresabonnement" if zeitraum == "jaehrlich" else datetime.now().strftime("%m/%Y"), faellig_am=datetime.now(timezone.utc)))
+    db.add(Rechnung(
+        organisation_id=mitglied.organisation_id,
+        nummer=nummer,
+        betrag=betrag,
+        status="zahlung_ausstehend",
+        abrechnungszeitraum=f"Tarifwechsel: {tarif.name} / {'Jährlich' if zeitraum == 'jaehrlich' else 'Monatlich'}",
+        faellig_am=datetime.now(timezone.utc),
+    ))
     db.commit()
-    hinweis_setzen(request, f"Der Tarif {tarif.name} wurde erfolgreich aktiviert.")
+    hinweis_setzen(request, f"Der Wechsel zu {tarif.name} wurde vorgemerkt. A+ Solution aktiviert ihn nach Bestätigung der Offline-Zahlung.")
     return RedirectResponse("/abrechnung", status_code=303)
 
 
@@ -785,7 +851,12 @@ def verwaltung(request: Request, db: Session = Depends(datenbank_sitzung)):
     organisationen = db.scalars(select(Organisation).options(joinedload(Organisation.abonnement).joinedload(Abonnement.tarif), joinedload(Organisation.mitglieder)).order_by(Organisation.erstellt_am.desc())).unique().all()
     tarife = db.scalars(select(Tarif).order_by(Tarif.monatspreis)).all()
     kontext = grundkontext(request, db, "verwaltung")
-    kontext.update({"kennzahlen": _verwaltungs_kennzahlen(db), "organisationen": organisationen, "tarife": tarife})
+    kontext.update({
+        "kennzahlen": _verwaltungs_kennzahlen(db),
+        "organisationen": organisationen,
+        "tarife": tarife,
+        "tarife_nach_id": {tarif.id: tarif for tarif in tarife},
+    })
     return vorlagen.TemplateResponse("verwaltung.html", kontext)
 
 
@@ -800,6 +871,83 @@ def konto_ansehen(organisation_id: int, request: Request, db: Session = Depends(
     request.session["mitglied_id"] = inhaber.id
     hinweis_setzen(request, f"Sie sehen A+ SmartDocs jetzt aus Sicht von {inhaber.organisation.name}.")
     return RedirectResponse("/arbeitsbereich", status_code=303)
+
+
+@app.post("/verwaltung/konto/{organisation_id}/aktivieren")
+def konto_aktivieren(
+    organisation_id: int,
+    request: Request,
+    zeitraum: str = Form("monatlich"),
+    zahlungshinweis: str = Form(""),
+    db: Session = Depends(datenbank_sitzung),
+):
+    admin = muss_verwalten_duerfen(request, db)
+    organisation = db.get(Organisation, organisation_id)
+    abonnement = db.scalar(select(Abonnement).where(Abonnement.organisation_id == organisation_id))
+    if not organisation or not abonnement:
+        hinweis_setzen(request, "Das Kundenkonto wurde nicht gefunden.", "fehler")
+        return RedirectResponse("/verwaltung", status_code=303)
+    if organisation.id == admin.organisation_id:
+        hinweis_setzen(request, "Das interne A+ Konto kann hier nicht verändert werden.", "fehler")
+        return RedirectResponse("/verwaltung", status_code=303)
+
+    if abonnement.angefragter_tarif_id:
+        angefragter_tarif = db.get(Tarif, abonnement.angefragter_tarif_id)
+        if angefragter_tarif and angefragter_tarif.aktiv:
+            abonnement.tarif_id = angefragter_tarif.id
+    zeitraum = abonnement.angefragter_zeitraum or ("jaehrlich" if zeitraum == "jaehrlich" else "monatlich")
+    abonnement.abrechnungszeitraum = zeitraum
+    abonnement.status = "aktiv"
+    abonnement.testphase_bis = None
+    abonnement.aktiviert_am = datetime.now(timezone.utc)
+    abonnement.verlaengert_am = datetime.now(timezone.utc) + (timedelta(days=365) if zeitraum == "jaehrlich" else timedelta(days=30))
+    abonnement.zahlungshinweis = zahlungshinweis.strip()
+    abonnement.angefragter_tarif_id = None
+    abonnement.angefragter_zeitraum = None
+    organisation.aktiv = True
+    for konto in organisation.mitglieder:
+        konto.aktiv = True
+
+    offene_rechnung = db.scalar(
+        select(Rechnung)
+        .where(Rechnung.organisation_id == organisation_id, Rechnung.status == "zahlung_ausstehend")
+        .order_by(Rechnung.erstellt_am.desc())
+    )
+    betrag = abonnement.preis
+    if offene_rechnung:
+        offene_rechnung.status = "bezahlt"
+        offene_rechnung.betrag = betrag
+        offene_rechnung.faellig_am = datetime.now(timezone.utc)
+    else:
+        nummer = f"ASD-{datetime.now().year}-{1000 + (db.scalar(select(func.count(Rechnung.id))) or 0) + 1}"
+        db.add(Rechnung(
+            organisation_id=organisation_id,
+            nummer=nummer,
+            betrag=betrag,
+            status="bezahlt",
+            abrechnungszeitraum="Jahresabonnement" if zeitraum == "jaehrlich" else datetime.now().strftime("%m/%Y"),
+            faellig_am=datetime.now(timezone.utc),
+        ))
+    db.commit()
+    hinweis_setzen(request, f"Zahlung bestätigt: {organisation.name} ist jetzt freigeschaltet.")
+    return RedirectResponse("/verwaltung", status_code=303)
+
+
+@app.post("/verwaltung/konto/{organisation_id}/sperren")
+def konto_sperren(organisation_id: int, request: Request, db: Session = Depends(datenbank_sitzung)):
+    admin = muss_verwalten_duerfen(request, db)
+    organisation = db.get(Organisation, organisation_id)
+    abonnement = db.scalar(select(Abonnement).where(Abonnement.organisation_id == organisation_id))
+    if not organisation or not abonnement or organisation.id == admin.organisation_id:
+        hinweis_setzen(request, "Das Konto konnte nicht gesperrt werden.", "fehler")
+        return RedirectResponse("/verwaltung", status_code=303)
+    organisation.aktiv = False
+    abonnement.status = "gesperrt"
+    for konto in organisation.mitglieder:
+        konto.aktiv = False
+    db.commit()
+    hinweis_setzen(request, f"Das Konto von {organisation.name} wurde gesperrt.")
+    return RedirectResponse("/verwaltung", status_code=303)
 
 
 @app.post("/verwaltung/zurueck")

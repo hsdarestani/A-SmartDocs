@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titel %}Freischaltung ausstehend – A+ SmartDocs{% endblock %}
+{% block oeffentlicher_inhalt %}
+<section class="freischaltung-seite">
+  <div class="freischaltung-karte">
+    <a class="marke" href="/"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span></a>
+    <span class="freischaltung-code">STATUS / PAYMENT REVIEW</span>
+    <div class="freischaltung-symbol">✓</div>
+    <span class="uebertitel">Registrierung eingegangen</span>
+    <h1>Ihr Konto wartet auf die Freischaltung.</h1>
+    <p>Die Zahlung wird offline außerhalb von A+ SmartDocs abgewickelt. Sobald der zuständige Ansprechpartner den Zahlungseingang an A+ Solution bestätigt hat, aktiviert die A+ Verwaltung Ihr Firmenkonto.</p>
+    <div class="freischaltung-schritte">
+      <article><i>01</i><div><strong>Registrierung gespeichert</strong><small>Unternehmen, Inhaber und Tarif wurden angelegt.</small></div></article>
+      <article class="aktiv"><i>02</i><div><strong>Offline-Zahlung bestätigen</strong><small>Die Zahlungsabwicklung erfolgt direkt mit A+ Solution.</small></div></article>
+      <article><i>03</i><div><strong>Konto wird freigeschaltet</strong><small>Danach können Sie sich mit Ihren Zugangsdaten anmelden.</small></div></article>
+    </div>
+    <div class="freischaltung-aktionen"><a class="schaltflaeche primaer" href="/anmelden">Freischaltung prüfen</a><a class="schaltflaeche sekundaer" href="/">Zur Startseite</a></div>
+  </div>
+</section>
+{% endblock %}

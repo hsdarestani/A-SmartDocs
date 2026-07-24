@@ -3,19 +3,20 @@
 {% block inhalt %}
 <section class="seitenrahmen">
   <div class="seitenkopf">
-    <div><span class="uebertitel">Tarif und Verbrauch</span><h1>Abrechnung</h1><p>Aktueller Tarif, Nutzungsgrenzen und Abrechnungsstatus Ihres Unternehmens.</p></div>
-    <span class="zustandsmarke bereit">{{ abonnement.status }}</span>
+    <div><span class="uebertitel">Tarif und Verbrauch</span><h1>Abrechnung</h1><p>Aktueller Tarif, Nutzungsgrenzen und manuell bestätigte Zahlungen Ihres Unternehmens.</p></div>
+    <span class="zustandsmarke {% if abonnement.status in ['aktiv','testphase','intern'] %}bereit{% endif %}">{{ abonnement.status }}</span>
   </div>
+
+  {% if angefragter_tarif %}
+  <section class="zahlungs-anfrage-banner">
+    <div><span class="uebertitel">Offene Tarifanfrage</span><h2>{{ angefragter_tarif.name }}</h2><p>{{ 'Jährliche' if abonnement.angefragter_zeitraum == 'jaehrlich' else 'Monatliche' }} Abrechnung · Aktivierung nach Bestätigung der Offline-Zahlung durch A+ Solution.</p></div>
+    <span>Prüfung ausstehend</span>
+  </section>
+  {% endif %}
 
   <div class="abrechnungs-gitter">
     <section class="aktuelle-tarifkarte">
-      <div>
-        <span class="uebertitel">Aktueller Tarif</span>
-        <h2>{{ abonnement.tarif.name }}</h2>
-        <p>{{ abonnement.tarif.beschreibung }}</p>
-        <div class="tarif-preis"><strong>{{ abonnement.preis|geld }}</strong><small>/ {{ 'Jahr' if abonnement.abrechnungszeitraum == 'jaehrlich' else 'Monat' }}</small></div>
-        {% if abonnement.testphase_bis %}<span class="testmarke">Kostenlose Testphase bis {{ abonnement.testphase_bis|datum }}</span>{% endif %}
-      </div>
+      <div><span class="uebertitel">Aktueller Tarif</span><h2>{{ abonnement.tarif.name }}</h2><p>{{ abonnement.tarif.beschreibung }}</p><div class="tarif-preis"><strong>{{ abonnement.preis|geld }}</strong><small>/ {{ 'Jahr' if abonnement.abrechnungszeitraum == 'jaehrlich' else 'Monat' }}</small></div></div>
       <div class="tarif-verbrauch">
         <article><span><strong>Dokumente</strong><small>{{ kennzahlen.dokumente }} von {{ abonnement.dokument_limit }}</small></span><div><i style="--fortschritt:{{ kennzahlen.verbrauch_prozent }}%"></i></div></article>
         <article><span><strong>Vorlagen</strong><small>{{ kennzahlen.vorlagen }} von {{ abonnement.vorlagen_limit }}</small></span><div><i style="--fortschritt:{{ (kennzahlen.vorlagen / abonnement.vorlagen_limit * 100) if abonnement.vorlagen_limit else 0 }}%"></i></div></article>
@@ -24,50 +25,21 @@
     </section>
 
     <section class="inhaltskarte zahlungsart">
-      <div class="kartenkopf"><div><h2>Zahlungsabwicklung</h2><p>Status der Produktiv-Anbindung</p></div></div>
-      <div class="kartenabbildung zahlungsmodus">
-        <span>A+ BILLING</span>
-        <strong>VORFÜHRMODUS</strong>
-        <small>Noch keine echte Abbuchung</small>
-      </div>
-      <p class="zahlungs-hinweis">Tarifwechsel werden in dieser Präsentationsfassung nur im Firmenkonto simuliert. Es werden keine Karten- oder Bankdaten erfasst und keine Beträge eingezogen.</p>
-      <button class="schaltflaeche sekundaer breit" type="button" disabled>Zahlungsanbieter noch nicht verbunden</button>
+      <div class="kartenkopf"><div><h2>Manuelle Zahlung</h2><p>Offline-Abwicklung durch A+ Solution</p></div></div>
+      <div class="kartenabbildung zahlungsmodus"><span>A+ BILLING</span><strong>OFFLINE PAYMENT</strong><small>Freischaltung durch die Verwaltung</small></div>
+      <p class="zahlungs-hinweis">Es werden keine Karten- oder Bankdaten in A+ SmartDocs gespeichert. Nach einer Zahlung bestätigt die A+ Verwaltung den Vorgang und aktiviert den Tarif manuell.</p>
+      <span class="zahlungs-bestaetigung">Letzte Zahlungsfreigabe: {{ abonnement.aktiviert_am|datum if abonnement.aktiviert_am else 'nicht hinterlegt' }}</span>
     </section>
   </div>
 
   <section class="tarifwechsel">
-    <div class="kartenkopf">
-      <div><h2>Tarif im Vorführkonto wechseln</h2><p>Die Auswahl ändert Limits und Preisansicht der Demo. Eine Zahlung wird dabei nicht ausgelöst.</p></div>
-      <div class="abrechnungsumschalter klein"><button class="aktiv" data-zeitraum="monatlich">Monatlich</button><button data-zeitraum="jaehrlich">Jährlich</button></div>
-    </div>
-    <div class="tarifwechsel-raster">
-      {% for tarif in tarife %}
-      <form action="/abrechnung/tarif-wechseln" method="post" class="wechselkarte {% if tarif.id == abonnement.tarif_id %}aktuell{% endif %}">
-        <input type="hidden" name="tarif_id" value="{{ tarif.id }}">
-        <input class="zeitraumEingabe" type="hidden" name="zeitraum" value="monatlich">
-        <div><span>{{ tarif.name }}</span>{% if tarif.id == abonnement.tarif_id %}<b>Aktuell</b>{% endif %}</div>
-        <strong class="monatspreis" data-monat="{{ tarif.monatspreis }}" data-jahr="{{ tarif.jahrespreis }}">{{ tarif.monatspreis|geld }}</strong>
-        <small>{{ tarif.dokumente_monat }} Dokumente · {{ tarif.vorlagen }} Vorlagen · {{ tarif.unterkonten }} Unterkonten</small>
-        <button class="schaltflaeche {% if tarif.id == abonnement.tarif_id %}sekundaer{% else %}primaer{% endif %} breit" type="submit" {% if tarif.id == abonnement.tarif_id %}disabled{% endif %}>{{ 'Aktiver Tarif' if tarif.id == abonnement.tarif_id else 'In der Demo anwenden' }}</button>
-      </form>
-      {% endfor %}
-    </div>
+    <div class="kartenkopf"><div><h2>Tarifwechsel anfragen</h2><p>Die Auswahl wird nur vorgemerkt. Ihr aktueller Tarif bleibt aktiv, bis A+ Solution die Offline-Zahlung bestätigt.</p></div><div class="abrechnungsumschalter klein"><button class="aktiv" data-zeitraum="monatlich">Monatlich</button><button data-zeitraum="jaehrlich">Jährlich</button></div></div>
+    <div class="tarifwechsel-raster">{% for tarif in tarife %}<form action="/abrechnung/tarif-wechseln" method="post" class="wechselkarte {% if tarif.id == abonnement.tarif_id %}aktuell{% endif %}"><input type="hidden" name="tarif_id" value="{{ tarif.id }}"><input class="zeitraumEingabe" type="hidden" name="zeitraum" value="monatlich"><div><span>{{ tarif.name }}</span>{% if tarif.id == abonnement.tarif_id %}<b>Aktuell</b>{% endif %}</div><strong class="monatspreis" data-monat="{{ tarif.monatspreis }}" data-jahr="{{ tarif.jahrespreis }}">{{ tarif.monatspreis|geld }}</strong><small>{{ tarif.dokumente_monat }} Dokumente · {{ tarif.vorlagen }} Vorlagen · {{ tarif.unterkonten }} Unterkonten</small><button class="schaltflaeche {% if tarif.id == abonnement.tarif_id %}sekundaer{% else %}primaer{% endif %} breit" type="submit" {% if tarif.id == abonnement.tarif_id %}disabled{% endif %}>{{ 'Aktiver Tarif' if tarif.id == abonnement.tarif_id else 'Tarif anfragen' }}</button></form>{% endfor %}</div>
   </section>
 
   <section class="inhaltskarte rechnungsliste">
-    <div class="kartenkopf"><div><h2>Simulierter Rechnungsverlauf</h2><p>Für die Produktpräsentation erzeugte Abrechnungsdatensätze</p></div></div>
-    <div class="tabellenrahmen">
-      <table>
-        <thead><tr><th>Rechnungsnummer</th><th>Zeitraum</th><th>Datum</th><th>Betrag</th><th>Status</th><th></th></tr></thead>
-        <tbody>
-          {% for rechnung in rechnungen %}
-          <tr><td><strong>{{ rechnung.nummer }}</strong></td><td>{{ rechnung.abrechnungszeitraum }}</td><td>{{ rechnung.erstellt_am|datum }}</td><td>{{ rechnung.betrag|geld }}</td><td><span class="zustandsmarke">Demo</span></td><td><span class="textknopf">Datensatz</span></td></tr>
-          {% else %}
-          <tr><td colspan="6">Noch keine simulierten Abrechnungen vorhanden.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <div class="kartenkopf"><div><h2>Zahlungs- und Rechnungsverlauf</h2><p>Manuell bestätigte und noch offene Abrechnungsvorgänge</p></div></div>
+    <div class="tabellenrahmen"><table><thead><tr><th>Vorgangsnummer</th><th>Tarif / Zeitraum</th><th>Datum</th><th>Betrag</th><th>Status</th></tr></thead><tbody>{% for rechnung in rechnungen %}<tr><td><strong>{{ rechnung.nummer }}</strong></td><td>{{ rechnung.abrechnungszeitraum }}</td><td>{{ rechnung.erstellt_am|datum }}</td><td>{{ rechnung.betrag|geld }}</td><td><span class="zustandsmarke {% if rechnung.status == 'bezahlt' %}bereit{% endif %}">{{ rechnung.status }}</span></td></tr>{% else %}<tr><td colspan="5">Noch keine Abrechnungsvorgänge vorhanden.</td></tr>{% endfor %}</tbody></table></div>
   </section>
 </section>
 {% endblock %}

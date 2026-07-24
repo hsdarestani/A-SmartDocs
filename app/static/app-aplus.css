@@ -347,3 +347,21 @@ body.angemeldet { background: #eef4f6; }
   .auth-bild { border-right: 0; border-bottom: 1px solid var(--aplus-navy); }
   .seitenleiste { box-shadow: 18px 0 40px rgba(7,28,46,.3); }
 }
+
+
+/* MANUAL-PAYMENT-FLOW */
+.freischaltung-seite{min-height:calc(100vh - 90px);display:grid;place-items:center;padding:70px 24px;background:linear-gradient(135deg,var(--aplus-ice),#fff)}
+.freischaltung-karte{width:min(760px,100%);background:#fff;border:1px solid var(--aplus-line);box-shadow:0 28px 80px rgba(7,28,46,.12);padding:44px;position:relative}
+.freischaltung-karte>.marke{margin-bottom:42px}.freischaltung-code{position:absolute;right:28px;top:30px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:var(--aplus-muted)}
+.freischaltung-symbol{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--aplus-navy);color:#fff;font-size:28px;margin-bottom:22px}
+.freischaltung-karte h1{font-size:clamp(34px,5vw,58px);line-height:1.02;max-width:650px;margin:8px 0 18px;color:var(--aplus-navy)}
+.freischaltung-karte>p{font-size:18px;line-height:1.7;color:var(--aplus-muted);max-width:680px}
+.freischaltung-schritte{display:grid;gap:0;margin:34px 0;border:1px solid var(--aplus-line)}
+.freischaltung-schritte article{display:flex;gap:18px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--aplus-line)}.freischaltung-schritte article:last-child{border-bottom:0}
+.freischaltung-schritte article.aktiv{background:var(--aplus-ice)}.freischaltung-schritte i{font-family:"IBM Plex Mono",monospace;color:var(--aplus-blue);font-style:normal;font-weight:600}.freischaltung-schritte div{display:grid;gap:3px}.freischaltung-schritte small{color:var(--aplus-muted)}
+.freischaltung-aktionen{display:flex;gap:12px;flex-wrap:wrap}
+.zahlungs-anfrage-banner{display:flex;justify-content:space-between;gap:24px;align-items:center;background:var(--aplus-navy);color:#fff;padding:24px 28px;margin-bottom:24px}.zahlungs-anfrage-banner h2{font-size:28px;margin:4px 0}.zahlungs-anfrage-banner p{color:#c9dbe4;margin:0}.zahlungs-anfrage-banner>span{border:1px solid rgba(255,255,255,.35);padding:8px 12px;font-family:"IBM Plex Mono",monospace;font-size:12px;white-space:nowrap}
+.zahlungs-bestaetigung{display:block;margin-top:14px;padding-top:14px;border-top:1px solid var(--aplus-line);font-size:13px;color:var(--aplus-muted)}
+.kennzahlkarte.warnung{border-color:#dfb75f}.kennzahlkarte.warnung .kartenzeichen{background:#fff3d8;color:#825b08}
+.admin-zeilenaktionen .admin-aktivieren{width:auto;padding:8px 11px;border-radius:3px;background:var(--aplus-blue);color:#fff;font-size:12px;font-weight:600;white-space:nowrap}
+@media(max-width:700px){.freischaltung-karte{padding:30px 22px}.freischaltung-code{position:static;display:block;margin:-24px 0 28px}.zahlungs-anfrage-banner{align-items:flex-start;flex-direction:column}}
