@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>{% block titel %}A+ SmartDocs{% endblock %}</title>
+  <meta name="description" content="Dokumentvorlagen intelligent erkennen, bestätigen und automatisch wiederverwenden.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('statisch', path='/app.css') }}">
+</head>
+<body class="bereich-{{ bereich|default('start') }}">
+  <div class="hintergrund-leuchten leuchten-eins"></div>
+  <div class="hintergrund-leuchten leuchten-zwei"></div>
+
+  <header class="kopfzeile">
+    <a class="marke" href="/" aria-label="A+ SmartDocs Startseite">
+      <span class="marken-symbol"><span>A+</span></span>
+      <span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span>
+    </a>
+    <nav class="hauptnavigation" aria-label="Hauptnavigation">
+      <a href="/arbeitsbereich" class="{% if bereich == 'arbeitsbereich' %}aktiv{% endif %}">Arbeitsbereich</a>
+      <a href="/vorlagen/neu" class="{% if bereich == 'vorlagen' %}aktiv{% endif %}">Vorlagenstudio</a>
+      <a href="/verwaltung" class="{% if bereich == 'verwaltung' %}aktiv{% endif %}">Verwaltung</a>
+    </nav>
+    <div class="kopfaktionen">
+      <button class="symbolknopf" aria-label="Benachrichtigungen">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+        <i></i>
+      </button>
+      <div class="profilknopf"><span>HD</span><div><strong>Hossein</strong><small>Hauptverwaltung</small></div></div>
+    </div>
+  </header>
+
+  <main>{% block inhalt %}{% endblock %}</main>
+  <div id="meldung" class="meldung" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('statisch', path='/app.js') }}" defer></script>
+</body>
+</html>
