@@ -46,15 +46,11 @@ jobs:
           rm -rf tools/presentation-update
           git checkout HEAD -- .github/workflows/bereitstellung.yml
 
-      - name: Änderungen speichern
+      - name: Änderungen auf eigenem Zweig speichern
         run: |
           set -euo pipefail
           git config user.name "A+ SmartDocs Automatisierung"
           git config user.email "actions@users.noreply.github.com"
           git add -A
-          if git diff --cached --quiet; then
-            echo "Keine neuen Änderungen vorhanden."
-          else
-            git commit -m "Vollständige Präsentationsfassung umsetzen"
-            git push origin HEAD:ausbau/vollstaendige-praesentation
-          fi
+          git commit -m "Vollständige Präsentationsfassung umsetzen"
+          git push --force origin HEAD:generated/vollstaendige-praesentation
