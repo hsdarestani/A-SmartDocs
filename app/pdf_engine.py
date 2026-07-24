@@ -30,6 +30,25 @@ def _wert_als_text(wert: Any) -> str:
     return str(wert)
 
 
+def _pflichtfelder_pruefen(schema: dict[str, Any], eingaben: dict[str, Any]) -> None:
+    fehlend: list[str] = []
+    felder = schema.get("felder", []) if isinstance(schema, dict) else []
+    for feld in felder:
+        if not bool(feld.get("pflichtfeld")):
+            continue
+        schluessel = str(feld.get("schluessel") or "").strip()
+        if not schluessel:
+            continue
+        wert = eingaben.get(schluessel)
+        leer = wert is None or wert == "" or wert == []
+        if isinstance(wert, str):
+            leer = not wert.strip()
+        if leer:
+            fehlend.append(str(feld.get("bezeichnung") or schluessel))
+    if fehlend:
+        raise ValueError("Bitte füllen Sie alle Pflichtfelder aus: " + ", ".join(fehlend))
+
+
 def _text_einpassen(c: canvas.Canvas, text: str, x: float, y: float, breite: float, hoehe: float, schrift: float) -> None:
     text = text.strip()
     if not text:
@@ -142,6 +161,7 @@ def _deckblatt(c: canvas.Canvas, titel: str, vorlagenname: str, eingaben: dict[s
 
 
 def dokument_erzeugen(original: Path, inhaltstyp: str, schema: dict[str, Any], eingaben: dict[str, Any], ziel: Path, titel: str, vorlagenname: str) -> int:
+    _pflichtfelder_pruefen(schema, eingaben)
     ziel.parent.mkdir(parents=True, exist_ok=True)
     if inhaltstyp == "application/pdf" and original.exists():
         leser = PdfReader(str(original))

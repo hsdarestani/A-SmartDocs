@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
 
-from sqlalchemy import Boolean, DateTime, Enum as SqlEnum, ForeignKey, Integer, JSON, Numeric, String, Text
+from sqlalchemy import Boolean, DateTime, Enum as SqlEnum, ForeignKey, Integer, JSON, Numeric, String, Text, event, func, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Basis
@@ -201,6 +201,12 @@ class Einladung(Basis):
     organisation: Mapped[Organisation] = relationship(back_populates="einladungen")
 
 
+@event.listens_for(Einladung, "load")
+def einladungszeit_auf_utc_setzen(ziel: Einladung, _kontext) -> None:
+    if ziel.laeuft_ab_am and ziel.laeuft_ab_am.tzinfo is None:
+        ziel.laeuft_ab_am = ziel.laeuft_ab_am.replace(tzinfo=timezone.utc)
+
+
 class Rechnung(Basis):
     __tablename__ = "rechnungen"
 
@@ -214,6 +220,24 @@ class Rechnung(Basis):
     erstellt_am: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=jetzt)
 
     organisation: Mapped[Organisation] = relationship(back_populates="rechnungen")
+
+
+@event.listens_for(Rechnung, "before_insert")
+def rechnungsnummer_eindeutig_machen(_mapper, connection, ziel: Rechnung) -> None:
+    """Bestehende Nummern aus Importen oder Demos dürfen neue Vorgänge nicht blockieren."""
+    nummer = (ziel.nummer or "").strip()
+    vorhanden = connection.execute(select(Rechnung.id).where(Rechnung.nummer == nummer)).first()
+    if nummer and not vorhanden:
+        return
+
+    jahr = (ziel.erstellt_am or datetime.now(timezone.utc)).year
+    laufend = int(connection.execute(select(func.count(Rechnung.id))).scalar_one() or 0) + 1001
+    while True:
+        kandidat = f"ASD-{jahr}-{laufend}"
+        if not connection.execute(select(Rechnung.id).where(Rechnung.nummer == kandidat)).first():
+            ziel.nummer = kandidat
+            return
+        laufend += 1
 
 
 class Nutzungsereignis(Basis):

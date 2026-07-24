@@ -4,13 +4,15 @@ import base64
 import hashlib
 import hmac
 import os
+import re
 import secrets
 from dataclasses import dataclass
 
 from fastapi import HTTPException, Request, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .models import Mitglied
+from .models import Abonnement, Kontorolle, Mitglied
 
 
 @dataclass(slots=True)
@@ -43,14 +45,63 @@ def token_erzeugen(laenge: int = 32) -> str:
     return secrets.token_urlsafe(laenge)
 
 
+def _schreibzugriff_erlaubt(request: Request, mitglied: Mitglied) -> bool:
+    """Zentrale Rollenregel für alle zustandsverändernden Produktaufrufe."""
+    methode = request.method.upper()
+    pfad = request.url.path.rstrip("/") or "/"
+
+    if methode in {"GET", "HEAD", "OPTIONS"} or pfad == "/abmelden":
+        return True
+    if mitglied.ist_superadmin:
+        return True
+
+    rolle = mitglied.rolle
+    if rolle == Kontorolle.LESEN:
+        return False
+
+    verwaltungsbereiche = ("/team", "/einstellungen", "/abrechnung")
+    if pfad.startswith(verwaltungsbereiche):
+        return rolle in {Kontorolle.INHABER, Kontorolle.VERWALTUNG}
+
+    vorlagenverwaltung = (
+        pfad == "/api/vorlagen/analysieren"
+        or pfad == "/api/vorlagen/korrigieren"
+        or (pfad.startswith("/api/vorlagen/") and (pfad.endswith("/schema") or pfad.endswith("/bestaetigen")))
+    )
+    if vorlagenverwaltung:
+        return rolle in {Kontorolle.INHABER, Kontorolle.VERWALTUNG, Kontorolle.BEARBEITUNG}
+
+    if re.fullmatch(r"/vorlagen/\d+/verwenden", pfad):
+        return rolle in {
+            Kontorolle.INHABER,
+            Kontorolle.VERWALTUNG,
+            Kontorolle.BEARBEITUNG,
+            Kontorolle.NUTZUNG,
+        }
+
+    if re.fullmatch(r"/dokumente/\d+/loeschen", pfad):
+        return rolle in {Kontorolle.INHABER, Kontorolle.VERWALTUNG, Kontorolle.BEARBEITUNG}
+
+    return rolle in {Kontorolle.INHABER, Kontorolle.VERWALTUNG, Kontorolle.BEARBEITUNG}
+
+
 def mitglied_aus_sitzung(request: Request, db: Session) -> Mitglied | None:
     mitglied_id = request.session.get("mitglied_id")
     if not mitglied_id:
         return None
     mitglied = db.get(Mitglied, int(mitglied_id))
-    if not mitglied or not mitglied.aktiv:
+    if not mitglied or not mitglied.aktiv or not mitglied.organisation.aktiv:
         request.session.clear()
         return None
+
+    abonnement = db.scalar(select(Abonnement).where(Abonnement.organisation_id == mitglied.organisation_id))
+    erlaubte_status = {"aktiv", "testphase", "intern"}
+    if not mitglied.ist_superadmin and (not abonnement or abonnement.status not in erlaubte_status):
+        request.session.clear()
+        return None
+
+    if not _schreibzugriff_erlaubt(request, mitglied):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Für diese Aktion fehlt Ihrer Rolle die Berechtigung.")
     return mitglied
 
 
