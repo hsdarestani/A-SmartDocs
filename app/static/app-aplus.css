@@ -1,0 +1,349 @@
+/*
+ * A+ SmartDocs — A+ Solution Corporate Layer
+ * Dunkelblau, klares Weiß und präzise Dokumentraster.
+ */
+:root {
+  --aplus-navy: #071c2e;
+  --aplus-navy-2: #0b2a43;
+  --aplus-navy-3: #123b5b;
+  --aplus-blue: #1676a7;
+  --aplus-sky: #55b7da;
+  --aplus-ice: #edf5f8;
+  --aplus-mist: #d8e8ee;
+  --aplus-white: #ffffff;
+  --aplus-ink: #0a1822;
+  --aplus-muted: #607582;
+  --aplus-line: #b9cbd3;
+  --aplus-success: #147759;
+  --papier: var(--aplus-ice);
+  --papier-hell: var(--aplus-white);
+  --tinte: var(--aplus-ink);
+  --tinte-2: #253945;
+  --grau: var(--aplus-muted);
+  --linie: var(--aplus-line);
+  --linie-dunkel: var(--aplus-navy);
+  --signal: var(--aplus-blue);
+  --signal-dunkel: #0e5b83;
+  --kobalt: var(--aplus-sky);
+  --gruen: var(--aplus-success);
+  --gelb: #b8dce9;
+}
+
+html { background: var(--aplus-ice); }
+body { color: var(--aplus-ink); background: var(--aplus-ice); }
+body::before {
+  opacity: .22;
+  background-image:
+    linear-gradient(rgba(7, 28, 46, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 28, 46, .035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mix-blend-mode: normal;
+}
+::selection { background: var(--aplus-sky); color: var(--aplus-navy); }
+
+.marken-symbol {
+  color: var(--aplus-white);
+  background: var(--aplus-navy);
+  border-color: var(--aplus-navy);
+}
+.marken-text strong { color: inherit; }
+.marken-text small { color: currentColor; opacity: .62; }
+
+.oeffentliche-kopfzeile {
+  color: var(--aplus-white);
+  background: rgba(7, 28, 46, .98);
+  border-bottom-color: rgba(255, 255, 255, .16);
+  box-shadow: 0 8px 30px rgba(7, 28, 46, .12);
+}
+.oeffentliche-kopfzeile .marken-symbol {
+  background: var(--aplus-white);
+  border-color: var(--aplus-white);
+  color: var(--aplus-navy);
+}
+.oeffentliche-kopfzeile nav a::after { background: var(--aplus-sky); }
+.oeffentliche-aktionen > a:first-child { color: rgba(255, 255, 255, .82); }
+.oeffentliche-kopfzeile .schaltflaeche.primaer {
+  color: var(--aplus-navy);
+  background: var(--aplus-sky);
+  border-color: var(--aplus-sky);
+}
+
+.schaltflaeche { border-color: var(--aplus-navy); }
+.schaltflaeche:hover { box-shadow: 3px 3px 0 var(--aplus-navy); }
+.schaltflaeche.primaer {
+  color: var(--aplus-white);
+  background: var(--aplus-blue);
+  border-color: var(--aplus-navy);
+}
+.schaltflaeche.primaer:hover { background: var(--aplus-navy-3); }
+.schaltflaeche.sekundaer {
+  color: var(--aplus-navy);
+  background: var(--aplus-white);
+  border-color: var(--aplus-navy);
+}
+.textknopf, .zeilenaktion { color: var(--aplus-blue); }
+
+.startbereich {
+  background: var(--aplus-white);
+  border-color: var(--aplus-navy);
+}
+.startinhalt {
+  background: var(--aplus-white);
+  border-right-color: var(--aplus-navy);
+}
+.startinhalt::before, .hinweismarke, .uebertitel { color: var(--aplus-blue); }
+.hinweismarke > span { background: var(--aplus-sky); }
+.startinhalt h1 { color: var(--aplus-navy); }
+.startinhalt h1 em {
+  color: var(--aplus-blue);
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 500;
+}
+.starttext { color: #39505e; }
+.vertrauenszeile { border-top-color: var(--aplus-line); }
+
+.produktbuehne { color: var(--aplus-white); background: var(--aplus-navy); }
+.produktbuehne::before {
+  background-image:
+    linear-gradient(rgba(85, 183, 218, .09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(85, 183, 218, .09) 1px, transparent 1px);
+}
+.produktfenster {
+  background: var(--aplus-navy-2);
+  border-color: rgba(255, 255, 255, .28);
+  box-shadow: 18px 18px 0 rgba(0, 0, 0, .18);
+}
+.fensterkopf, .dokumentvorschau, .dialogkopf { border-color: rgba(255, 255, 255, .16); }
+.sicherheitsanzeige, .statuspunkt, .statushaken { color: var(--aplus-sky); }
+.statuspunkt { background: var(--aplus-sky); }
+.dokumentblatt { background: var(--aplus-white); color: var(--aplus-ink); }
+.mini-logo, .assistentenbild { background: var(--aplus-blue); color: var(--aplus-white); }
+.feldmarkierung { border-color: var(--aplus-blue); background: rgba(22, 118, 167, .08); }
+.feldmarkierung span { background: var(--aplus-blue); }
+.dialognachricht.assistent { background: #173a53; color: #e8f2f6; }
+.dialognachricht.nutzer { background: var(--aplus-blue); color: var(--aplus-white); }
+.erkennungsliste span { border-color: rgba(85, 183, 218, .3); color: #dff5fc; }
+.schwebekarte {
+  color: var(--aplus-navy);
+  background: var(--aplus-white);
+  border-color: var(--aplus-navy);
+}
+.zeitkarte > span { color: var(--aplus-blue); }
+
+.ablaufbereich { background: var(--aplus-ice); }
+.ablaufkarten article { background: var(--aplus-white); border-color: var(--aplus-navy); }
+.ablaufkarten article:nth-child(2) { background: #e4f1f6; }
+.ablaufkarten article:nth-child(3) { background: #d7eaf1; }
+.ablaufzeichen { color: var(--aplus-white); background: var(--aplus-navy); }
+.vorteilsbereich { color: var(--aplus-white); background: var(--aplus-navy); }
+.vorteilsbereich .uebertitel { color: var(--aplus-sky); }
+.vorteilsraster article { border-color: rgba(255,255,255,.28); }
+.sicherheitsbereich {
+  color: var(--aplus-navy);
+  background: var(--aplus-mist);
+  border-color: var(--aplus-navy);
+}
+.sicherheitszeichen { background: var(--aplus-navy); color: var(--aplus-white); }
+.oeffentlicher-fuss {
+  color: var(--aplus-white);
+  background: #04131f;
+  border-top-color: var(--aplus-sky);
+}
+.oeffentlicher-fuss .marken-symbol {
+  background: var(--aplus-white);
+  color: var(--aplus-navy);
+  border-color: var(--aplus-white);
+}
+
+.auth-seite { background: var(--aplus-white); }
+.auth-bild {
+  color: var(--aplus-white);
+  background: var(--aplus-navy);
+  border-right-color: var(--aplus-navy);
+}
+.auth-bild::before {
+  background-image:
+    linear-gradient(rgba(85, 183, 218, .09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(85, 183, 218, .09) 1px, transparent 1px);
+}
+.auth-bild .marken-symbol {
+  background: var(--aplus-white);
+  color: var(--aplus-navy);
+  border-color: var(--aplus-white);
+}
+.auth-bild .hinweismarke, .auth-bild .uebertitel { color: var(--aplus-sky); }
+.auth-bild h1 em { color: var(--aplus-sky); }
+.auth-formular { background: var(--aplus-ice); }
+.auth-box { background: var(--aplus-white); border-color: var(--aplus-navy); }
+.formular-stapel input,
+.formular-stapel select,
+.formular-stapel textarea,
+.eingabefeld input,
+.formularraster input,
+.formularraster select,
+.formularraster textarea {
+  color: var(--aplus-ink);
+  background: var(--aplus-white);
+  border-color: var(--aplus-line);
+}
+.formular-stapel input:focus,
+.formular-stapel select:focus,
+.formular-stapel textarea:focus,
+.eingabefeld input:focus,
+.formularraster input:focus,
+.formularraster select:focus,
+.formularraster textarea:focus {
+  border-color: var(--aplus-blue);
+  box-shadow: 0 0 0 3px rgba(22,118,167,.12);
+}
+.tarifoption { background: var(--aplus-white); border-color: var(--aplus-line); }
+.tarifoption.ausgewaehlt { background: #e5f2f7; border-color: var(--aplus-blue); }
+.tarifoption input, .kontrollzeile input { accent-color: var(--aplus-blue); }
+.zugangshinweis { background: #e5f2f7; border-color: var(--aplus-line); }
+
+.preis-seite { background: var(--aplus-ice); }
+.preiskarte { background: var(--aplus-white); border-color: var(--aplus-navy); }
+.preiskarte.empfohlen { color: var(--aplus-white); background: var(--aplus-navy); }
+.preiskarte.empfohlen .schaltflaeche.primaer {
+  color: var(--aplus-navy);
+  background: var(--aplus-sky);
+  border-color: var(--aplus-sky);
+}
+.empfehlungsmarke { color: var(--aplus-navy); background: var(--aplus-sky); }
+.abrechnungsumschalter { border-color: var(--aplus-navy); background: var(--aplus-white); }
+.abrechnungsumschalter button.aktiv { color: var(--aplus-white); background: var(--aplus-blue); }
+.preis-hinweis { background: var(--aplus-mist); border-color: var(--aplus-navy); }
+
+body.angemeldet { background: #eef4f6; }
+.seitenleiste {
+  color: #dceaf0;
+  background: var(--aplus-navy);
+  border-right-color: rgba(255,255,255,.12);
+}
+.seitenleiste .marken-symbol {
+  color: var(--aplus-navy);
+  background: var(--aplus-white);
+  border-color: var(--aplus-white);
+}
+.seitenleiste .marken-text small { color: #a9c2cd; opacity: 1; }
+.navigationsgruppe { color: #86a7b5; }
+.seitennavigation a { color: #d3e1e7; border-color: transparent; }
+.seitennavigation a:hover { color: var(--aplus-white); background: rgba(255,255,255,.07); }
+.seitennavigation a.aktiv {
+  color: var(--aplus-navy);
+  background: var(--aplus-sky);
+  border-color: var(--aplus-sky);
+}
+.seitennavigation a i { border-color: currentColor; }
+.seitenleisten-fuss { border-top-color: rgba(255,255,255,.14); }
+.konto-mini > span, .profilchip > span { background: var(--aplus-blue); color: var(--aplus-white); }
+.abmelden-knopf { color: var(--aplus-white); border-color: rgba(255,255,255,.32); }
+.app-kopfzeile {
+  background: rgba(255,255,255,.97);
+  border-bottom-color: var(--aplus-line);
+  box-shadow: 0 8px 22px rgba(7,28,46,.06);
+}
+.kopf-suche { background: var(--aplus-ice); border-color: var(--aplus-line); }
+.kopf-neu { color: var(--aplus-white); background: var(--aplus-blue); border-color: var(--aplus-navy); }
+.symbolknopf { color: var(--aplus-navy); background: var(--aplus-white); border-color: var(--aplus-line); }
+.app-inhalt { background: #eef4f6; }
+.ansichtsleiste { color: var(--aplus-white); background: var(--aplus-blue); }
+
+.seitenkopf h1, .studiokopf h1, .editor-kopf h1 { color: var(--aplus-navy); }
+.kennzahlkarte,
+.inhaltskarte,
+.studiohauptkarte,
+.assistentenkarte,
+.ergebnisbereich,
+.aktuelle-tarifkarte,
+.wechselkarte,
+.einstellungsblock,
+.editor-panel,
+.editor-seitenleiste,
+.kontenkarte,
+.umsatzkarte,
+.tarifkarte {
+  background: var(--aplus-white);
+  border-color: var(--aplus-line);
+  box-shadow: 0 6px 18px rgba(7,28,46,.045);
+}
+.kennzahlkarte.hervorgehoben {
+  color: var(--aplus-white);
+  background: var(--aplus-navy);
+  border-color: var(--aplus-navy);
+}
+.kennzahlkarte.hervorgehoben small,
+.kennzahlkarte.hervorgehoben span { color: #bcd0d9; }
+.kartenzeichen, .schnellzeichen, .aktivitaetszeichen, .assistentenbild {
+  color: var(--aplus-white);
+  background: var(--aplus-blue);
+  border-color: var(--aplus-blue);
+}
+.schnellstart {
+  color: var(--aplus-white);
+  background: var(--aplus-navy-2);
+  border-color: var(--aplus-navy);
+}
+.schnellstart a { color: var(--aplus-sky); }
+.kartenkopf { border-bottom-color: var(--aplus-line); }
+.vorlagenzeile, .aktivitaetsliste article, table td, table th { border-color: #d9e4e9; }
+.vorlagenzeile:hover, table tbody tr:hover { background: #edf6f9; }
+.dateizeichen.pdf { color: var(--aplus-navy); background: #d9ecf3; border-color: #9fc7d8; }
+.zustandsmarke.bereit { color: #0d6248; background: #dff3eb; border-color: #9bcdbb; }
+.kreisfortschritt { background: conic-gradient(var(--aplus-blue) calc(var(--wert)*1%), #dce8ed 0); }
+.kreisfortschritt::after { background: var(--aplus-white); }
+
+.kontingenthinweis { background: #e3f0f5; border-color: var(--aplus-line); }
+.kontingenthinweis i, .tarif-verbrauch i, .verbrauch span { background: var(--aplus-blue); }
+.hochladebereich { background: #f7fbfc; border-color: #8eb9ca; }
+.hochladebereich:hover, .hochladebereich.darueber {
+  background: #e4f2f7;
+  border-color: var(--aplus-blue);
+}
+.hochladezeichen { color: var(--aplus-blue); background: #d9ecf3; border-color: #9bc7d8; }
+.datenschutzhinweis { color: var(--aplus-navy); background: #e4f2f7; border-color: #a8cbd8; }
+.assistentenkarte { border-top: 5px solid var(--aplus-blue); }
+.assistentenkarte .dialognachricht.assistent {
+  color: var(--aplus-ink);
+  background: #e7f1f5;
+  border-color: #c2d7df;
+}
+.assistentenkarte .dialognachricht.nutzer { color: var(--aplus-white); background: var(--aplus-blue); }
+.assistenteneingabe { background: var(--aplus-white); border-color: var(--aplus-line); }
+.assistenteneingabe textarea { color: var(--aplus-ink); }
+.assistenteneingabe button { color: var(--aplus-white); background: var(--aplus-blue); }
+.feldkarte { background: #f8fbfc; border-color: var(--aplus-line); }
+.feldtyp { color: var(--aplus-blue); background: #e1f0f5; }
+
+.aktuelle-tarifkarte { border-top: 6px solid var(--aplus-blue); }
+.kartenabbildung { color: var(--aplus-white); background: var(--aplus-navy); border-color: var(--aplus-navy); }
+.wechselkarte.aktuell { background: #e3f0f5; border-color: var(--aplus-blue); }
+.tarifmarke { color: var(--aplus-blue); background: #e0eef3; }
+.verwaltungsseite .kennzahlkarte:first-child {
+  color: var(--aplus-white);
+  background: var(--aplus-navy);
+  border-color: var(--aplus-navy);
+}
+.ring { background: conic-gradient(var(--aplus-blue) 0 52%, var(--aplus-sky) 52% 78%, var(--aplus-navy-3) 78% 100%); }
+.ring::after { background: var(--aplus-white); }
+.linienpfad { stroke: var(--aplus-blue); }
+.flaechenpfad { fill: rgba(22,118,167,.13); }
+.einstellungsdialog { background: var(--aplus-white); border-color: var(--aplus-navy); }
+.dialoghintergrund { background: rgba(7,28,46,.72); }
+
+.meldung { color: var(--aplus-white); background: var(--aplus-navy); border-color: var(--aplus-sky); }
+
+@media (max-width: 900px) {
+  .oeffentliche-kopfzeile { background: var(--aplus-navy); }
+  .startinhalt { border-right: 0; border-bottom-color: var(--aplus-navy); }
+  .produktbuehne { min-height: 620px; }
+}
+
+@media (max-width: 700px) {
+  body::before { background-size: 24px 24px; }
+  .startbereich { border-left: 0; border-right: 0; }
+  .startinhalt h1 em { color: var(--aplus-blue); }
+  .auth-bild { border-right: 0; border-bottom: 1px solid var(--aplus-navy); }
+  .seitenleiste { box-shadow: 18px 0 40px rgba(7,28,46,.3); }
+}
