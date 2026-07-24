@@ -28,20 +28,20 @@ jobs:
           pip install -r requirements.txt
       - name: Python-Dateien prüfen
         run: python -m compileall app scripts
-      - name: Stylesheet-Struktur prüfen
+      - name: Editorial-Designsystem prüfen
         run: |
           python - <<'PY'
           from pathlib import Path
-          haupt_css = Path("app/static/app-v2.css").read_text(encoding="utf-8")
-          typografie_css = Path("app/static/app-typography.css").read_text(encoding="utf-8")
-          vorlage = Path("app/templates/base.html").read_text(encoding="utf-8")
-          assert haupt_css.count("{") == haupt_css.count("}"), "Das Hauptstylesheet enthält einen nicht geschlossenen Regelblock."
-          assert typografie_css.count("{") == typografie_css.count("}"), "Das Typografie-Stylesheet enthält einen nicht geschlossenen Regelblock."
-          assert "app-v2.css" in vorlage, "Das Hauptstylesheet ist nicht eingebunden."
-          assert "app-typography.css" in vorlage, "Das Typografie-Stylesheet ist nicht eingebunden."
-          assert len(haupt_css) > 20000, "Das vollständige Produktoberflächen-Stylesheet fehlt."
-          assert len(typografie_css) > 5000, "Die vollständige lesbare Schriftstaffel fehlt."
-          print("Stylesheets sind vollständig, eingebunden und strukturell ausgeglichen.")
+          css = Path("app/static/editorial-system.css").read_text(encoding="utf-8")
+          basis = Path("app/templates/base.html").read_text(encoding="utf-8")
+          start = Path("app/templates/start.html").read_text(encoding="utf-8")
+          assert css.count("{") == css.count("}"), "Das Editorial-Stylesheet enthält einen nicht geschlossenen Regelblock."
+          assert "editorial-system.css" in basis, "Das neue Designsystem ist nicht eingebunden."
+          assert "app-v2.css" not in basis and "app-typography.css" not in basis, "Alte Designsysteme sind noch aktiv."
+          assert "IBM+Plex" in basis, "Die neue Typografie ist nicht eingebunden."
+          assert len(css) > 30000, "Das vollständige Designsystem fehlt."
+          assert "Aus Ihrem Muster wird" in start, "Die neue Startseitenkonzeption fehlt."
+          print("Editorial-Designsystem ist vollständig, eigenständig und strukturell ausgeglichen.")
           PY
       - name: Produktabläufe prüfen
         run: python scripts/pruefung.py
