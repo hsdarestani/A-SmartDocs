@@ -25,9 +25,9 @@ jobs:
       - name: Abhängigkeiten installieren
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
       - name: Python-Dateien prüfen
-        run: python -m compileall app scripts
+        run: python -m compileall app scripts tests
       - name: A+ Solution Designsystem prüfen
         run: |
           python - <<'PY'
@@ -49,8 +49,19 @@ jobs:
           assert "Aus Ihrem Muster wird" in start, "Die neue Startseitenkonzeption fehlt."
           print("A+ Solution Designsystem ist vollständig, eingebunden und strukturell ausgeglichen.")
           PY
-      - name: Produktabläufe prüfen
+      - name: Integrations- und Berechtigungsprüfungen ausführen
+        run: |
+          mkdir -p testberichte
+          pytest -q tests --junitxml=testberichte/pytest.xml
+      - name: Bestehenden Vorführablauf prüfen
         run: python scripts/pruefung.py
+      - name: Testbericht sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartdocs-testberichte
+          path: testberichte
+          if-no-files-found: warn
       - name: Container-Konfiguration prüfen
         run: |
           cp .env.example .env
