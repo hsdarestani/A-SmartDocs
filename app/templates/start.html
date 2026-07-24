@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block titel %}A+ SmartDocs – Dokumente automatisch erstellen{% endblock %}
+{% block inhalt %}
+<section class="startbereich">
+  <div class="startinhalt">
+    <div class="hinweismarke"><span></span>Dokumentenautomatisierung, die sich an Ihre Vorlagen anpasst</div>
+    <h1>Aus jedem Dokument wird ein <em>intelligenter Ablauf.</em></h1>
+    <p class="starttext">Laden Sie eine bestehende PDF- oder Bildvorlage hoch. A+ SmartDocs erkennt veränderliche Inhalte, klärt Rückfragen im Dialog und erstellt daraus eine dauerhaft wiederverwendbare Vorlage.</p>
+    <div class="startaktionen">
+      <a class="schaltflaeche primaer" href="/vorlagen/neu">Erste Vorlage erstellen <span>→</span></a>
+      <a class="schaltflaeche sekundaer" href="/arbeitsbereich"><span class="abspielzeichen">▶</span> Arbeitsbereich ansehen</a>
+    </div>
+    <div class="vertrauenszeile">
+      <div><strong>Beliebige Dokumentarten</strong><small>PDF, Scan und Bilddateien</small></div>
+      <div><strong>Dialoggestützte Prüfung</strong><small>Sie behalten die Kontrolle</small></div>
+      <div><strong>Serverstandort Deutschland</strong><small>Für vertrauliche Geschäftsdaten</small></div>
+    </div>
+  </div>
+
+  <div class="produktbuehne">
+    <div class="schwebekarte statuskarte">
+      <span class="statuspunkt"></span>
+      <div><small>Analyse abgeschlossen</small><strong>18 Felder erkannt</strong></div>
+      <span class="statushaken">✓</span>
+    </div>
+    <div class="produktfenster">
+      <div class="fensterkopf">
+        <div class="fensterpunkte"><i></i><i></i><i></i></div>
+        <span>Vorlagenstudio</span>
+        <span class="sicherheitsanzeige">Sicher verarbeitet</span>
+      </div>
+      <div class="produktspalten">
+        <div class="dokumentvorschau">
+          <div class="dokumentblatt">
+            <div class="blattkopf"><span class="mini-logo">A+</span><div><b>LEISTUNGSNACHWEIS</b><small>Projektbezogene Dokumentation</small></div></div>
+            <div class="zeile gross"></div><div class="zeile mittel"></div>
+            <div class="feldmarkierung feld-eins"><span>Kundenname</span></div>
+            <div class="feldmarkierung feld-zwei"><span>Leistungsdatum</span></div>
+            <div class="zeile kurz"></div>
+            <div class="tabellensimulation"><i></i><i></i><i></i><i></i></div>
+            <div class="unterschriften"><span></span><span></span></div>
+          </div>
+          <div class="seitenangabe">Seite 1 von 3</div>
+        </div>
+        <div class="dialogvorschau">
+          <div class="dialogkopf"><span class="assistentenbild">✦</span><div><strong>Vorlagenassistent</strong><small>Prüfung Ihrer Vorlage</small></div></div>
+          <div class="dialognachricht assistent">Ich habe 18 veränderliche Felder erkannt. Sollen die Tabellenzeilen beliebig oft ergänzt werden können?</div>
+          <div class="dialognachricht nutzer">Ja, und die Unterschrift soll auf der letzten Seite verpflichtend sein.</div>
+          <div class="dialognachricht assistent kompakt"><span class="denkpunkt"></span><span class="denkpunkt"></span><span class="denkpunkt"></span></div>
+          <div class="dialogeingabe"><span>Änderung beschreiben …</span><button>↑</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="schwebekarte zeitkarte"><span>−92 %</span><div><strong>weniger Bearbeitungszeit</strong><small>bei wiederkehrenden Dokumenten</small></div></div>
+  </div>
+</section>
+
+<section class="ablaufbereich">
+  <div class="abschnittskopf"><span>So funktioniert es</span><h2>Vom Muster zur fertigen Vorlage in vier klaren Schritten</h2></div>
+  <div class="ablaufkarten">
+    <article><b>01</b><div class="ablaufzeichen">⇧</div><h3>Dokument hochladen</h3><p>Bestehende PDF-, Scan- oder Bilddatei sicher übertragen.</p></article>
+    <article><b>02</b><div class="ablaufzeichen">✦</div><h3>Inhalte erkennen lassen</h3><p>Feste und veränderliche Bestandteile werden automatisch unterschieden.</p></article>
+    <article><b>03</b><div class="ablaufzeichen">◌</div><h3>Im Dialog bestätigen</h3><p>Rückfragen beantworten und erkannte Felder direkt korrigieren.</p></article>
+    <article><b>04</b><div class="ablaufzeichen">✓</div><h3>Beliebig wiederverwenden</h3><p>Neue Angaben eintragen und jederzeit ein fertiges PDF erzeugen.</p></article>
+  </div>
+</section>
+{% endblock %}
