@@ -42,8 +42,8 @@ jobs:
           DATABASE_URL: postgresql+psycopg://smartdocs:pruefwert@datenbank:5432/smartdocs
 
   bereitstellen:
-    name: Produktivsystem aktualisieren
-    if: github.event_name != 'pull_request' || github.head_ref == 'ausbau/vollstaendige-praesentation'
+    name: Vorführsystem aktualisieren
+    if: github.event_name != 'pull_request' || github.head_ref == 'release/vorfuehrung'
     needs: pruefen
     runs-on: ubuntu-latest
     environment: produktiv
