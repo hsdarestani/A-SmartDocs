@@ -1,34 +1,53 @@
 # A+ SmartDocs
 
-A+ SmartDocs ist eine mandantenfähige Plattform zur intelligenten Erkennung, Konfiguration und automatischen Erstellung wiederverwendbarer Dokumentvorlagen.
+A+ SmartDocs ist eine mandantenfähige Plattform zur intelligenten Erkennung, Korrektur, Wiederverwendung und Ausgabe beliebiger Geschäftsdokumente.
 
-## Aktueller Stand
+## Vorführfassung
 
-Der erste Produktkern umfasst:
+Der aktuelle Stand bildet den vollständigen Weg vom öffentlichen Produktauftritt über Registrierung und Firmenkonto bis zur wiederverwendbaren Dokumentvorlage und erzeugten PDF-Ausgabe ab. Zusätzlich steht eine getrennte A+ Verwaltungszentrale zur Verfügung.
 
-- eine vollständig deutschsprachige Produktoberfläche,
-- eine moderne Start- und Arbeitsoberfläche,
-- den Ablauf „Dokument hochladen → Felder erkennen → im Dialog bestätigen → Vorlage speichern“,
-- eine Verwaltungsansicht für Umsatz, Abonnements, Nutzung und individuelle Kontolimits,
-- eine technische Grundlage für Organisationen und Unterkonten,
-- einen Container-Betrieb auf dem Hetzner-Server,
-- eine automatische Bereitstellung über GitHub Actions.
+## Enthaltene Produktbereiche
 
-## Bereitstellung
+- öffentliche deutschsprachige Produkt- und Preisseiten,
+- Registrierung, Anmeldung, Sitzungsschutz und Passwort-Wiederherstellung,
+- Firmenkonten mit Inhaber, Verwaltung, Bearbeitung, Nutzung und Leserechten,
+- Einladungen und Unterkonten,
+- KI-gestützte Erkennung variabler Inhalte und ihrer Positionen,
+- dialoggestützte Korrektur und visueller Feldeditor,
+- dynamische Formulare aus erkannten Dokumentfeldern,
+- PDF-Ausgabe auf Grundlage der hochgeladenen Originalvorlage,
+- Dokumentarchiv mit geschütztem Herunterladen,
+- Tarif-, Verbrauchs- und Rechnungsansicht,
+- A+ Verwaltungszentrale für Umsatz, Abonnements, Tarife und individuelle Kontogrenzen,
+- Kundensicht aus der Verwaltungszentrale,
+- WordPress-Erweiterung mit Kurzcode und WooCommerce-Kontobereich,
+- Docker-, PostgreSQL-, Caddy- und Hetzner-Bereitstellung.
 
-Die Anwendung wird über Docker Compose betrieben. Caddy übernimmt HTTPS und leitet `smartdocs.aplus-solution.de` an die Anwendung weiter.
-
-Die benötigten GitHub-Geheimnisse sind:
-
-- `HOST`
-- `PASS`
-- `OPENAIAPI`
-
-## Lokaler Start
+## Betrieb
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-Danach ist die Anwendung unter `http://localhost` erreichbar.
+Danach ist die Anwendung über die in `DOMAIN` hinterlegte Adresse erreichbar.
+
+## Automatische Prüfung
+
+```bash
+python scripts/pruefung.py
+```
+
+Die Prüfung kontrolliert öffentliche Seiten, Anmeldung, Kundenbereich, PDF-Erstellung und Verwaltungszugang mit einer temporären SQLite-Datenbank.
+
+## WordPress
+
+Der Ordner `wordpress-plugin/a-plus-smartdocs` enthält die installierbare WordPress-Anbindung. Der Kurzcode lautet:
+
+```text
+[a_plus_smartdocs_portal]
+```
+
+## Sicherheitshinweise vor dem öffentlichen Produktivbetrieb
+
+Für einen echten Verkauf müssen zusätzlich ein Zahlungsanbieter, ein E-Mail-Versanddienst, rechtsgeprüfte Datenschutztexte, regelmäßige Sicherungen und ein externer Sicherheitscheck konfiguriert werden. Die Kernanwendung trennt bereits Organisationen, Sitzungen, Vorlagen und Dokumentausgaben voneinander.

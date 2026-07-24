@@ -5,36 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07111f">
   <title>{% block titel %}A+ SmartDocs{% endblock %}</title>
-  <meta name="description" content="Dokumentvorlagen intelligent erkennen, bestätigen und automatisch wiederverwenden.">
+  <meta name="description" content="Dokumentvorlagen intelligent erkennen, bestätigen, ausfüllen und wiederverwenden.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('statisch', path='/app.css') }}">
 </head>
-<body class="bereich-{{ bereich|default('start') }}">
+<body class="bereich-{{ bereich|default('start') }} {% if mitglied %}angemeldet{% endif %}">
   <div class="hintergrund-leuchten leuchten-eins"></div>
   <div class="hintergrund-leuchten leuchten-zwei"></div>
 
-  <header class="kopfzeile">
-    <a class="marke" href="/" aria-label="A+ SmartDocs Startseite">
-      <span class="marken-symbol"><span>A+</span></span>
+  {% if mitglied %}
+  <aside class="seitenleiste" id="seitenleiste">
+    <a class="marke" href="/arbeitsbereich" aria-label="A+ SmartDocs Arbeitsbereich">
+      <span class="marken-symbol">A+</span>
       <span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span>
     </a>
-    <nav class="hauptnavigation" aria-label="Hauptnavigation">
-      <a href="/arbeitsbereich" class="{% if bereich == 'arbeitsbereich' %}aktiv{% endif %}">Arbeitsbereich</a>
-      <a href="/vorlagen/neu" class="{% if bereich == 'vorlagen' %}aktiv{% endif %}">Vorlagenstudio</a>
-      <a href="/verwaltung" class="{% if bereich == 'verwaltung' %}aktiv{% endif %}">Verwaltung</a>
+    <nav class="seitennavigation" aria-label="Produktnavigation">
+      <span class="navigationsgruppe">Arbeitsbereich</span>
+      <a href="/arbeitsbereich" class="{% if bereich == 'arbeitsbereich' %}aktiv{% endif %}"><i>⌂</i><span>Übersicht</span></a>
+      <a href="/vorlagen" class="{% if bereich == 'vorlagen' %}aktiv{% endif %}"><i>◫</i><span>Dokumentvorlagen</span></a>
+      <a href="/dokumente" class="{% if bereich == 'dokumente' %}aktiv{% endif %}"><i>▧</i><span>Erstellte Dokumente</span></a>
+      <span class="navigationsgruppe">Unternehmen</span>
+      <a href="/team" class="{% if bereich == 'team' %}aktiv{% endif %}"><i>◎</i><span>Team und Rollen</span></a>
+      <a href="/abrechnung" class="{% if bereich == 'abrechnung' %}aktiv{% endif %}"><i>€</i><span>Tarif und Abrechnung</span></a>
+      <a href="/einstellungen" class="{% if bereich == 'einstellungen' %}aktiv{% endif %}"><i>⚙</i><span>Einstellungen</span></a>
+      {% if mitglied.ist_superadmin %}
+      <span class="navigationsgruppe">A+ Verwaltung</span>
+      <a href="/verwaltung" class="{% if bereich == 'verwaltung' %}aktiv{% endif %}"><i>✦</i><span>Verwaltungszentrale</span></a>
+      {% endif %}
     </nav>
-    <div class="kopfaktionen">
-      <button class="symbolknopf" aria-label="Benachrichtigungen">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
-        <i></i>
-      </button>
-      <div class="profilknopf"><span>HD</span><div><strong>Hossein</strong><small>Hauptverwaltung</small></div></div>
+    <div class="seitenleisten-fuss">
+      <div class="konto-mini"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ organisation.name }}</small></div></div>
+      <form action="/abmelden" method="post"><button type="submit" class="abmelden-knopf" title="Abmelden">↗</button></form>
     </div>
+  </aside>
+  <header class="app-kopfzeile">
+    <button class="menueknopf" id="menueknopf" aria-label="Navigation öffnen">☰</button>
+    <div class="kopf-suche"><span>⌕</span><input type="search" placeholder="Vorlagen und Dokumente durchsuchen …"><kbd>⌘ K</kbd></div>
+    <a class="kopf-neu" href="/vorlagen/neu">＋ Neue Vorlage</a>
+    <button class="symbolknopf" aria-label="Benachrichtigungen">♢<i></i></button>
+    <a class="profilchip" href="/einstellungen"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ mitglied.rolle.value|capitalize }}</small></div></a>
   </header>
+  {% if rueckkehr_admin %}
+  <div class="ansichtsleiste"><span>Sie sehen das Produkt aus Kundensicht: <strong>{{ organisation.name }}</strong></span><form action="/verwaltung/zurueck" method="post"><button type="submit">Zur A+ Verwaltung zurückkehren</button></form></div>
+  {% endif %}
+  <main class="app-inhalt">{% block inhalt %}{% endblock %}</main>
+  {% else %}
+  <header class="oeffentliche-kopfzeile">
+    <a class="marke" href="/"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span></a>
+    <nav><a href="/#funktion">So funktioniert es</a><a href="/preise" class="{% if bereich == 'preise' %}aktiv{% endif %}">Preise</a><a href="/#sicherheit">Datenschutz</a></nav>
+    <div class="oeffentliche-aktionen"><a href="/anmelden">Anmelden</a><a href="/registrieren" class="schaltflaeche primaer klein">Kostenlos testen</a></div>
+  </header>
+  <main>{% block oeffentlicher_inhalt %}{% endblock %}</main>
+  {% endif %}
 
-  <main>{% block inhalt %}{% endblock %}</main>
+  {% if hinweis %}<div id="serverHinweis" class="meldung sichtbar {{ hinweis.art }}">{{ hinweis.text }}</div>{% endif %}
   <div id="meldung" class="meldung" role="status" aria-live="polite"></div>
   <script src="{{ url_for('statisch', path='/app.js') }}" defer></script>
 </body>

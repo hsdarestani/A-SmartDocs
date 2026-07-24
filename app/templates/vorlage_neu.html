@@ -1,57 +1,9 @@
 {% extends "base.html" %}
-{% block titel %}Vorlagenstudio – A+ SmartDocs{% endblock %}
+{% block titel %}Neue Vorlage – A+ SmartDocs{% endblock %}
 {% block inhalt %}
-<section class="studioseite">
-  <div class="studiokopf">
-    <div><span class="uebertitel">Neue Dokumentvorlage</span><h1>Was möchten Sie automatisieren?</h1><p>Laden Sie ein ausgefülltes Beispiel oder eine leere Vorlage hoch. Der Assistent erkennt die veränderlichen Bestandteile.</p></div>
-    <div class="schrittanzeige"><span class="aktiv"><b>1</b>Datei</span><i></i><span><b>2</b>Prüfung</span><i></i><span><b>3</b>Bestätigung</span></div>
-  </div>
-
-  <div class="studiogitter">
-    <section class="studiohauptkarte">
-      <div id="hochladeBereich" class="hochladebereich">
-        <div class="hochladezeichen"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5h14v-5"/></svg></div>
-        <h2>Dokument hier ablegen</h2>
-        <p>oder klicken, um eine Datei auszuwählen</p>
-        <div class="dateihinweise"><span>PDF</span><span>PNG</span><span>JPG</span><span>WEBP</span><small>bis 20 MB</small></div>
-        <input id="dateiEingabe" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" hidden>
-      </div>
-
-      <div id="dateiKarte" class="dateikarte versteckt">
-        <div class="dateizeichen gross pdf">PDF</div>
-        <div><strong id="dateiName">Dokument.pdf</strong><small id="dateiGroesse">0 MB</small></div>
-        <button id="dateiEntfernen" aria-label="Datei entfernen">×</button>
-      </div>
-
-      <label class="eingabefeld">
-        <span>Name der Vorlage</span>
-        <input id="vorlagenName" type="text" value="Neue Dokumentvorlage" maxlength="180">
-      </label>
-
-      <div class="datenschutzhinweis"><span>⌾</span><div><strong>Vertrauliche Verarbeitung</strong><p>Die Datei wird verschlüsselt übertragen und ausschließlich zur Erstellung Ihrer Vorlage verarbeitet.</p></div></div>
-
-      <button id="analyseStarten" class="schaltflaeche primaer breit" disabled>Dokument analysieren <span>✦</span></button>
-    </section>
-
-    <aside class="assistentenkarte">
-      <div class="assistentenkopf"><span class="assistentenbild gross">✦</span><div><strong>Ihr Vorlagenassistent</strong><small><i></i> bereit für Ihre Datei</small></div></div>
-      <div id="dialogVerlauf" class="dialogverlauf">
-        <div class="dialognachricht assistent">Guten Abend! Laden Sie zunächst ein Beispieldokument hoch. Ich prüfe anschließend, welche Inhalte bei späteren Dokumenten verändert werden sollen.</div>
-        <div class="vorschlagsfragen">
-          <button data-vorschlag="Welche Dokumentarten werden unterstützt?">Welche Dokumentarten werden unterstützt?</button>
-          <button data-vorschlag="Wie werden sensible Daten geschützt?">Wie werden sensible Daten geschützt?</button>
-        </div>
-      </div>
-      <form id="dialogFormular" class="assistenteneingabe">
-        <textarea id="dialogText" rows="1" placeholder="Korrektur oder Frage eingeben …" disabled></textarea>
-        <button type="submit" disabled aria-label="Nachricht senden">↑</button>
-      </form>
-    </aside>
-  </div>
-
-  <section id="ergebnisBereich" class="ergebnisbereich versteckt">
-    <div class="ergebniskopf"><div><span class="uebertitel">Erkannte Struktur</span><h2 id="dokumentArt">Dokumentvorlage</h2><p id="zusammenfassung"></p></div><button id="vorlageBestaetigen" class="schaltflaeche primaer">Vorlage bestätigen <span>✓</span></button></div>
-    <div id="felderListe" class="felderliste"></div>
-  </section>
-</section>
+<section class="studioseite"><div class="studiokopf"><div><span class="uebertitel">Neue Dokumentvorlage</span><h1>Was möchten Sie automatisieren?</h1><p>Laden Sie ein ausgefülltes Beispiel oder eine leere Vorlage hoch. Der Assistent erkennt die veränderlichen Bestandteile.</p></div><div class="schrittanzeige"><span class="aktiv"><b>1</b>Datei</span><i></i><span><b>2</b>Prüfung</span><i></i><span><b>3</b>Bestätigung</span><i></i><span><b>4</b>Verwendung</span></div></div>
+<div class="kontingenthinweis"><span>Aktueller Tarif: <strong>{{ kennzahlen.abonnement.tarif.name }}</strong></span><div><i style="--fortschritt:{{ (kennzahlen.vorlagen / kennzahlen.abonnement.vorlagen_limit * 100) if kennzahlen.abonnement.vorlagen_limit else 0 }}%"></i></div><small>{{ kennzahlen.vorlagen }} von {{ kennzahlen.abonnement.vorlagen_limit }} Vorlagen verwendet</small></div>
+<div class="studiogitter"><section class="studiohauptkarte"><div id="hochladeBereich" class="hochladebereich"><div class="hochladezeichen"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5h14v-5"/></svg></div><h2>Dokument hier ablegen</h2><p>oder klicken, um eine Datei auszuwählen</p><div class="dateihinweise"><span>PDF</span><span>PNG</span><span>JPG</span><span>WEBP</span><small>bis 20 MB</small></div><input id="dateiEingabe" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" hidden></div><div id="dateiKarte" class="dateikarte versteckt"><div class="dateizeichen gross pdf">PDF</div><div><strong id="dateiName">Dokument.pdf</strong><small id="dateiGroesse">0 MB</small></div><button id="dateiEntfernen" aria-label="Datei entfernen">×</button></div><label class="eingabefeld"><span>Name der Vorlage</span><input id="vorlagenName" type="text" value="Neue Dokumentvorlage" maxlength="180"></label><div class="datenschutzhinweis"><span>⌾</span><div><strong>Vertrauliche Verarbeitung</strong><p>Die Datei wird dem Firmenkonto zugeordnet und ist nur für berechtigte Teammitglieder erreichbar.</p></div></div><button id="analyseStarten" class="schaltflaeche primaer breit" disabled>Dokument analysieren <span>✦</span></button></section>
+<aside class="assistentenkarte"><div class="assistentenkopf"><span class="assistentenbild gross">✦</span><div><strong>Ihr Vorlagenassistent</strong><small><i></i> bereit für Ihre Datei</small></div></div><div id="dialogVerlauf" class="dialogverlauf"><div class="dialognachricht assistent">Guten Tag! Laden Sie ein Beispieldokument hoch. Ich prüfe, welche Inhalte später verändert werden sollen, und schätze ihre Position auf jeder Seite.</div><div class="assistenten-checkliste"><span>1. Text und Tabellen erkennen</span><span>2. Variable Inhalte unterscheiden</span><span>3. Positionen für PDF-Ausgabe bestimmen</span><span>4. Rückfragen im Dialog klären</span></div><div class="vorschlagsfragen"><button data-vorschlag="Welche Dokumentarten werden unterstützt?">Unterstützte Dokumentarten</button><button data-vorschlag="Wie werden sensible Daten geschützt?">Schutz sensibler Daten</button></div></div><form id="dialogFormular" class="assistenteneingabe"><textarea id="dialogText" rows="1" placeholder="Nach der Analyse Korrektur eingeben …" disabled></textarea><button type="submit" disabled aria-label="Nachricht senden">↑</button></form></aside></div>
+<section id="ergebnisBereich" class="ergebnisbereich versteckt"><div class="ergebniskopf"><div><span class="uebertitel">Erkannte Struktur</span><h2 id="dokumentArt">Dokumentvorlage</h2><p id="zusammenfassung"></p></div><button id="vorlageBestaetigen" class="schaltflaeche primaer">Vorlage bestätigen <span>✓</span></button></div><div id="felderListe" class="felderliste"></div></section></section>
 {% endblock %}
