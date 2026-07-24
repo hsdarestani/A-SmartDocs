@@ -44,6 +44,7 @@ jobs:
           tar -xzf /tmp/smartdocs-update.tar.gz
           find app -type d -name __pycache__ -prune -exec rm -rf {} +
           rm -rf tools/presentation-update
+          git checkout HEAD -- .github/workflows/bereitstellung.yml
 
       - name: Änderungen speichern
         run: |
