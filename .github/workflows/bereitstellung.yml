@@ -1,4 +1,4 @@
-name: Bereitstellung auf dem Produktivserver
+name: Prüfung und Bereitstellung
 
 on:
   push:
@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   pruefen:
-    name: Anwendung prüfen
+    name: Anwendung vollständig prüfen
     runs-on: ubuntu-latest
     steps:
       - name: Quelltext laden
@@ -27,7 +27,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Python-Dateien prüfen
-        run: python -m compileall app
+        run: python -m compileall app scripts
+      - name: Produktabläufe prüfen
+        run: python scripts/pruefung.py
       - name: Container-Konfiguration prüfen
         run: |
           cp .env.example .env
@@ -41,12 +43,13 @@ jobs:
 
   bereitstellen:
     name: Produktivsystem aktualisieren
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' || github.head_ref == 'ausbau/vollstaendige-praesentation'
     needs: pruefen
     runs-on: ubuntu-latest
     environment: produktiv
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAIAPI }}
+      BEREITSTELLUNGSZWEIG: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Über SSH bereitstellen
         uses: appleboy/ssh-action@v1.2.2
@@ -54,12 +57,11 @@ jobs:
           host: ${{ secrets.HOST }}
           username: root
           password: ${{ secrets.PASS }}
-          envs: OPENAI_API_KEY
+          envs: OPENAI_API_KEY,BEREITSTELLUNGSZWEIG
           script_stop: true
           script: |
             set -eu
             export DEBIAN_FRONTEND=noninteractive
-
             apt-get update
             apt-get install -y ca-certificates curl git openssl python3
 
@@ -75,10 +77,11 @@ jobs:
 
             mkdir -p /opt/a-smartdocs
             if [ ! -d /opt/a-smartdocs/.git ]; then
-              git clone https://github.com/hsdarestani/A-SmartDocs.git /opt/a-smartdocs
+              git clone --branch "$BEREITSTELLUNGSZWEIG" https://github.com/hsdarestani/A-SmartDocs.git /opt/a-smartdocs
             else
-              git -C /opt/a-smartdocs fetch origin main
-              git -C /opt/a-smartdocs reset --hard origin/main
+              git -C /opt/a-smartdocs fetch origin "$BEREITSTELLUNGSZWEIG"
+              git -C /opt/a-smartdocs checkout -B "$BEREITSTELLUNGSZWEIG" "origin/$BEREITSTELLUNGSZWEIG"
+              git -C /opt/a-smartdocs reset --hard "origin/$BEREITSTELLUNGSZWEIG"
             fi
 
             cd /opt/a-smartdocs
@@ -86,15 +89,15 @@ jobs:
               DATENBANK_PASSWORT=$(openssl rand -hex 24)
               APP_GEHEIMNIS=$(openssl rand -hex 32)
               cat > .env <<UMGEBUNG
-            DOMAIN=smartdocs.aplus-solution.de
-            POSTGRES_DB=smartdocs
-            POSTGRES_USER=smartdocs
-            POSTGRES_PASSWORD=${DATENBANK_PASSWORT}
-            DATABASE_URL=postgresql+psycopg://smartdocs:${DATENBANK_PASSWORT}@datenbank:5432/smartdocs
-            APP_SECRET=${APP_GEHEIMNIS}
-            OPENAI_MODEL=gpt-4.1-mini
-            MAX_UPLOAD_MB=20
-            UMGEBUNG
+DOMAIN=smartdocs.aplus-solution.de
+POSTGRES_DB=smartdocs
+POSTGRES_USER=smartdocs
+POSTGRES_PASSWORD=${DATENBANK_PASSWORT}
+DATABASE_URL=postgresql+psycopg://smartdocs:${DATENBANK_PASSWORT}@datenbank:5432/smartdocs
+APP_SECRET=${APP_GEHEIMNIS}
+OPENAI_MODEL=gpt-4.1-mini
+MAX_UPLOAD_MB=20
+UMGEBUNG
             fi
 
             python3 - <<'PY'
@@ -120,6 +123,6 @@ jobs:
             docker compose pull
             docker compose up -d --build --remove-orphans
             docker image prune -f
-            sleep 8
+            sleep 10
             docker compose ps
-            curl --fail --silent --show-error http://127.0.0.1/api/status >/dev/null || true
+            curl --fail --silent --show-error http://127.0.0.1/api/status >/dev/null
