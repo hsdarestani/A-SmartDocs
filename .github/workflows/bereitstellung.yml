@@ -3,10 +3,12 @@ name: Bereitstellung auf dem Produktivserver
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: produktivbereitstellung
+  group: smartdocs-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -39,6 +41,7 @@ jobs:
 
   bereitstellen:
     name: Produktivsystem aktualisieren
+    if: github.event_name != 'pull_request'
     needs: pruefen
     runs-on: ubuntu-latest
     environment: produktiv
