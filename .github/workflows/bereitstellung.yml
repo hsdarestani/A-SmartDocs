@@ -28,20 +28,26 @@ jobs:
           pip install -r requirements.txt
       - name: Python-Dateien prüfen
         run: python -m compileall app scripts
-      - name: Editorial-Designsystem prüfen
+      - name: A+ Solution Designsystem prüfen
         run: |
           python - <<'PY'
           from pathlib import Path
-          css = Path("app/static/editorial-system.css").read_text(encoding="utf-8")
+          editorial = Path("app/static/editorial-system.css").read_text(encoding="utf-8")
+          marke = Path("app/static/app-aplus.css").read_text(encoding="utf-8")
           basis = Path("app/templates/base.html").read_text(encoding="utf-8")
           start = Path("app/templates/start.html").read_text(encoding="utf-8")
-          assert css.count("{") == css.count("}"), "Das Editorial-Stylesheet enthält einen nicht geschlossenen Regelblock."
-          assert "editorial-system.css" in basis, "Das neue Designsystem ist nicht eingebunden."
+          assert editorial.count("{") == editorial.count("}"), "Das Editorial-Stylesheet enthält einen nicht geschlossenen Regelblock."
+          assert marke.count("{") == marke.count("}"), "Der A+ Markenlayer enthält einen nicht geschlossenen Regelblock."
+          assert "editorial-system.css" in basis, "Das Editorial-Grundsystem ist nicht eingebunden."
+          assert "app-aplus.css" in basis, "Der A+ Solution Markenlayer ist nicht eingebunden."
+          assert "#071c2e" in marke and "--aplus-sky" in marke, "Die dunkelblaue A+ Markenpalette fehlt."
+          assert "#ff5a1f" not in marke and "#7658EF" not in marke, "Alte orange oder violette Akzentfarben sind im Markenlayer aktiv."
           assert "app-v2.css" not in basis and "app-typography.css" not in basis, "Alte Designsysteme sind noch aktiv."
-          assert "IBM+Plex" in basis, "Die neue Typografie ist nicht eingebunden."
-          assert len(css) > 30000, "Das vollständige Designsystem fehlt."
+          assert "IBM+Plex" in basis, "Die Produkttypografie ist nicht eingebunden."
+          assert len(editorial) > 30000, "Das vollständige Grundsystem fehlt."
+          assert len(marke) > 10000, "Der vollständige A+ Markenlayer fehlt."
           assert "Aus Ihrem Muster wird" in start, "Die neue Startseitenkonzeption fehlt."
-          print("Editorial-Designsystem ist vollständig, eigenständig und strukturell ausgeglichen.")
+          print("A+ Solution Designsystem ist vollständig, eingebunden und strukturell ausgeglichen.")
           PY
       - name: Produktabläufe prüfen
         run: python scripts/pruefung.py
