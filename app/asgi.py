@@ -12,8 +12,8 @@ from pypdf import PdfReader
 
 from .ai import dokument_analysieren
 from .database import Sitzung, datenbank_sitzung
+from .local_analysis import formular_lokal_analysieren, schema_kombinieren
 from .main import (
-    _ersatz_schema,
     _organisation_kennzahlen,
     app,
     cfg,
@@ -45,6 +45,20 @@ def _utc(wert: datetime | None) -> datetime:
     return wert.astimezone(timezone.utc)
 
 
+def _lokale_analyse(dateipfad: Path, dateiname: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    try:
+        return formular_lokal_analysieren(dateipfad, dateiname)
+    except Exception as exc:
+        logger.warning("Lokale Formularerkennung für %s fehlgeschlagen: %s", dateiname, exc)
+        return {
+            "dokumentart": Path(dateiname).stem or "Dokumentvorlage",
+            "zusammenfassung": "Die Dokumentstruktur konnte lokal nicht sicher ausgewertet werden.",
+            "felder": [],
+            "rueckfragen": [],
+            "analysequelle": "lokale-analyse-fehlgeschlagen",
+        }, {"felder": 0, "quelle": "lokale-analyse-fehlgeschlagen"}
+
+
 def _analyse_abschliessen(vorlage_id: int) -> None:
     """Verarbeitet eine gespeicherte Vorlage außerhalb der Upload-Anfrage."""
     with Sitzung() as db:
@@ -56,35 +70,61 @@ def _analyse_abschliessen(vorlage_id: int) -> None:
         eintrag.aktualisiert_am = datetime.now(timezone.utc)
         db.commit()
 
+        dateipfad = Path(eintrag.speicherort)
+        lokales_schema, lokale_diagnostik = _lokale_analyse(dateipfad, eintrag.dateiname)
+        lokale_felder = list(lokales_schema.get("felder", []) or [])
+        nutzung: dict[str, Any] = {"eingabe": 0, "ausgabe": 0, "lokale_analyse": lokale_diagnostik}
         analyse_hinweis = ""
-        try:
-            schema, nutzung = dokument_analysieren(Path(eintrag.speicherort), eintrag.dateiname)
-        except Exception as exc:
-            logger.warning("KI-Analyse für Vorlage %s fehlgeschlagen: %s", vorlage_id, exc)
-            schema = _ersatz_schema(eintrag.dateiname)
-            nutzung = {"eingabe": 0, "ausgabe": 0}
-            analyse_hinweis = (
-                " Die automatische Erkennung war vorübergehend nicht erreichbar. "
-                "Eine sichere Grundstruktur wurde erstellt und kann vollständig angepasst werden."
-            )
 
         try:
-            felder = schema.get("felder", []) if isinstance(schema, dict) else []
+            ki_schema, ki_nutzung = dokument_analysieren(dateipfad, eintrag.dateiname)
+            schema = schema_kombinieren(ki_schema, lokales_schema)
+            nutzung.update(ki_nutzung)
+            nutzung["analysequelle"] = schema.get("analysequelle", "ki")
+            if len(lokale_felder) >= 6 and len(list(ki_schema.get("felder", []) or [])) < len(lokale_felder) * 0.5:
+                analyse_hinweis = (
+                    " Der allgemeine KI-Vorschlag war für dieses Formular unvollständig; "
+                    "deshalb wurden die konkret aus dem PDF erkannten Eingabebereiche verwendet."
+                )
+        except Exception as exc:
+            logger.warning("KI-Analyse für Vorlage %s fehlgeschlagen: %s", vorlage_id, exc)
+            if lokale_felder:
+                schema = lokales_schema
+                nutzung["analysequelle"] = "pdf-struktur-ohne-ki"
+                analyse_hinweis = (
+                    " Die KI-Verbindung war nicht verfügbar. Die angezeigten Felder stammen direkt "
+                    "aus Text, Linien und Formularstruktur des Original-PDFs."
+                )
+            else:
+                schema = lokales_schema
+                nutzung["analysequelle"] = "keine-verlaessliche-erkennung"
+                analyse_hinweis = (
+                    " Es konnten keine verlässlichen Eingabebereiche erkannt werden. "
+                    "Die Datei wurde gespeichert, aber nicht als fertige Analyse freigegeben."
+                )
+
+        try:
+            felder = list(schema.get("felder", []) or []) if isinstance(schema, dict) else []
             eintrag.schema = schema
             eintrag.erkannte_felder = len(felder)
             eintrag.zusammenfassung = str(schema.get("zusammenfassung", ""))
-            eintrag.status = "Bestätigung erforderlich"
             eintrag.aktualisiert_am = datetime.now(timezone.utc)
-            db.add(
-                Vorlagendialog(
-                    vorlage_id=eintrag.id,
-                    rolle="assistent",
-                    nachricht=(
-                        f"Ich habe {len(felder)} veränderliche Felder erkannt. "
-                        f"Bitte prüfen Sie die Vorschläge und nennen Sie mir notwendige Korrekturen.{analyse_hinweis}"
-                    ),
+
+            if felder:
+                eintrag.status = "Bestätigung erforderlich"
+                nachricht = (
+                    f"Ich habe {len(felder)} konkrete Eingabebereiche erkannt. "
+                    f"Bitte prüfen Sie die Positionen und Feldtypen.{analyse_hinweis}"
                 )
-            )
+            else:
+                eintrag.status = "Analyse fehlgeschlagen"
+                nachricht = (
+                    "Aus diesem Dokument konnte noch kein belastbares Feldschema erstellt werden. "
+                    "Bitte starten Sie den Prüflauf erneut oder verwenden Sie ein textbasiertes PDF."
+                    f"{analyse_hinweis}"
+                )
+
+            db.add(Vorlagendialog(vorlage_id=eintrag.id, rolle="assistent", nachricht=nachricht))
             kosten = round(
                 (int(nutzung.get("eingabe", 0)) * 0.0000004)
                 + (int(nutzung.get("ausgabe", 0)) * 0.0000016),
@@ -93,7 +133,7 @@ def _analyse_abschliessen(vorlage_id: int) -> None:
             db.add(
                 Nutzungsereignis(
                     organisation_id=eintrag.organisation_id,
-                    art="vorlage_analysiert",
+                    art="vorlage_analysiert" if felder else "vorlage_analyse_fehlgeschlagen",
                     menge=1,
                     kosten_euro=Decimal(str(kosten)),
                     einzelheiten=nutzung,
@@ -167,7 +207,10 @@ async def vorlage_analysieren_robust(
             ziel.unlink(missing_ok=True)
             raise HTTPException(status_code=422, detail="Die PDF-Datei ist beschädigt oder kann nicht gelesen werden.")
 
-    vorlaeufiges_schema = _ersatz_schema(ursprungsname)
+    # Bereits vor dem externen KI-Lauf werden echte PDF-Felder und Eingabelinien lokal erkannt.
+    # Dadurch wird niemals mehr ein allgemeines Vier-Felder-Schema als Dokumentanalyse ausgegeben.
+    vorlaeufiges_schema, lokale_diagnostik = _lokale_analyse(ziel, ursprungsname)
+    vorlaeufige_felder = list(vorlaeufiges_schema.get("felder", []) or [])
     eintrag = Dokumentvorlage(
         organisation_id=mitglied.organisation_id,
         erstellt_von_id=mitglied.id,
@@ -179,7 +222,7 @@ async def vorlage_analysieren_robust(
         status="wird analysiert",
         seiten=seiten,
         schema=vorlaeufiges_schema,
-        erkannte_felder=len(vorlaeufiges_schema.get("felder", [])),
+        erkannte_felder=len(vorlaeufige_felder),
         zusammenfassung=str(vorlaeufiges_schema.get("zusammenfassung", "")),
         aktualisiert_am=datetime.now(timezone.utc),
     )
@@ -191,14 +234,18 @@ async def vorlage_analysieren_robust(
     return {
         "erfolg": True,
         "vorlage_id": eintrag.id,
-        # Kompatibilität für bisherige Clients: Eine vollständig bearbeitbare
-        # Grundstruktur ist sofort verfügbar; die präzisere Analyse läuft weiter.
-        "status": "Bestätigung erforderlich",
+        "status": "Bestätigung erforderlich" if vorlaeufige_felder else "wird analysiert",
         "analyse_status": eintrag.status,
-        "schema": vorlaeufiges_schema,
+        "schema": vorlaeufiges_schema if vorlaeufige_felder else None,
+        "lokale_diagnostik": lokale_diagnostik,
         "status_url": f"/api/vorlagen/{eintrag.id}/analyse-status",
         "weiter": f"/vorlagen/{eintrag.id}",
-        "hinweis": "Die Datei ist gespeichert. Der Prüflauf wird im Hintergrund fortgesetzt.",
+        "hinweis": (
+            f"Die Datei ist gespeichert. {len(vorlaeufige_felder)} konkrete Bereiche wurden bereits lokal erkannt; "
+            "der Prüflauf wird im Hintergrund verfeinert."
+            if vorlaeufige_felder
+            else "Die Datei ist gespeichert. Der Prüflauf wird im Hintergrund fortgesetzt."
+        ),
     }
 
 
@@ -207,8 +254,6 @@ def analyse_status(vorlage_id: int, request: Request, db=Depends(datenbank_sitzu
     mitglied = muss_angemeldet_sein(request, db)
     eintrag = vorlage_fuer_mitglied(db, mitglied, vorlage_id)
 
-    # Nach einem Prozessneustart bleibt die Datei erhalten. Ein alter, offener Lauf
-    # wird als unterbrochen gekennzeichnet und kann erneut gestartet werden.
     if eintrag.status == "wird analysiert" and _utc(eintrag.aktualisiert_am) < datetime.now(timezone.utc) - timedelta(minutes=4):
         eintrag.status = "Analyse unterbrochen"
         eintrag.aktualisiert_am = datetime.now(timezone.utc)
@@ -229,7 +274,7 @@ def analyse_status(vorlage_id: int, request: Request, db=Depends(datenbank_sitzu
             if fertig
             else "Der Prüflauf läuft weiter."
             if not fehler
-            else "Der Prüflauf wurde unterbrochen. Die Datei ist gespeichert und kann erneut analysiert werden."
+            else "Es wurde kein belastbares Feldschema erzeugt. Die Datei bleibt gespeichert und kann erneut analysiert werden."
         ),
     }
 
