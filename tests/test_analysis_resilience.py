@@ -60,7 +60,7 @@ def test_nur_die_entkoppelte_analyseroute_ist_registriert(client):
     assert routen[0].endpoint.__name__ == "vorlage_analysieren_robust"
 
 
-def test_upload_liefert_202_und_statusabfrage_bleibt_verwendbar(client):
+def test_upload_bleibt_api_kompatibel_und_statusabfrage_funktioniert(client):
     _anmelden(client)
     name = f"Analyse {uuid.uuid4().hex[:8]}"
     antwort = client.post(
@@ -69,7 +69,7 @@ def test_upload_liefert_202_und_statusabfrage_bleibt_verwendbar(client):
         files={"datei": ("analyse.pdf", _pdf_bytes(), "application/pdf")},
         follow_redirects=False,
     )
-    assert antwort.status_code == 202
+    assert antwort.status_code == 200
     daten = antwort.json()
     assert daten["vorlage_id"]
     assert daten["status_url"].endswith("/analyse-status")
