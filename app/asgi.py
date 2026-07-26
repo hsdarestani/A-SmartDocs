@@ -12,7 +12,7 @@ from pypdf import PdfReader
 
 from .ai import dokument_analysieren
 from .database import Sitzung, datenbank_sitzung
-from .local_analysis import formular_lokal_analysieren, schema_kombinieren
+from .form_analysis import formular_lokal_analysieren, schema_kombinieren
 from .main import (
     _organisation_kennzahlen,
     app,
