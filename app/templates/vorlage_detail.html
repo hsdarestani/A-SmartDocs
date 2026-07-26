@@ -16,6 +16,20 @@
     </div>
   </div>
 
+  <section class="qualitaetsleiste" id="qualitaetsleiste">
+    <div class="qualitaets-einleitung">
+      <small>Automatische Qualitätskontrolle</small>
+      <strong id="qualitaetsKurzstatus">Erkannte Felder werden bewertet</strong>
+      <p>Grüne Felder stammen aus einer belastbaren PDF-Struktur. Gelbe und rote Felder werden in der Testausfüllung gezielt geprüft.</p>
+      <div class="qualitaets-legende"><span><i class="gruen"></i>sicher</span><span><i class="gelb"></i>kurz prüfen</span><span><i class="rot"></i>unsicher</span></div>
+    </div>
+    <div class="qualitaetszahl sicher"><b id="qSicher">0</b><span>Sicher erkannt</span></div>
+    <div class="qualitaetszahl pruefen"><b id="qPruefen">0</b><span>Gelb markiert</span></div>
+    <div class="qualitaetszahl unsicher"><b id="qUnsicher">0</b><span>Rot markiert</span></div>
+    <div class="qualitaetszahl offen"><b id="qDurchschnitt">0 %</b><span>Durchschnitt</span><small class="pruefstatus-klein"><span id="qOffen">0</span> offen · <span id="qGesamt">0</span> gesamt</small></div>
+    <div class="qualitaetsaktion"><button id="testausfuellungStarten" class="schaltflaeche primaer">Testausfüllung prüfen →</button></div>
+  </section>
+
   <div class="editor-gitter">
     <section class="dokument-editor">
       <div class="editor-werkzeuge">
@@ -28,7 +42,7 @@
           <div id="feldOverlay" class="feld-overlay"></div>
         </div>
       </div>
-      <p class="editor-hinweis"><strong>Position prüfen:</strong><span>Ziehen Sie ein Feld direkt auf den Beispielwert. Über den Griff unten rechts ändern Sie die Größe. Bei durchsuchbaren PDFs findet SmartDocs den sichtbaren Beispieltext zusätzlich automatisch und verwendet dessen echte Position.</span></p>
+      <p class="editor-hinweis"><strong>Wenig Nacharbeit:</strong><span>Prüfen Sie zuerst nur gelbe und rote Felder. Verschieben oder bearbeiten Sie ein Feld, gilt es automatisch als manuell bestätigt. Anschließend erzeugt SmartDocs eine vollständige Testausfüllung.</span></p>
       <div class="seiten-fuss"><span>{{ eintrag.dateiname }}</span><span>{{ eintrag.seiten }} Seite{% if eintrag.seiten != 1 %}n{% endif %}</span></div>
     </section>
 
@@ -63,8 +77,26 @@
         <label><span>Höhe in %</span><input id="feldHoehe" type="number" min="1" max="100" step="0.1"></label>
         <label class="volle-breite kontrollzeile"><input id="feldPflicht" type="checkbox"><span>Dieses Feld ist verpflichtend</span></label>
       </div>
+      <div class="vergleich-hinweis">Jede manuelle Änderung markiert dieses Feld automatisch als geprüft. Eine neue Testausfüllung kontrolliert danach die tatsächliche PDF-Ausgabe.</div>
       <div class="dialogaktionen"><button type="button" id="feldLoeschen" class="schaltflaeche gefahr">Feld löschen</button><span></span><button type="button" class="schaltflaeche sekundaer dialogSchliessen">Abbrechen</button><button type="submit" class="schaltflaeche primaer">Feld übernehmen</button></div>
     </form>
+  </div>
+
+  <div id="testausfuellungDialog" class="dialoghintergrund versteckt">
+    <section class="vergleich-dialog">
+      <header class="vergleich-kopf">
+        <div><span class="uebertitel">Automatische Testausfüllung</span><h2>Original und tatsächliche PDF-Ausgabe vergleichen</h2><p>SmartDocs füllt jedes erkannte Feld mit gut sichtbaren Musterwerten. Achten Sie besonders auf gelbe und rote Positionen.</p></div>
+        <button type="button" id="testausfuellungSchliessen" aria-label="Vergleich schließen">×</button>
+      </header>
+      <div class="vergleich-raster">
+        <section class="vergleich-spalte"><header><span>01 · Original</span><span>unverändert</span></header><iframe id="vergleichOriginal" title="Originaldokument"></iframe></section>
+        <section class="vergleich-spalte"><header><span>02 · Testausfüllung</span><span>echter PDF-Renderer</span></header><iframe id="vergleichTest" title="Testausfüllung"></iframe></section>
+      </div>
+      <footer class="vergleich-freigabe">
+        <label><input id="testausfuellungBestaetigt" type="checkbox"><span>Ich habe Original und Testausfüllung verglichen. Positionen, Feldarten, Textüberlagerungen und Bild-/Unterschriftsfelder sind korrekt.</span></label>
+        <button id="qualitaetsPruefungAbschliessen" type="button" class="schaltflaeche primaer">Prüfung abschließen ✓</button>
+      </footer>
+    </section>
   </div>
 </section>
 {% endblock %}
