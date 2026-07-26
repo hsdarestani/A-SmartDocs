@@ -21,6 +21,7 @@ from .main import (
     vorlage_fuer_mitglied,
 )
 from .models import Dokumentvorlage, Nutzungsereignis, Vorlagendialog
+from .quality import schema_mit_qualitaet
 
 logger = logging.getLogger("smartdocs.analyse")
 
@@ -32,8 +33,7 @@ def _alte_analyseroute(route: Any) -> bool:
     )
 
 
-# Die bisherige Route hält die HTTP-Verbindung während des vollständigen KI-Laufs offen.
-# Sie wird durch eine kurze Upload-Route mit nachgelagerter Analyse ersetzt.
+# Die alte Route hielt die HTTP-Verbindung während des gesamten KI-Laufs offen.
 app.router.routes[:] = [route for route in app.router.routes if not _alte_analyseroute(route)]
 
 
@@ -47,16 +47,18 @@ def _utc(wert: datetime | None) -> datetime:
 
 def _lokale_analyse(dateipfad: Path, dateiname: str) -> tuple[dict[str, Any], dict[str, Any]]:
     try:
-        return formular_lokal_analysieren(dateipfad, dateiname)
+        schema, diagnostik = formular_lokal_analysieren(dateipfad, dateiname)
+        return schema_mit_qualitaet(schema), diagnostik
     except Exception as exc:
         logger.warning("Lokale Formularerkennung für %s fehlgeschlagen: %s", dateiname, exc)
-        return {
+        schema = {
             "dokumentart": Path(dateiname).stem or "Dokumentvorlage",
             "zusammenfassung": "Die Dokumentstruktur konnte lokal nicht sicher ausgewertet werden.",
             "felder": [],
             "rueckfragen": [],
             "analysequelle": "lokale-analyse-fehlgeschlagen",
-        }, {"felder": 0, "quelle": "lokale-analyse-fehlgeschlagen"}
+        }
+        return schema_mit_qualitaet(schema), {"felder": 0, "quelle": "lokale-analyse-fehlgeschlagen"}
 
 
 def _analyse_abschliessen(vorlage_id: int) -> None:
@@ -78,7 +80,7 @@ def _analyse_abschliessen(vorlage_id: int) -> None:
 
         try:
             ki_schema, ki_nutzung = dokument_analysieren(dateipfad, eintrag.dateiname)
-            schema = schema_kombinieren(ki_schema, lokales_schema)
+            schema = schema_mit_qualitaet(schema_kombinieren(ki_schema, lokales_schema))
             nutzung.update(ki_nutzung)
             nutzung["analysequelle"] = schema.get("analysequelle", "ki")
             if len(lokale_felder) >= 6 and len(list(ki_schema.get("felder", []) or [])) < len(lokale_felder) * 0.5:
@@ -88,15 +90,14 @@ def _analyse_abschliessen(vorlage_id: int) -> None:
                 )
         except Exception as exc:
             logger.warning("KI-Analyse für Vorlage %s fehlgeschlagen: %s", vorlage_id, exc)
+            schema = schema_mit_qualitaet(lokales_schema)
             if lokale_felder:
-                schema = lokales_schema
                 nutzung["analysequelle"] = "pdf-struktur-ohne-ki"
                 analyse_hinweis = (
                     " Die KI-Verbindung war nicht verfügbar. Die angezeigten Felder stammen direkt "
                     "aus Text, Linien und Formularstruktur des Original-PDFs."
                 )
             else:
-                schema = lokales_schema
                 nutzung["analysequelle"] = "keine-verlaessliche-erkennung"
                 analyse_hinweis = (
                     " Es konnten keine verlässlichen Eingabebereiche erkannt werden. "
@@ -104,7 +105,8 @@ def _analyse_abschliessen(vorlage_id: int) -> None:
                 )
 
         try:
-            felder = list(schema.get("felder", []) or []) if isinstance(schema, dict) else []
+            felder = list(schema.get("felder", []) or [])
+            qualitaet = schema.get("qualitaet", {})
             eintrag.schema = schema
             eintrag.erkannte_felder = len(felder)
             eintrag.zusammenfassung = str(schema.get("zusammenfassung", ""))
@@ -114,7 +116,9 @@ def _analyse_abschliessen(vorlage_id: int) -> None:
                 eintrag.status = "Bestätigung erforderlich"
                 nachricht = (
                     f"Ich habe {len(felder)} konkrete Eingabebereiche erkannt. "
-                    f"Bitte prüfen Sie die Positionen und Feldtypen.{analyse_hinweis}"
+                    f"{qualitaet.get('sicher', 0)} sind sicher, "
+                    f"{qualitaet.get('pruefen', 0)} gelb und {qualitaet.get('unsicher', 0)} rot markiert. "
+                    f"Bitte prüfen Sie nur die markierten Felder und anschließend die Testausfüllung.{analyse_hinweis}"
                 )
             else:
                 eintrag.status = "Analyse fehlgeschlagen"
@@ -188,10 +192,7 @@ async def vorlage_analysieren_robust(
                     break
                 groesse += len(block)
                 if groesse > cfg.max_upload_mb * 1024 * 1024:
-                    raise HTTPException(
-                        status_code=413,
-                        detail=f"Die Datei darf höchstens {cfg.max_upload_mb} MB groß sein.",
-                    )
+                    raise HTTPException(status_code=413, detail=f"Die Datei darf höchstens {cfg.max_upload_mb} MB groß sein.")
                 ausgabe.write(block)
     except Exception:
         ziel.unlink(missing_ok=True)
@@ -207,8 +208,6 @@ async def vorlage_analysieren_robust(
             ziel.unlink(missing_ok=True)
             raise HTTPException(status_code=422, detail="Die PDF-Datei ist beschädigt oder kann nicht gelesen werden.")
 
-    # Bereits vor dem externen KI-Lauf werden echte PDF-Felder und Eingabelinien lokal erkannt.
-    # Dadurch wird niemals mehr ein allgemeines Vier-Felder-Schema als Dokumentanalyse ausgegeben.
     vorlaeufiges_schema, lokale_diagnostik = _lokale_analyse(ziel, ursprungsname)
     vorlaeufige_felder = list(vorlaeufiges_schema.get("felder", []) or [])
     eintrag = Dokumentvorlage(
@@ -237,6 +236,7 @@ async def vorlage_analysieren_robust(
         "status": "Bestätigung erforderlich" if vorlaeufige_felder else "wird analysiert",
         "analyse_status": eintrag.status,
         "schema": vorlaeufiges_schema if vorlaeufige_felder else None,
+        "qualitaet": vorlaeufiges_schema.get("qualitaet", {}),
         "lokale_diagnostik": lokale_diagnostik,
         "status_url": f"/api/vorlagen/{eintrag.id}/analyse-status",
         "weiter": f"/vorlagen/{eintrag.id}",
@@ -261,13 +261,15 @@ def analyse_status(vorlage_id: int, request: Request, db=Depends(datenbank_sitzu
 
     fertig = eintrag.status in {"Bestätigung erforderlich", "bereit"}
     fehler = eintrag.status in {"Analyse unterbrochen", "Analyse fehlgeschlagen"}
+    schema = schema_mit_qualitaet(eintrag.schema) if fertig else None
     return {
         "erfolg": True,
         "vorlage_id": eintrag.id,
         "status": eintrag.status,
         "fertig": fertig,
         "fehler": fehler,
-        "schema": eintrag.schema if fertig else None,
+        "schema": schema,
+        "qualitaet": (schema or {}).get("qualitaet", {}),
         "weiter": f"/vorlagen/{eintrag.id}",
         "hinweis": (
             "Die Analyse ist abgeschlossen."
@@ -303,5 +305,8 @@ def analyse_neu_starten(
         "status_url": f"/api/vorlagen/{eintrag.id}/analyse-status",
     }
 
+
+# Lädt die Qualitäts-, Testausfüllungs- und Freigaberouten erst nach allen bisherigen Routen.
+from . import quality_routes as _quality_routes  # noqa: E402,F401
 
 __all__ = ["app"]
