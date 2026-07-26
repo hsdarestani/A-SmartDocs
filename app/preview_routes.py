@@ -30,6 +30,19 @@ def _ist_alte_vorschau_route(route: Any) -> bool:
 app.router.routes[:] = [route for route in app.router.routes if not _ist_alte_vorschau_route(route)]
 
 
+def _medientyp(pfad: Path, gespeichert: str | None = None) -> str:
+    endung = pfad.suffix.lower()
+    if endung == ".pdf":
+        return "application/pdf"
+    if endung in {".jpg", ".jpeg"}:
+        return "image/jpeg"
+    if endung == ".png":
+        return "image/png"
+    if endung == ".webp":
+        return "image/webp"
+    return gespeichert or "application/octet-stream"
+
+
 def _inline_datei(pfad: Path, media_type: str) -> FileResponse:
     return FileResponse(
         pfad,
@@ -49,7 +62,7 @@ def vorlage_inline_anzeigen(vorlage_id: int, request: Request, db=Depends(datenb
     pfad = Path(eintrag.speicherort)
     if not pfad.exists():
         raise HTTPException(status_code=404, detail="Die Originaldatei ist nicht mehr verfügbar.")
-    return _inline_datei(pfad, eintrag.inhaltstyp or "application/octet-stream")
+    return _inline_datei(pfad, _medientyp(pfad, eintrag.inhaltstyp))
 
 
 @app.get("/vorlagen/{vorlage_id}/testausfuellung.pdf")
