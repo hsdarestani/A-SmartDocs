@@ -1,7 +1,55 @@
 {% extends "base.html" %}
 {% block titel %}Dokumentvorlagen – A+ SmartDocs{% endblock %}
 {% block inhalt %}
-<section class="seitenrahmen"><div class="seitenkopf"><div><span class="uebertitel">Vorlagenbibliothek</span><h1>Dokumentvorlagen</h1><p>Analysierte Muster prüfen, bearbeiten und für neue PDF-Ausgaben verwenden.</p></div><a href="/vorlagen/neu" class="schaltflaeche primaer">Neue Vorlage <span>＋</span></a></div>
-<div class="werkzeugleiste"><label class="suchfeld"><span>⌕</span><input id="vorlagenSuche" type="search" placeholder="Vorlagen durchsuchen …"></label><div class="filtergruppe"><button class="aktiv" data-filter="alle">Alle</button><button data-filter="bereit">Bereit</button><button data-filter="prüfung">Prüfung nötig</button></div><span class="listenanzahl">{{ vorlagen_liste|length }} Vorlagen</span></div>
-<div class="vorlagenraster">{% for eintrag in vorlagen_liste %}<article class="vorlagenkarte" data-name="{{ eintrag.name|lower }}" data-status="{{ eintrag.status|lower }}"><div class="vorlagenbild"><div class="mini-dokument"><span>A+</span><i></i><i></i><i></i><b>{{ eintrag.erkannte_felder }}</b></div><span class="zustandsmarke {% if eintrag.status == 'bereit' %}bereit{% endif %}">{{ eintrag.status }}</span></div><div class="vorlagenkarten-inhalt"><span class="dateityp">{{ eintrag.inhaltstyp.split('/')[-1]|upper }}</span><h3>{{ eintrag.name }}</h3><p>{{ eintrag.zusammenfassung or 'Intelligente, wiederverwendbare Dokumentvorlage.' }}</p><div class="vorlagenwerte"><span><b>{{ eintrag.seiten }}</b> Seiten</span><span><b>{{ eintrag.erkannte_felder }}</b> Felder</span><span><b>{{ eintrag.dokumente|length }}</b> Ausgaben</span></div><div class="vorlagenkarten-aktionen"><a href="/vorlagen/{{ eintrag.id }}" class="schaltflaeche sekundaer">Bearbeiten</a>{% if eintrag.status == 'bereit' %}<a href="/vorlagen/{{ eintrag.id }}/verwenden" class="schaltflaeche primaer">Verwenden →</a>{% endif %}</div></div></article>{% else %}<div class="leerzustand gross"><i>◫</i><h2>Ihre Vorlagenbibliothek ist noch leer.</h2><p>Laden Sie ein vorhandenes Dokument hoch. A+ SmartDocs erstellt daraus einen wiederverwendbaren Ablauf.</p><a class="schaltflaeche primaer" href="/vorlagen/neu">Erste Vorlage erstellen</a></div>{% endfor %}</div></section>
+<section class="seitenrahmen produktseite">
+  <div class="seitenkopf">
+    <div>
+      <span class="uebertitel">Vorlagenbibliothek</span>
+      <h1>Dokumentvorlagen</h1>
+      <p>Analysierte Muster prüfen, präzise kalibrieren und für neue PDF-Ausgaben verwenden.</p>
+    </div>
+    <a href="/vorlagen/neu" class="schaltflaeche primaer">Neue Vorlage <span>＋</span></a>
+  </div>
+
+  <div class="produkt-werkzeugleiste">
+    <label class="suchfeld"><span>⌕</span><input id="vorlagenSuche" type="search" placeholder="Vorlagen durchsuchen …"></label>
+    <div class="filtergruppe" aria-label="Vorlagen filtern">
+      <button class="aktiv" data-filter="alle">Alle</button>
+      <button data-filter="bereit">Bereit</button>
+      <button data-filter="prüfung">Prüfung nötig</button>
+    </div>
+    <span class="listenanzahl">{{ vorlagen_liste|length }} Vorlagen</span>
+  </div>
+
+  <div class="vorlagenraster">
+    {% for eintrag in vorlagen_liste %}
+    <article class="vorlagenkarte" data-name="{{ eintrag.name|lower }}" data-status="{{ eintrag.status|lower }}">
+      <div class="vorlagenbild">
+        <div class="mini-dokument"><span>A+</span><i></i><i></i><i></i><b>{{ eintrag.erkannte_felder }}</b></div>
+        <span class="zustandsmarke {% if eintrag.status == 'bereit' %}bereit{% endif %}">{{ eintrag.status }}</span>
+      </div>
+      <div class="vorlagenkarten-inhalt">
+        <span class="dateityp">{{ eintrag.inhaltstyp.split('/')[-1]|upper }} · {{ eintrag.seiten }} Seite{% if eintrag.seiten != 1 %}n{% endif %}</span>
+        <h3>{{ eintrag.name }}</h3>
+        <p>{{ eintrag.zusammenfassung or 'Intelligente, wiederverwendbare Dokumentvorlage.' }}</p>
+        <div class="vorlagenwerte">
+          <span><b>{{ eintrag.seiten }}</b> Seiten</span>
+          <span><b>{{ eintrag.erkannte_felder }}</b> Felder</span>
+          <span><b>{{ eintrag.dokumente|length }}</b> Ausgaben</span>
+        </div>
+        <div class="vorlagenkarten-aktionen">
+          <a href="/vorlagen/{{ eintrag.id }}" class="schaltflaeche sekundaer">Bearbeiten</a>
+          {% if eintrag.status == 'bereit' %}<a href="/vorlagen/{{ eintrag.id }}/verwenden" class="schaltflaeche primaer">Verwenden →</a>{% else %}<a href="/vorlagen/{{ eintrag.id }}" class="schaltflaeche primaer">Prüfen →</a>{% endif %}
+        </div>
+      </div>
+    </article>
+    {% else %}
+    <div class="leerzustand gross">
+      <i>◫</i><h2>Ihre Vorlagenbibliothek ist noch leer.</h2>
+      <p>Laden Sie ein vorhandenes Dokument hoch. A+ SmartDocs erstellt daraus einen wiederverwendbaren Ablauf.</p>
+      <a class="schaltflaeche primaer" href="/vorlagen/neu">Erste Vorlage erstellen</a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
 {% endblock %}
