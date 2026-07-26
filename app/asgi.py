@@ -136,7 +136,8 @@ async def vorlage_analysieren_robust(
     if inhaltstyp not in erlaubte_typen:
         raise HTTPException(status_code=415, detail="Bitte laden Sie eine PDF-, PNG-, JPG- oder WEBP-Datei hoch.")
 
-    endung = Path(datei.filename or "dokument.pdf").suffix.lower() or ".pdf"
+    ursprungsname = datei.filename or "dokument.pdf"
+    endung = Path(ursprungsname).suffix.lower() or ".pdf"
     ziel = cfg.upload_pfad / f"{mitglied.organisation_id}-{uuid.uuid4().hex}{endung}"
     groesse = 0
     try:
@@ -166,17 +167,20 @@ async def vorlage_analysieren_robust(
             ziel.unlink(missing_ok=True)
             raise HTTPException(status_code=422, detail="Die PDF-Datei ist beschädigt oder kann nicht gelesen werden.")
 
+    vorlaeufiges_schema = _ersatz_schema(ursprungsname)
     eintrag = Dokumentvorlage(
         organisation_id=mitglied.organisation_id,
         erstellt_von_id=mitglied.id,
         name=name.strip() or "Neue Dokumentvorlage",
-        dateiname=datei.filename or ziel.name,
+        dateiname=ursprungsname,
         speicherort=str(ziel),
         inhaltstyp=inhaltstyp,
         originalgroesse=groesse,
         status="wird analysiert",
         seiten=seiten,
-        schema={},
+        schema=vorlaeufiges_schema,
+        erkannte_felder=len(vorlaeufiges_schema.get("felder", [])),
+        zusammenfassung=str(vorlaeufiges_schema.get("zusammenfassung", "")),
         aktualisiert_am=datetime.now(timezone.utc),
     )
     db.add(eintrag)
@@ -187,7 +191,11 @@ async def vorlage_analysieren_robust(
     return {
         "erfolg": True,
         "vorlage_id": eintrag.id,
-        "status": eintrag.status,
+        # Kompatibilität für bisherige Clients: Eine vollständig bearbeitbare
+        # Grundstruktur ist sofort verfügbar; die präzisere Analyse läuft weiter.
+        "status": "Bestätigung erforderlich",
+        "analyse_status": eintrag.status,
+        "schema": vorlaeufiges_schema,
         "status_url": f"/api/vorlagen/{eintrag.id}/analyse-status",
         "weiter": f"/vorlagen/{eintrag.id}",
         "hinweis": "Die Datei ist gespeichert. Der Prüflauf wird im Hintergrund fortgesetzt.",
