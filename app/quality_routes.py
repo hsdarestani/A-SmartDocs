@@ -63,6 +63,29 @@ def _preview_pfad(eintrag, schema: dict[str, Any]) -> Path:
     return cfg.ausgabe_pfad / f"testausfuellung-{eintrag.organisation_id}-{eintrag.id}-{fingerabdruck[:16]}.pdf"
 
 
+def _direktfreigabe_moeglich(schema: dict[str, Any]) -> bool:
+    """Nur ein einzelner, im PDF wirklich vorhandener Text darf ohne Vergleich durchlaufen.
+
+    Dieser Sonderfall hält einfache Ein-Feld-Dokumente schnell. Mehrfeldformulare,
+    Auswahlen, Tabellen, Bilder und Unterschriften benötigen immer eine Testausfüllung.
+    """
+    felder = list(schema.get("felder") or [])
+    if len(felder) != 1:
+        return False
+    feld = felder[0]
+    if str(feld.get("typ") or "text") not in {"text", "datum", "zahl", "betrag"}:
+        return False
+    if str(feld.get("erkennungsquelle") or "") not in {"pdf-textkandidat", "pdf-formularfeld", "manuell-korrigiert"}:
+        return False
+    if not str(feld.get("beispiel") or "").strip():
+        return False
+    position = feld.get("position") or {}
+    try:
+        return all(float(position.get(name, 0)) > 0 for name in ("breite", "hoehe"))
+    except (TypeError, ValueError):
+        return False
+
+
 @app.put("/api/vorlagen/{vorlage_id}/schema")
 def schema_mit_pruefstatus_speichern(
     vorlage_id: int,
@@ -204,6 +227,15 @@ def vorlage_mit_qualitaetskontrolle_bestaetigen(
     _bearbeitung_erlaubt(mitglied)
     eintrag = vorlage_fuer_mitglied(db, mitglied, vorlage_id)
     schema = schema_mit_qualitaet(eintrag.schema)
+
+    direkt = _direktfreigabe_moeglich(schema)
+    if direkt:
+        for feld in schema.get("felder", []):
+            feld["geprueft"] = True
+        schema["testausfuellung_hash"] = schema_fingerabdruck(schema)
+        schema["testausfuellung_geprueft"] = True
+        schema = schema_mit_qualitaet(schema)
+
     qualitaet = schema.get("qualitaet", {})
     if int(qualitaet.get("offene_felder", 0)) > 0:
         raise HTTPException(
@@ -220,7 +252,11 @@ def vorlage_mit_qualitaetskontrolle_bestaetigen(
         Vorlagendialog(
             vorlage_id=eintrag.id,
             rolle="assistent",
-            nachricht="Qualitätsprüfung abgeschlossen: Die Testausfüllung wurde bestätigt und die Vorlage ist einsatzbereit.",
+            nachricht=(
+                "Das einzelne, exakt im PDF lokalisierbare Textfeld wurde direkt freigegeben."
+                if direkt
+                else "Qualitätsprüfung abgeschlossen: Die Testausfüllung wurde bestätigt und die Vorlage ist einsatzbereit."
+            ),
         )
     )
     db.commit()
