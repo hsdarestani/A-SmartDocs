@@ -77,7 +77,7 @@ def test_beispieltext_bestimmt_echte_position_und_hintergrund_bleibt_farbig(tmp_
     seiten = dokument_erzeugen(original, "application/pdf", schema, {"kunde": "NEUER KUNDE"}, ziel, "Prüfung", "Farbige Vorlage")
     assert seiten == 1
 
-    mit fitz.open(original) as alt, fitz.open(ziel) as neu:
+    with fitz.open(original) as alt, fitz.open(ziel) as neu:
         alter_treffer = alt[0].search_for("ALTER MUSTERWERT")
         neuer_treffer = neu[0].search_for("NEUER KUNDE")
         assert len(alter_treffer) == 1
@@ -123,7 +123,7 @@ def test_unterschrift_wird_als_transparentes_bild_eingebettet(tmp_path: Path):
 
     dokument_erzeugen(original, "application/pdf", schema, {"signatur": str(signatur)}, ziel, "Signatur", "Unterschrift")
 
-    mit fitz.open(ziel) as dokument:
+    with fitz.open(ziel) as dokument:
         assert dokument[0].get_images(full=True), "Die Unterschrift muss als Bildobjekt im PDF vorhanden sein."
         text = "".join(seite.get_text() for seite in dokument)
         assert "UploadFile" not in text
