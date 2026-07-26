@@ -172,3 +172,7 @@ __all__ = [
     "schema_mit_qualitaet",
     "testwert_fuer_feld",
 ]
+
+
+# Registriert die kompakten Verwendungs-, Vorschau- und Löschrouten nach app.main.
+from . import product_routes as _product_routes  # noqa: E402,F401
