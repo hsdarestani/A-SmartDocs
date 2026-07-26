@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block titel %}Erstellte Dokumente – A+ SmartDocs{% endblock %}
 {% block inhalt %}
+{% set darf_loeschen = mitglied.ist_superadmin or mitglied.rolle.value in ['inhaber', 'verwaltung'] %}
 <section class="seitenrahmen produktseite">
   <div class="seitenkopf">
     <div>
@@ -30,7 +31,7 @@
             <td>{{ dokument.erstellt_am|datum }}</td>
             <td>{{ dokument.dateigroesse|dateigroesse }}</td>
             <td><span class="zustandsmarke bereit">{{ dokument.status }}</span></td>
-            <td><div class="zeilenaktionen"><a href="/dokumente/{{ dokument.id }}/herunterladen">Herunterladen</a><form action="/dokumente/{{ dokument.id }}/loeschen" method="post" onsubmit="return confirm('Dokument wirklich löschen?')"><button type="submit" aria-label="Dokument löschen">×</button></form></div></td>
+            <td><div class="zeilenaktionen"><a href="/dokumente/{{ dokument.id }}/herunterladen">Herunterladen</a>{% if darf_loeschen %}<form action="/dokumente/{{ dokument.id }}/loeschen" method="post" onsubmit="return confirm('Dokument dauerhaft löschen?')"><button type="submit" aria-label="Dokument löschen" title="Dokument löschen">×</button></form>{% endif %}</div></td>
           </tr>
         {% else %}
           <tr><td colspan="7"><div class="leerzustand gross"><i>▧</i><h2>Noch keine Dokumente erstellt.</h2><p>Wählen Sie eine fertige Vorlage aus und erzeugen Sie die erste PDF-Ausgabe.</p><a class="schaltflaeche primaer" href="/vorlagen">Vorlage auswählen</a></div></td></tr>
