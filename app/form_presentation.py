@@ -51,6 +51,21 @@ def _label_bereinigen(text: Any) -> str:
     return re.sub(r"\s+", " ", wert)
 
 
+def _typ_aus_beschriftung(typ: str, label: str) -> str:
+    if typ not in {"", "text"}:
+        return typ
+    sauber = _norm(label)
+    if any(wort in sauber for wort in ("unterschrift", "signature", "signatur")):
+        return "unterschrift"
+    if any(wort in sauber for wort in ("datum", "date of birth", "birth date", "geburtstag", "beginn", "ende", "seit wann")):
+        return "datum"
+    if any(wort in sauber for wort in ("betrag", "brutto", "netto", "gehalt", "verdienst", "lohn", "amount", "salary")):
+        return "betrag"
+    if any(wort in sauber for wort in ("beschreibung", "bemerkung", "hinweis", "kommentar", "description", "remarks")):
+        return "mehrzeilig"
+    return "text"
+
+
 def _position_als_rechteck(feld: dict[str, Any], seite: fitz.Page) -> fitz.Rect | None:
     position = feld.get("position") or {}
     try:
@@ -170,8 +185,6 @@ def schema_mit_dokumentbeschriftungen(schema: dict[str, Any] | None, dateipfad: 
                     optionen.append(option_text)
 
             if typ == "auswahl" and len(optionen) < 2:
-                # Ein leeres Select ist unbedienbar. Einzelne PDF-Radio-/Optionsfelder
-                # werden als anklickbare Markierung an ihrer echten Position behandelt.
                 typ = "kontrollfeld"
                 optionen = []
 
@@ -179,6 +192,7 @@ def schema_mit_dokumentbeschriftungen(schema: dict[str, Any] | None, dateipfad: 
                 label = "Option" if typ == "kontrollfeld" else "Feld"
                 label = f"{label} {index}"
 
+            typ = _typ_aus_beschriftung(typ, label)
             basis = _norm(label)
             verwendete_labels[basis] = verwendete_labels.get(basis, 0) + 1
             if verwendete_labels[basis] > 1:
