@@ -1,0 +1,407 @@
+/* A+ SmartDocs – gezielte Produktkorrekturen für Bibliothek, Archiv und Editor */
+
+.produktseite .seitenkopf {
+  align-items: end;
+  padding-bottom: 26px;
+  border-bottom: 1px solid #0b2a3f;
+}
+
+.produktseite .seitenkopf h1 {
+  max-width: 850px;
+}
+
+.produkt-werkzeugleiste {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  margin: 30px 0 18px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #b8cbd6;
+  box-shadow: 0 6px 0 rgba(7, 28, 46, .05);
+}
+
+.produkt-werkzeugleiste .suchfeld {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  border: 1px solid #7594a6;
+  background: #f8fbfd;
+  padding: 0 14px;
+}
+
+.produkt-werkzeugleiste .suchfeld input {
+  min-width: 0;
+  height: 46px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #071c2e;
+  font-size: 15px;
+}
+
+.produkt-werkzeugleiste .filtergruppe {
+  display: inline-flex;
+  min-height: 48px;
+  border: 1px solid #7594a6;
+  background: #edf5f8;
+}
+
+.produkt-werkzeugleiste .filtergruppe button {
+  min-width: 98px;
+  border: 0;
+  border-right: 1px solid #a7beca;
+  background: transparent;
+  color: #355568;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.produkt-werkzeugleiste .filtergruppe button:last-child { border-right: 0; }
+.produkt-werkzeugleiste .filtergruppe button.aktiv {
+  background: #0f78a8;
+  color: white;
+}
+
+.listenanzahl {
+  color: #587486;
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.vorlagenraster {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.vorlagenkarte {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #adc4d0;
+  box-shadow: 0 8px 0 rgba(7, 28, 46, .045);
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+
+.vorlagenkarte:hover {
+  transform: translateY(-3px);
+  border-color: #1676a7;
+  box-shadow: 0 11px 0 rgba(22, 118, 167, .11);
+}
+
+.vorlagenbild {
+  min-height: 158px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(82, 178, 216, .16), transparent 60%),
+    #eaf3f7;
+  border-bottom: 1px solid #bfd1da;
+}
+
+.vorlagenbild::before {
+  content: "VORLAGE";
+  position: absolute;
+  left: 14px;
+  top: 13px;
+  color: #537283;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+}
+
+.vorlagenbild .zustandsmarke {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
+
+.mini-dokument {
+  width: 102px;
+  min-height: 118px;
+  position: relative;
+  padding: 18px 14px;
+  background: white;
+  border: 1px solid #607f90;
+  box-shadow: 7px 7px 0 rgba(7, 28, 46, .12);
+}
+
+.mini-dokument > span {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  margin-bottom: 16px;
+  background: #0f78a8;
+  color: white;
+  font-family: var(--mono);
+  font-size: 9px;
+}
+
+.mini-dokument i {
+  display: block;
+  width: 100%;
+  height: 3px;
+  margin-top: 8px;
+  background: #c4d2d9;
+}
+
+.mini-dokument i:nth-of-type(2) { width: 78%; }
+.mini-dokument i:nth-of-type(3) { width: 55%; }
+.mini-dokument b {
+  position: absolute;
+  right: -8px;
+  bottom: 12px;
+  min-width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  background: #071c2e;
+  color: white;
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.vorlagenkarten-inhalt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+}
+
+.vorlagenkarten-inhalt .dateityp {
+  color: #1676a7;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+
+.vorlagenkarten-inhalt h3 {
+  margin: 10px 0 8px;
+  color: #071c2e;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.vorlagenkarten-inhalt p {
+  min-height: 65px;
+  margin: 0;
+  color: #587486;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.vorlagenwerte {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 20px 0;
+  border-top: 1px solid #c9d7de;
+  border-bottom: 1px solid #c9d7de;
+}
+
+.vorlagenwerte span {
+  padding: 12px 8px;
+  color: #587486;
+  font-size: 11px;
+  text-align: center;
+  border-right: 1px solid #d8e2e7;
+}
+
+.vorlagenwerte span:last-child { border-right: 0; }
+.vorlagenwerte b { display: block; color: #071c2e; font-size: 17px; }
+
+.vorlagenkarten-aktionen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.archiv-panel {
+  padding: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #adc4d0;
+  box-shadow: 0 8px 0 rgba(7, 28, 46, .045);
+}
+
+.dokumenttabelle table { min-width: 980px; }
+.dokumenttabelle thead { background: #eaf3f7; }
+.dokumenttabelle th {
+  padding: 15px 14px;
+  color: #426477;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.dokumenttabelle td { padding: 18px 14px; vertical-align: middle; }
+.dokumenttabelle tbody tr:hover { background: #f5fafc; }
+.dokumentzelle { min-width: 260px; display: flex; align-items: center; gap: 14px; }
+.dokumentzelle > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.dokumentzelle strong { color: #071c2e; font-size: 14px; }
+.dokumentzelle small {
+  max-width: 260px;
+  overflow: hidden;
+  color: #6b8492;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.zeilenaktionen { display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
+.zeilenaktionen a,
+.zeilenaktionen button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #7594a6;
+  background: #fff;
+  color: #0d628c;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.zeilenaktionen button { width: 36px; padding: 0; color: #9b2c2c; }
+
+.editorseite { padding-bottom: 70px; }
+.editor-gitter {
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 18px;
+}
+.dokument-editor,
+.editor-seitenpanel {
+  border: 1px solid #9eb8c5;
+  background: #fff;
+  box-shadow: 0 8px 0 rgba(7, 28, 46, .05);
+}
+.editor-werkzeuge {
+  min-height: 58px;
+  padding: 10px 14px;
+  background: #071c2e;
+  color: white;
+}
+.editor-werkzeuge button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid #567388;
+  background: transparent;
+  color: white;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.editor-werkzeuge button.aktiv { background: #52b2d8; color: #071c2e; border-color: #52b2d8; }
+.dokument-arbeitsflaeche {
+  min-height: 720px;
+  padding: 34px;
+  background:
+    linear-gradient(90deg, rgba(7,28,46,.035) 1px, transparent 1px),
+    linear-gradient(rgba(7,28,46,.035) 1px, transparent 1px),
+    #dfe9ee;
+  background-size: 20px 20px;
+  overflow: auto;
+}
+.seiten-container {
+  width: min(100%, 794px);
+  aspect-ratio: 210 / 297;
+  position: relative;
+  margin: 0 auto;
+  transform-origin: top center;
+  background: #fff;
+  border: 1px solid #6b8796;
+  box-shadow: 0 16px 34px rgba(7, 28, 46, .18);
+  overflow: hidden;
+}
+.seiten-container iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: white;
+}
+.feld-overlay { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.overlay-feld {
+  position: absolute;
+  min-width: 26px;
+  min-height: 18px;
+  padding: 0;
+  border: 2px solid #0f78a8;
+  background: rgba(82,178,216,.12);
+  color: #071c2e;
+  cursor: move;
+  pointer-events: auto;
+  touch-action: none;
+}
+.overlay-feld:hover,
+.overlay-feld.aktiv { border-color: #071c2e; background: rgba(82,178,216,.22); }
+.overlay-feld > span {
+  position: absolute;
+  left: -2px;
+  top: -24px;
+  max-width: 190px;
+  padding: 3px 6px;
+  overflow: hidden;
+  background: #0f78a8;
+  color: white;
+  font-family: var(--mono);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.overlay-feld .resize-griff {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid white;
+  background: #071c2e;
+  cursor: nwse-resize;
+}
+.editor-hinweis {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  background: #e7f4f9;
+  border-top: 1px solid #9eb8c5;
+  color: #355568;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.editor-hinweis strong { color: #071c2e; }
+.detail-feld { border-left: 4px solid transparent; }
+.detail-feld:hover { border-left-color: #52b2d8; background: #f2f8fb; }
+
+@media (max-width: 1180px) {
+  .vorlagenraster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .editor-gitter { grid-template-columns: 1fr; }
+  .editor-seitenpanel { min-height: 560px; }
+}
+
+@media (max-width: 760px) {
+  .produkt-werkzeugleiste { grid-template-columns: 1fr; }
+  .produkt-werkzeugleiste .filtergruppe { overflow-x: auto; }
+  .vorlagenraster { grid-template-columns: 1fr; }
+  .vorlagenwerte { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dokument-arbeitsflaeche { min-height: 500px; padding: 16px; }
+  .vorlagenkarten-aktionen { grid-template-columns: 1fr; }
+}

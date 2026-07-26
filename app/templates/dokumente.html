@@ -1,5 +1,43 @@
 {% extends "base.html" %}
 {% block titel %}Erstellte Dokumente – A+ SmartDocs{% endblock %}
 {% block inhalt %}
-<section class="seitenrahmen"><div class="seitenkopf"><div><span class="uebertitel">Dokumentarchiv</span><h1>Erstellte Dokumente</h1><p>Alle automatisch erzeugten PDF-Dateien Ihres Unternehmens.</p></div><a href="/vorlagen" class="schaltflaeche primaer">Dokument erstellen ＋</a></div><div class="werkzeugleiste"><label class="suchfeld"><span>⌕</span><input id="dokumentSuche" type="search" placeholder="Dokumente durchsuchen …"></label><span class="listenanzahl">{{ dokumente_liste|length }} Dateien</span></div><section class="inhaltskarte dokumenttabelle"><div class="tabellenrahmen"><table id="dokumentTabelle"><thead><tr><th>Dokument</th><th>Vorlage</th><th>Erstellt von</th><th>Datum</th><th>Größe</th><th>Status</th><th></th></tr></thead><tbody>{% for dokument in dokumente_liste %}<tr data-name="{{ dokument.titel|lower }}"><td><div class="dokumentzelle"><span class="dateizeichen pdf">PDF</span><div><strong>{{ dokument.titel }}</strong><small>{{ dokument.dateiname }}</small></div></div></td><td>{{ dokument.vorlage.name }}</td><td>{{ dokument.erstellt_von.name if dokument.erstellt_von else 'Automatisch' }}</td><td>{{ dokument.erstellt_am|datum }}</td><td>{{ dokument.dateigroesse|dateigroesse }}</td><td><span class="zustandsmarke bereit">{{ dokument.status }}</span></td><td><div class="zeilenaktionen"><a href="/dokumente/{{ dokument.id }}/herunterladen">Herunterladen</a><form action="/dokumente/{{ dokument.id }}/loeschen" method="post" onsubmit="return confirm('Dokument wirklich löschen?')"><button type="submit">×</button></form></div></td></tr>{% else %}<tr><td colspan="7"><div class="leerzustand gross"><i>▧</i><h2>Noch keine Dokumente erstellt.</h2><p>Wählen Sie eine fertige Vorlage aus und erzeugen Sie die erste PDF-Ausgabe.</p><a class="schaltflaeche primaer" href="/vorlagen">Vorlage auswählen</a></div></td></tr>{% endfor %}</tbody></table></div></section></section>
+<section class="seitenrahmen produktseite">
+  <div class="seitenkopf">
+    <div>
+      <span class="uebertitel">Dokumentarchiv</span>
+      <h1>Erstellte Dokumente</h1>
+      <p>Alle automatisch erzeugten PDF-Dateien Ihres Unternehmens – nachvollziehbar und erneut abrufbar.</p>
+    </div>
+    <a href="/vorlagen" class="schaltflaeche primaer">Dokument erstellen <span>＋</span></a>
+  </div>
+
+  <div class="produkt-werkzeugleiste">
+    <label class="suchfeld"><span>⌕</span><input id="dokumentSuche" type="search" placeholder="Dokumente durchsuchen …"></label>
+    <span></span>
+    <span class="listenanzahl">{{ dokumente_liste|length }} Dateien</span>
+  </div>
+
+  <section class="archiv-panel dokumenttabelle">
+    <div class="tabellenrahmen">
+      <table id="dokumentTabelle">
+        <thead><tr><th>Dokument</th><th>Vorlage</th><th>Erstellt von</th><th>Datum</th><th>Größe</th><th>Status</th><th>Aktionen</th></tr></thead>
+        <tbody>
+        {% for dokument in dokumente_liste %}
+          <tr data-name="{{ dokument.titel|lower }} {{ dokument.dateiname|lower }}">
+            <td><div class="dokumentzelle"><span class="dateizeichen pdf">PDF</span><div><strong>{{ dokument.titel }}</strong><small>{{ dokument.dateiname }}</small></div></div></td>
+            <td>{{ dokument.vorlage.name }}</td>
+            <td>{{ dokument.erstellt_von.name if dokument.erstellt_von else 'Automatisch' }}</td>
+            <td>{{ dokument.erstellt_am|datum }}</td>
+            <td>{{ dokument.dateigroesse|dateigroesse }}</td>
+            <td><span class="zustandsmarke bereit">{{ dokument.status }}</span></td>
+            <td><div class="zeilenaktionen"><a href="/dokumente/{{ dokument.id }}/herunterladen">Herunterladen</a><form action="/dokumente/{{ dokument.id }}/loeschen" method="post" onsubmit="return confirm('Dokument wirklich löschen?')"><button type="submit" aria-label="Dokument löschen">×</button></form></div></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7"><div class="leerzustand gross"><i>▧</i><h2>Noch keine Dokumente erstellt.</h2><p>Wählen Sie eine fertige Vorlage aus und erzeugen Sie die erste PDF-Ausgabe.</p><a class="schaltflaeche primaer" href="/vorlagen">Vorlage auswählen</a></div></td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
 {% endblock %}
