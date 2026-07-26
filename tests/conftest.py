@@ -26,7 +26,7 @@ os.environ["MAX_UPLOAD_MB"] = "2"
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from app.asgi import app  # noqa: E402
+from app.asgi_inline import app  # noqa: E402
 
 
 @pytest.fixture(scope="session")
