@@ -1,0 +1,52 @@
+.assistenten-checkliste span.aktiv {
+  color: #0f78a8;
+  border-color: #0f78a8;
+  background: #eef8fc;
+}
+
+.assistenten-checkliste span.fertig {
+  color: #0e7a4b;
+  border-color: #7fc5a8;
+}
+
+.assistenten-checkliste span.fertig::after {
+  content: "  ✓";
+}
+
+.analyse-wiederholen {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #9bb7c5;
+  background: #f4f9fb;
+  color: #355568;
+  font-size: 12px;
+}
+
+.analyse-wiederholen button,
+.analyse-weiter-link {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #0f78a8;
+  background: #0f78a8;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.analyse-weiter-link {
+  width: max-content;
+  margin-top: 12px;
+}
+
+@media (max-width: 680px) {
+  .analyse-wiederholen { grid-template-columns: 1fr; }
+}
