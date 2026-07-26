@@ -57,7 +57,9 @@ def _client():
     cfg = einstellungen()
     if not cfg.openai_api_key:
         raise RuntimeError("Für die Dokumentanalyse ist noch kein KI-Schlüssel hinterlegt.")
-    return OpenAI(api_key=cfg.openai_api_key)
+    # Ein externer Dienst darf die Webanfrage nicht unbegrenzt blockieren.
+    # Nach Ablauf übernimmt SmartDocs die vollständig bearbeitbare Grundstruktur.
+    return OpenAI(api_key=cfg.openai_api_key, timeout=45.0, max_retries=1)
 
 
 def _json_aus_text(text: str) -> dict[str, Any]:
