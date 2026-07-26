@@ -7,9 +7,8 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-from fastapi import BackgroundTasks, File, Form, HTTPException, Request, UploadFile
+from fastapi import BackgroundTasks, Depends, File, Form, HTTPException, Request, UploadFile
 from pypdf import PdfReader
-from sqlalchemy import select
 
 from .ai import dokument_analysieren
 from .database import Sitzung, datenbank_sitzung
@@ -119,13 +118,13 @@ def _analyse_abschliessen(vorlage_id: int) -> None:
             logger.warning("Speicherfehler: %s", exc)
 
 
-@app.post("/api/vorlagen/analysieren", status_code=202)
+@app.post("/api/vorlagen/analysieren")
 async def vorlage_analysieren_robust(
     request: Request,
     background_tasks: BackgroundTasks,
     datei: UploadFile = File(...),
     name: str = Form(default="Neue Dokumentvorlage"),
-    db=__import__("fastapi").Depends(datenbank_sitzung),
+    db=Depends(datenbank_sitzung),
 ):
     mitglied = muss_angemeldet_sein(request, db)
     kennzahlen = _organisation_kennzahlen(db, mitglied.organisation_id)
@@ -196,7 +195,7 @@ async def vorlage_analysieren_robust(
 
 
 @app.get("/api/vorlagen/{vorlage_id}/analyse-status")
-def analyse_status(vorlage_id: int, request: Request, db=__import__("fastapi").Depends(datenbank_sitzung)):
+def analyse_status(vorlage_id: int, request: Request, db=Depends(datenbank_sitzung)):
     mitglied = muss_angemeldet_sein(request, db)
     eintrag = vorlage_fuer_mitglied(db, mitglied, vorlage_id)
 
@@ -232,7 +231,7 @@ def analyse_neu_starten(
     vorlage_id: int,
     request: Request,
     background_tasks: BackgroundTasks,
-    db=__import__("fastapi").Depends(datenbank_sitzung),
+    db=Depends(datenbank_sitzung),
 ):
     mitglied = muss_angemeldet_sein(request, db)
     eintrag = vorlage_fuer_mitglied(db, mitglied, vorlage_id)
