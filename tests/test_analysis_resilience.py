@@ -32,7 +32,17 @@ def _anmelden(client) -> None:
 def _pdf_bytes(text: str = "Robuste Analyse") -> bytes:
     speicher = io.BytesIO()
     zeichner = canvas.Canvas(speicher, pagesize=A4)
-    zeichner.drawString(72, 760, text)
+    zeichner.setFont("Helvetica-Bold", 14)
+    zeichner.drawString(72, 780, text)
+    zeichner.setFont("Helvetica", 9)
+    for x0, y, x1, label in [
+        (72, 730, 270, "Vorname"),
+        (320, 730, 520, "Nachname"),
+        (72, 670, 270, "Geburtsdatum"),
+        (320, 670, 520, "Unterschrift"),
+    ]:
+        zeichner.drawString(x0, y + 8, label)
+        zeichner.line(x0, y, x1, y)
     zeichner.save()
     return speicher.getvalue()
 
@@ -73,14 +83,13 @@ def test_upload_bleibt_api_kompatibel_und_statusabfrage_funktioniert(client):
     daten = antwort.json()
     assert daten["vorlage_id"]
     assert daten["status_url"].endswith("/analyse-status")
+    assert daten["lokale_diagnostik"]["felder"] >= 4
     vorlage_id = int(daten["vorlage_id"])
 
     try:
         status = client.get(daten["status_url"])
         assert status.status_code == 200
         statusdaten = status.json()
-        # Im Test ist kein externer KI-Schlüssel gesetzt. Deshalb muss die sichere,
-        # bearbeitbare Grundstruktur den Lauf trotzdem erfolgreich abschließen.
         assert statusdaten["fertig"] is True
         assert statusdaten["fehler"] is False
         assert statusdaten["schema"]["felder"]
