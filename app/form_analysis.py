@@ -5,6 +5,7 @@ from typing import Any
 
 import fitz
 
+from .form_presentation import schema_mit_dokumentbeschriftungen
 from .local_analysis import (
     formular_lokal_analysieren as _struktur_analysieren,
     schema_kombinieren,
@@ -57,8 +58,6 @@ def _sichtbare_textkandidaten(dateipfad: Path, dateiname: str) -> tuple[dict[str
                     if texte and rect is not None:
                         alle_zeilen.append((seitenindex + 1, seite, " ".join(texte), rect, max(groessen or [0])))
 
-        # Nur sehr kleine, überschaubare Dokumente dürfen diesen Modus verwenden.
-        # Bei Verträgen oder Fließtexten wäre jeder automatisch erzeugte Textkandidat irreführend.
         geeignete = [
             eintrag
             for eintrag in alle_zeilen
@@ -96,18 +95,19 @@ def _sichtbare_textkandidaten(dateipfad: Path, dateiname: str) -> tuple[dict[str
         "analysequelle": "pdf-textkandidaten",
         "analysequalitaet": {"erkannte_felder": len(felder), "pruefung_erforderlich": True},
     }
+    schema = schema_mit_dokumentbeschriftungen(schema, dateipfad)
     return schema, {"felder": len(felder), "quelle": "pdf-textkandidaten", "pruefung_erforderlich": True}
 
 
 def formular_lokal_analysieren(dateipfad: Path, dateiname: str) -> tuple[dict[str, Any], dict[str, Any]]:
     schema, diagnostik = _struktur_analysieren(dateipfad, dateiname)
     if list(schema.get("felder", []) or []):
-        return schema, diagnostik
+        return schema_mit_dokumentbeschriftungen(schema, dateipfad), diagnostik
 
     textkandidaten = _sichtbare_textkandidaten(dateipfad, dateiname)
     if textkandidaten is not None:
         return textkandidaten
-    return schema, diagnostik
+    return schema_mit_dokumentbeschriftungen(schema, dateipfad), diagnostik
 
 
 __all__ = ["formular_lokal_analysieren", "schema_kombinieren"]

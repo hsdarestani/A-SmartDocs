@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block titel %}Dokumentvorlagen – A+ SmartDocs{% endblock %}
 {% block inhalt %}
+{% set darf_loeschen = mitglied.ist_superadmin or mitglied.rolle.value in ['inhaber', 'verwaltung'] %}
 <section class="seitenrahmen produktseite">
   <div class="seitenkopf">
     <div>
@@ -37,9 +38,14 @@
           <span><b>{{ eintrag.erkannte_felder }}</b> Felder</span>
           <span><b>{{ eintrag.dokumente|length }}</b> Ausgaben</span>
         </div>
-        <div class="vorlagenkarten-aktionen">
+        <div class="vorlagenkarten-aktionen {% if darf_loeschen %}mit-loeschen{% endif %}">
           <a href="/vorlagen/{{ eintrag.id }}" class="schaltflaeche sekundaer">Bearbeiten</a>
           {% if eintrag.status == 'bereit' %}<a href="/vorlagen/{{ eintrag.id }}/verwenden" class="schaltflaeche primaer">Verwenden →</a>{% else %}<a href="/vorlagen/{{ eintrag.id }}" class="schaltflaeche primaer">Prüfen →</a>{% endif %}
+          {% if darf_loeschen %}
+          <form action="/vorlagen/{{ eintrag.id }}/loeschen" method="post" onsubmit="return confirm('Vorlage und alle daraus erstellten Dokumente dauerhaft löschen?')">
+            <button class="vorlagen-loeschen-knopf" type="submit" title="Vorlage löschen" aria-label="Vorlage löschen">×</button>
+          </form>
+          {% endif %}
         </div>
       </div>
     </article>
