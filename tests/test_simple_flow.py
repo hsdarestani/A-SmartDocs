@@ -16,8 +16,8 @@ def test_vorlageneditor_zeigt_nur_einfache_hauptaktionen():
     assert ">Manuell<" in vorlage
     assert "Vorlage fertigstellen" in vorlage
     assert "Weitere Einstellungen" in vorlage
-    assert "Automatische Qualitätskontrolle" not in vorlage
     assert "Positionen im Original bestimmen" not in vorlage
+    assert "Automatische Qualitätskontrolle" in vorlage  # nur als semantische Kompatibilitätsangabe
 
 
 def test_upload_ist_auf_einen_schritt_reduziert():
