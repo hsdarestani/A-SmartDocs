@@ -16,54 +16,28 @@
   <link rel="stylesheet" href="{{ url_for('statisch', path='/quality-control.css') }}?v=20260726-1">
   <link rel="stylesheet" href="{{ url_for('statisch', path='/use-page-fixes.css') }}?v=20260726-2">
   <link rel="stylesheet" href="{{ url_for('statisch', path='/workflow-v2.css') }}?v=20260728-1">
+  <link rel="stylesheet" href="{{ url_for('statisch', path='/simple-flow.css') }}?v=20260728-1">
 </head>
 <body class="bereich-{{ bereich|default('start') }} {% if mitglied %}angemeldet{% endif %}">
   {% if mitglied %}
   <aside class="seitenleiste" id="seitenleiste">
-    <a class="marke" href="/arbeitsbereich" aria-label="A+ SmartDocs Arbeitsbereich">
-      <span class="marken-symbol">A+</span>
-      <span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span>
-    </a>
+    <a class="marke" href="/arbeitsbereich" aria-label="A+ SmartDocs Arbeitsbereich"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span></a>
     <nav class="seitennavigation" aria-label="Produktnavigation">
-      <span class="navigationsgruppe">Arbeitsbereich</span>
-      <a href="/arbeitsbereich" class="{% if bereich == 'arbeitsbereich' %}aktiv{% endif %}"><i>01</i><span>Übersicht</span></a>
-      <a href="/vorlagen" class="{% if bereich == 'vorlagen' %}aktiv{% endif %}"><i>02</i><span>Dokumentvorlagen</span></a>
-      <a href="/dokumente" class="{% if bereich == 'dokumente' %}aktiv{% endif %}"><i>03</i><span>Erstellte Dokumente</span></a>
-      <span class="navigationsgruppe">Unternehmen</span>
-      <a href="/team" class="{% if bereich == 'team' %}aktiv{% endif %}"><i>04</i><span>Team und Rollen</span></a>
-      <a href="/abrechnung" class="{% if bereich == 'abrechnung' %}aktiv{% endif %}"><i>05</i><span>Tarif und Abrechnung</span></a>
-      <a href="/einstellungen" class="{% if bereich == 'einstellungen' %}aktiv{% endif %}"><i>06</i><span>Einstellungen</span></a>
-      {% if mitglied.ist_superadmin %}
-      <span class="navigationsgruppe">A+ Verwaltung</span>
-      <a href="/verwaltung" class="{% if bereich == 'verwaltung' %}aktiv{% endif %}"><i>A+</i><span>Verwaltungszentrale</span></a>
-      {% endif %}
+      <span class="navigationsgruppe">Arbeitsbereich</span><a href="/arbeitsbereich" class="{% if bereich == 'arbeitsbereich' %}aktiv{% endif %}"><i>01</i><span>Übersicht</span></a><a href="/vorlagen" class="{% if bereich == 'vorlagen' %}aktiv{% endif %}"><i>02</i><span>Dokumentvorlagen</span></a><a href="/dokumente" class="{% if bereich == 'dokumente' %}aktiv{% endif %}"><i>03</i><span>Erstellte Dokumente</span></a>
+      <span class="navigationsgruppe">Unternehmen</span><a href="/team" class="{% if bereich == 'team' %}aktiv{% endif %}"><i>04</i><span>Team und Rollen</span></a><a href="/abrechnung" class="{% if bereich == 'abrechnung' %}aktiv{% endif %}"><i>05</i><span>Tarif und Abrechnung</span></a><a href="/einstellungen" class="{% if bereich == 'einstellungen' %}aktiv{% endif %}"><i>06</i><span>Einstellungen</span></a>
+      {% if mitglied.ist_superadmin %}<span class="navigationsgruppe">A+ Verwaltung</span><a href="/verwaltung" class="{% if bereich == 'verwaltung' %}aktiv{% endif %}"><i>A+</i><span>Verwaltungszentrale</span></a>{% endif %}
     </nav>
-    <div class="seitenleisten-fuss">
-      <div class="konto-mini"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ organisation.name }}</small></div></div>
-      <form action="/abmelden" method="post"><button type="submit" class="abmelden-knopf" title="Abmelden">↗</button></form>
-    </div>
+    <div class="seitenleisten-fuss"><div class="konto-mini"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ organisation.name }}</small></div></div><form action="/abmelden" method="post"><button type="submit" class="abmelden-knopf" title="Abmelden">↗</button></form></div>
   </aside>
-  <header class="app-kopfzeile">
-    <button class="menueknopf" id="menueknopf" aria-label="Navigation öffnen">☰</button>
-    <div class="kopf-suche"><span>⌕</span><input type="search" placeholder="Vorlagen und Dokumente durchsuchen …"><kbd>⌘ K</kbd></div>
-    <a class="kopf-neu" href="/vorlagen/neu">＋ Neue Vorlage</a>
-    <button class="symbolknopf" aria-label="Benachrichtigungen">□<i></i></button>
-    <a class="profilchip" href="/einstellungen"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ mitglied.rolle.value|capitalize }}</small></div></a>
-  </header>
-  {% if rueckkehr_admin %}
-  <div class="ansichtsleiste"><span>Sie sehen das Produkt aus Kundensicht: <strong>{{ organisation.name }}</strong></span><form action="/verwaltung/zurueck" method="post"><button type="submit">Zur A+ Verwaltung zurückkehren</button></form></div>
-  {% endif %}
+  <header class="app-kopfzeile"><button class="menueknopf" id="menueknopf" aria-label="Navigation öffnen">☰</button><div class="kopf-suche"><span>⌕</span><input type="search" placeholder="Vorlagen und Dokumente durchsuchen …"><kbd>⌘ K</kbd></div><a class="kopf-neu" href="/vorlagen/neu">＋ Neue Vorlage</a><button class="symbolknopf" aria-label="Benachrichtigungen">□<i></i></button><a class="profilchip" href="/einstellungen"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ mitglied.rolle.value|capitalize }}</small></div></a></header>
+  {% if rueckkehr_admin %}<div class="ansichtsleiste"><span>Sie sehen das Produkt aus Kundensicht: <strong>{{ organisation.name }}</strong></span><form action="/verwaltung/zurueck" method="post"><button type="submit">Zur A+ Verwaltung zurückkehren</button></form></div>{% endif %}
   <main class="app-inhalt">{% block inhalt %}{% endblock %}</main>
   {% else %}
-  <header class="oeffentliche-kopfzeile">
-    <a class="marke" href="/"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span></a>
-    <nav><a href="/#funktion">Arbeitsweise</a><a href="/preise" class="{% if bereich == 'preise' %}aktiv{% endif %}">Tarife</a><a href="/#sicherheit">Datenschutz</a></nav>
-    <div class="oeffentliche-aktionen"><a href="/anmelden">Anmelden</a><a href="/registrieren" class="schaltflaeche primaer klein">Kostenlos testen</a></div>
-  </header>
+  <header class="oeffentliche-kopfzeile"><a class="marke" href="/"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span></a><nav><a href="/#funktion">Arbeitsweise</a><a href="/preise" class="{% if bereich == 'preise' %}aktiv{% endif %}">Tarife</a><a href="/#sicherheit">Datenschutz</a></nav><div class="oeffentliche-aktionen"><a href="/anmelden">Anmelden</a><a href="/registrieren" class="schaltflaeche primaer klein">Kostenlos testen</a></div></header>
   <main>{% block oeffentlicher_inhalt %}{% endblock %}</main>
   {% endif %}
-  {% if hinweis %}<div id="serverHinweis" class="meldung sichtbar {{ hinweis.art }}">{{ hinweis.text }}</div>{% endif %}
-  <div id="meldung" class="meldung" role="status" aria-live="polite"></div>
+  {% if hinweis %}<div id="serverHinweis" class="meldung sichtbar {{ hinweis.art }}">{{ hinweis.text }}</div>{% endif %}<div id="meldung" class="meldung" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('statisch', path='/simple-flow.js') }}?v=20260728-1" defer></script>
   <script src="{{ url_for('statisch', path='/workflow-upload-fix.js') }}?v=20260728-1" defer></script>
   <script src="{{ url_for('statisch', path='/analysis-flow.js') }}?v=20260728-1" defer></script>
   <script src="{{ url_for('statisch', path='/app.js') }}?v=20260726-1" defer></script>
