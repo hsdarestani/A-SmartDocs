@@ -66,7 +66,12 @@
           statusElement.textContent = inhalt.antwort || 'Die Änderung wurde übernommen.';
           statusElement.classList.remove('auftrag-laeuft');
           statusElement.classList.add('auftrag-fertig');
-          window.setTimeout(() => window.location.reload(), 650);
+          if (inhalt.schema) {
+            const schemaElement = document.querySelector('#workflowSchema');
+            if (schemaElement) schemaElement.textContent = JSON.stringify(inhalt.schema);
+            document.dispatchEvent(new CustomEvent('smartdocs:schema-updated', { detail: { schema: inhalt.schema } }));
+          }
+          window.setTimeout(() => window.location.reload(), 1400);
           return;
         }
         if (inhalt.fehler) {
