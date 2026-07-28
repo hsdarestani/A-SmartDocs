@@ -3,16 +3,17 @@
 {% block inhalt %}
 {% macro feld_eingabe(feld) -%}
   {% set pos = feld.position or {} %}
+  {% set standard = feld.standardwert or feld.vorschauwert or '' %}
   <div class="dynamisches-feld {% if feld.typ in ['mehrzeilig','tabelle','bilderliste'] %}volle-breite{% endif %}" data-feld-schluessel="{{ feld.schluessel }}" data-feld-label="{{ feld.bezeichnung }}" data-seite="{{ feld.seite or 1 }}" data-x="{{ pos.x or 0 }}" data-y="{{ pos.y or 0 }}" data-breite="{{ pos.breite or 0.25 }}" data-hoehe="{{ pos.hoehe or 0.04 }}">
     <label class="feldkopf" for="feld-{{ feld.schluessel }}"><span>{{ feld.bezeichnung }} {% if feld.pflichtfeld %}<b>*</b>{% endif %}</span></label>
-    {% if feld.typ == 'mehrzeilig' or feld.typ == 'tabelle' %}<textarea id="feld-{{ feld.schluessel }}" name="{{ feld.schluessel }}" rows="4" placeholder="{{ feld.beispiel or '' }}" {% if feld.pflichtfeld %}required{% endif %}></textarea>
-    {% elif feld.typ == 'datum' %}<input id="feld-{{ feld.schluessel }}" type="date" name="{{ feld.schluessel }}" {% if feld.pflichtfeld %}required{% endif %}>
-    {% elif feld.typ == 'zahl' %}<input id="feld-{{ feld.schluessel }}" type="number" name="{{ feld.schluessel }}" placeholder="{{ feld.beispiel or '' }}" {% if feld.pflichtfeld %}required{% endif %}>
-    {% elif feld.typ == 'betrag' %}<div class="betragfeld"><input id="feld-{{ feld.schluessel }}" type="number" step="0.01" name="{{ feld.schluessel }}" placeholder="0,00" {% if feld.pflichtfeld %}required{% endif %}><span>€</span></div>
-    {% elif feld.typ == 'auswahl' and feld.optionen %}<div class="auswahloptionen" id="feld-{{ feld.schluessel }}" role="radiogroup" aria-label="{{ feld.bezeichnung }}">{% for option in feld.optionen %}<label class="auswahlchip"><input type="radio" name="{{ feld.schluessel }}" value="{{ option }}" {% if feld.pflichtfeld and loop.first %}required{% endif %}><span>{{ option }}</span></label>{% endfor %}</div>
-    {% elif feld.typ == 'kontrollfeld' %}<label class="kontrollkarte" id="feld-{{ feld.schluessel }}"><input type="checkbox" name="{{ feld.schluessel }}" value="ja" {% if feld.pflichtfeld %}required{% endif %}><span><b>Ja</b></span></label>
+    {% if feld.typ == 'mehrzeilig' or feld.typ == 'tabelle' %}<textarea id="feld-{{ feld.schluessel }}" name="{{ feld.schluessel }}" rows="4" placeholder="{{ feld.beispiel or '' }}" {% if feld.pflichtfeld %}required{% endif %}>{{ standard }}</textarea>
+    {% elif feld.typ == 'datum' %}<input id="feld-{{ feld.schluessel }}" type="date" name="{{ feld.schluessel }}" value="{{ standard }}" {% if feld.pflichtfeld %}required{% endif %}>
+    {% elif feld.typ == 'zahl' %}<input id="feld-{{ feld.schluessel }}" type="number" name="{{ feld.schluessel }}" value="{{ standard }}" placeholder="{{ feld.beispiel or '' }}" {% if feld.pflichtfeld %}required{% endif %}>
+    {% elif feld.typ == 'betrag' %}<div class="betragfeld"><input id="feld-{{ feld.schluessel }}" type="number" step="0.01" name="{{ feld.schluessel }}" value="{{ standard }}" placeholder="0,00" {% if feld.pflichtfeld %}required{% endif %}><span>€</span></div>
+    {% elif feld.typ == 'auswahl' and feld.optionen %}<div class="auswahloptionen" id="feld-{{ feld.schluessel }}" role="radiogroup" aria-label="{{ feld.bezeichnung }}">{% for option in feld.optionen %}<label class="auswahlchip"><input type="radio" name="{{ feld.schluessel }}" value="{{ option }}" {% if standard == option %}checked{% endif %} {% if feld.pflichtfeld and loop.first %}required{% endif %}><span>{{ option }}</span></label>{% endfor %}</div>
+    {% elif feld.typ == 'kontrollfeld' %}<label class="kontrollkarte" id="feld-{{ feld.schluessel }}"><input type="checkbox" name="{{ feld.schluessel }}" value="ja" {% if standard|lower in ['ja','true','1','on'] %}checked{% endif %} {% if feld.pflichtfeld %}required{% endif %}><span><b>Ja</b></span></label>
     {% elif feld.typ in ['unterschrift','bild','bilderliste'] %}<label class="datei-upload-klein" id="feld-{{ feld.schluessel }}"><input type="file" name="{{ feld.schluessel }}" accept="image/*" {% if feld.pflichtfeld %}required{% endif %}><span>Bild auswählen</span></label>
-    {% else %}<input id="feld-{{ feld.schluessel }}" type="text" name="{{ feld.schluessel }}" placeholder="{{ feld.beispiel or '' }}" {% if feld.pflichtfeld %}required{% endif %}>{% endif %}
+    {% else %}<input id="feld-{{ feld.schluessel }}" type="text" name="{{ feld.schluessel }}" value="{{ standard }}" placeholder="{{ feld.beispiel or '' }}" {% if feld.pflichtfeld %}required{% endif %}>{% endif %}
   </div>
 {%- endmacro %}
 <section class="ausfuellseite ausfuellseite-einfach">
