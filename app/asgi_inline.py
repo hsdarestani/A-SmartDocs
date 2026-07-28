@@ -14,5 +14,9 @@ from . import preview_routes as _preview_routes  # noqa: E402,F401
 # präziseren PDF-Renderer.
 from . import workflow_v2 as _workflow_v2  # noqa: E402,F401
 
+# Chatkorrekturen werden als persistente Hintergrundaufträge gestartet. Dadurch
+# bleibt keine Browseranfrage an der externen KI-Verbindung hängen.
+from . import chat_jobs as _chat_jobs  # noqa: E402,F401
+
 
 __all__ = ["app"]
