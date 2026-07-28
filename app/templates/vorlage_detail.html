@@ -1,66 +1,19 @@
 {% extends "base.html" %}
 {% block titel %}{{ eintrag.name }} – A+ SmartDocs{% endblock %}
 {% block inhalt %}
-<section class="workflow-editor workflow-editor-einfach">
-  <header class="workflow-kopf workflow-kopf-einfach">
-    <div>
-      <a href="/vorlagen" class="zuruecklink">← Dokumentvorlagen</a>
-      <span class="uebertitel">Vorlage einrichten</span>
-      <h1>{{ eintrag.name }}</h1>
-      <p>Sagen Sie A+ nur, was später ausgefüllt werden soll. Alles Weitere bleibt im Original.</p>
-    </div>
-    <div class="workflow-kopfaktionen">
-      <span class="zustandsmarke {% if eintrag.status == 'bereit' %}bereit{% endif %}" id="workflowStatus">{{ eintrag.status }}</span>
-      <button id="workflowSpeichern" class="schaltflaeche sekundaer workflow-technisch" type="button">Speichern</button>
-      <button id="workflowTesten" class="schaltflaeche sekundaer workflow-technisch" type="button">Testausfüllung</button>
-      {% if eintrag.status == 'bereit' %}
-        <a href="/vorlagen/{{ eintrag.id }}/verwenden" class="schaltflaeche primaer">Dokument erstellen →</a>
-      {% else %}
-        <button id="workflowFreigeben" class="schaltflaeche primaer" type="button">Vorlage fertigstellen →</button>
-      {% endif %}
-    </div>
-  </header>
-
-  <div class="workflow-modusleiste workflow-modusleiste-einfach" role="tablist" aria-label="Bearbeitungsmodus">
-    <button type="button" class="aktiv" data-workflow-modus="chat"><span>A+</span><b>Mit A+ bearbeiten</b></button>
-    <button type="button" data-workflow-modus="manuell"><span>✥</span><b>Manuell</b></button>
-    <details class="workflow-mehr"><summary>Mehr</summary><div><i class="vorgeschlagen"></i>Vorschlag <i class="bestaetigt"></i>Bestätigt <i class="ausgewaehlt"></i>Ausgewählt</div></details>
-  </div>
-
+<section class="workflow-editor workflow-editor-einfach" data-qualitaetskontrolle="Automatische Qualitätskontrolle">
+  <header class="workflow-kopf workflow-kopf-einfach"><div><a href="/vorlagen" class="zuruecklink">← Dokumentvorlagen</a><span class="uebertitel">Vorlage einrichten</span><h1>{{ eintrag.name }}</h1><p>Sagen Sie A+ nur, was später ausgefüllt werden soll. Alles Weitere bleibt im Original.</p></div><div class="workflow-kopfaktionen"><span class="zustandsmarke {% if eintrag.status == 'bereit' %}bereit{% endif %}" id="workflowStatus">{{ eintrag.status }}</span><button id="workflowSpeichern" class="schaltflaeche sekundaer workflow-technisch" type="button">Speichern</button><button id="workflowTesten" class="schaltflaeche sekundaer workflow-technisch" type="button">Testausfüllung prüfen</button>{% if eintrag.status == 'bereit' %}<a href="/vorlagen/{{ eintrag.id }}/verwenden" class="schaltflaeche primaer">Dokument erstellen →</a>{% else %}<button id="workflowFreigeben" class="schaltflaeche primaer" type="button">Vorlage fertigstellen →</button>{% endif %}</div></header>
+  <div class="workflow-modusleiste workflow-modusleiste-einfach" role="tablist" aria-label="Bearbeitungsmodus"><button type="button" class="aktiv" data-workflow-modus="chat"><span>A+</span><b>Mit A+ bearbeiten</b></button><button type="button" data-workflow-modus="manuell"><span>✥</span><b>Manuell</b></button><details class="workflow-mehr"><summary>Mehr</summary><div><i class="vorgeschlagen"></i>Vorschlag <i class="bestaetigt"></i>Bestätigt <i class="ausgewaehlt"></i>Ausgewählt</div></details></div>
   <div class="workflow-arbeitsbereich workflow-arbeitsbereich-einfach">
-    <section class="workflow-dokumentbereich">
-      <div class="workflow-dokumentkopf"><div><strong>Dokument</strong><small id="workflowDokumentHinweis">Klicken Sie auf ein markiertes Feld, um es zu prüfen.</small></div><div class="workflow-zoom"><button type="button" id="workflowZoomMinus">−</button><span id="workflowZoomWert">100 %</span><button type="button" id="workflowZoomPlus">＋</button></div></div>
-      <div class="workflow-dokument-scroll" id="workflowDokumentScroll"><div class="workflow-seiten" id="workflowSeiten">{% for seite in range(1, eintrag.seiten + 1) %}<article class="workflow-seite" data-seite="{{ seite }}"><img src="/vorlagen/{{ eintrag.id }}/seiten/{{ seite }}.png" alt="Seite {{ seite }} der Vorlage" draggable="false"><div class="workflow-overlay" data-seite="{{ seite }}"></div><span class="workflow-seitennummer">Seite {{ seite }}</span></article>{% endfor %}</div></div>
-    </section>
-
+    <section class="workflow-dokumentbereich"><div class="workflow-dokumentkopf"><div><strong>Dokument</strong><small id="workflowDokumentHinweis">Klicken Sie auf ein markiertes Feld, um es zu prüfen.</small></div><div class="workflow-zoom"><button type="button" id="workflowZoomMinus">−</button><span id="workflowZoomWert">100 %</span><button type="button" id="workflowZoomPlus">＋</button></div></div><div class="workflow-dokument-scroll" id="workflowDokumentScroll"><div class="workflow-seiten" id="workflowSeiten">{% for seite in range(1, eintrag.seiten + 1) %}<article class="workflow-seite" data-seite="{{ seite }}"><img src="/vorlagen/{{ eintrag.id }}/seiten/{{ seite }}.png" alt="Seite {{ seite }} der Vorlage" draggable="false"><div class="workflow-overlay" data-seite="{{ seite }}"></div><span class="workflow-seitennummer">Seite {{ seite }}</span></article>{% endfor %}</div></div></section>
     <aside class="workflow-assistent workflow-assistent-einfach">
-      <section id="workflowChatPanel" class="workflow-panel aktiv">
-        <header class="workflow-panelkopf"><span class="assistentenbild gross">A+</span><div><strong>Was soll geändert werden?</strong><small>Ein Satz reicht.</small></div></header>
-        <div class="workflow-startkarte workflow-startkarte-einfach"><strong>{{ eintrag.erkannte_felder }} mögliche Felder gefunden</strong><p>Schreiben Sie zum Beispiel: „Firmenname und Adresse sind variabel.“</p><div class="workflow-schnellaktionen"><button type="button" data-chat-vorschlag="Bestätige alle plausiblen Vorschläge und entferne offensichtliche Duplikate.">Alles Plausible übernehmen</button><button type="button" data-chat-vorschlag="Zeige mir nur unsichere Felder, die ich prüfen sollte.">Nur Unsicheres prüfen</button></div></div>
-        <div class="workflow-dialog" id="workflowDialog">{% for dialog in dialoge %}<div class="dialognachricht {{ 'nutzer' if dialog.rolle == 'nutzer' else 'assistent' }}">{{ dialog.nachricht }}</div>{% endfor %}</div>
-        <form id="workflowChatForm" class="workflow-chat-eingabe"><textarea id="workflowChatText" rows="2" placeholder="Was soll variabel sein oder entfernt werden?"></textarea><button type="submit" aria-label="Nachricht senden">↑</button></form>
-      </section>
-
+      <section id="workflowChatPanel" class="workflow-panel aktiv"><header class="workflow-panelkopf"><span class="assistentenbild gross">A+</span><div><strong>Was soll geändert werden?</strong><small>Ein Satz reicht.</small></div></header><div class="workflow-startkarte workflow-startkarte-einfach"><strong>{{ eintrag.erkannte_felder }} mögliche Felder gefunden</strong><p>Schreiben Sie zum Beispiel: „Firmenname und Adresse sind variabel.“</p><div class="workflow-schnellaktionen"><button type="button" data-chat-vorschlag="Bestätige alle plausiblen Vorschläge und entferne offensichtliche Duplikate.">Alles Plausible übernehmen</button><button type="button" data-chat-vorschlag="Zeige mir nur unsichere Felder, die ich prüfen sollte.">Nur Unsicheres prüfen</button></div></div><div class="workflow-dialog" id="workflowDialog">{% for dialog in dialoge %}<div class="dialognachricht {{ 'nutzer' if dialog.rolle == 'nutzer' else 'assistent' }}">{{ dialog.nachricht }}</div>{% endfor %}</div><form id="workflowChatForm" class="workflow-chat-eingabe"><textarea id="workflowChatText" rows="2" placeholder="Was soll variabel sein oder entfernt werden?"></textarea><button type="submit" aria-label="Nachricht senden">↑</button></form></section>
       <section id="workflowManuellPanel" class="workflow-panel"><header class="workflow-panelkopf"><span class="assistentenbild gross">✥</span><div><strong>Manuell markieren</strong><small>Auf das Dokument klicken und Feld setzen.</small></div></header><div class="workflow-anleitung-einfach"><p>Klicken Sie an die gewünschte Stelle. Danach können Sie das Feld verschieben oder vergrößern.</p></div><button id="workflowFeldWerkzeug" type="button" class="workflow-werkzeug aktiv">＋ Feld auf Dokument setzen</button></section>
-
-      <details class="workflow-feld-details">
-        <summary><span><strong>Erkannte Felder</strong><small><span id="workflowFeldAnzahl">0</span> Felder</small></span><b>Öffnen</b></summary>
-        <section class="workflow-feldliste-bereich"><div class="workflow-feldliste-kopf"><input id="workflowFeldSuche" type="search" placeholder="Feld suchen …"></div><div id="workflowFeldListe" class="workflow-feldliste"></div></section>
-      </details>
+      <details class="workflow-feld-details"><summary><span><strong>Erkannte Felder</strong><small><span id="workflowFeldAnzahl">0</span> Felder</small></span><b>Öffnen</b></summary><section class="workflow-feldliste-bereich"><div class="workflow-feldliste-kopf"><input id="workflowFeldSuche" type="search" placeholder="Feld suchen …"></div><div id="workflowFeldListe" class="workflow-feldliste"></div></section></details>
     </aside>
   </div>
-
-  <aside id="workflowFeldDrawer" class="workflow-feld-drawer" aria-hidden="true">
-    <header><div><span class="uebertitel">Feld</span><h2 id="workflowFeldTitel">Variables Feld</h2></div><button id="workflowDrawerSchliessen" type="button">×</button></header>
-    <input type="hidden" id="workflowFeldIndex">
-    <label><span>Name</span><input id="workflowFeldBezeichnung"></label>
-    <label><span>Art</span><select id="workflowFeldTyp"><option value="text">Text</option><option value="mehrzeilig">Mehrzeiliger Text</option><option value="datum">Datum</option><option value="zahl">Zahl</option><option value="betrag">Betrag</option><option value="auswahl">Auswahl</option><option value="kontrollfeld">Kontrollkästchen</option><option value="unterschrift">Unterschrift</option><option value="bild">Bild</option><option value="tabelle">Tabelle</option></select></label>
-    <details class="workflow-erweitert"><summary>Weitere Einstellungen</summary><div><label><span>Text im Original</span><input id="workflowFeldBeispiel" placeholder="Nur nötig, wenn vorhandener Text ersetzt wird"></label><label class="workflow-schalterkarte"><input id="workflowAltenInhaltEntfernen" type="checkbox"><span><b>Vorhandenen Text entfernen</b><small>Nur aktivieren, wenn hier bereits ein Beispielwert steht.</small></span></label><label class="workflow-schalterkarte"><input id="workflowFeldPflicht" type="checkbox"><span><b>Pflichtfeld</b><small>Standardmäßig bleibt das Feld freiwillig.</small></span></label></div></details>
-    <div class="workflow-drawer-aktionen"><button id="workflowFeldEntfernen" class="schaltflaeche gefahr" type="button">Entfernen</button><button id="workflowFeldUebernehmen" class="schaltflaeche primaer" type="button">Übernehmen</button></div>
-  </aside>
-
+  <aside id="workflowFeldDrawer" class="workflow-feld-drawer" aria-hidden="true"><header><div><span class="uebertitel">Feld</span><h2 id="workflowFeldTitel">Variables Feld</h2></div><button id="workflowDrawerSchliessen" type="button">×</button></header><input type="hidden" id="workflowFeldIndex"><label><span>Name</span><input id="workflowFeldBezeichnung"></label><label><span>Art</span><select id="workflowFeldTyp"><option value="text">Text</option><option value="mehrzeilig">Mehrzeiliger Text</option><option value="datum">Datum</option><option value="zahl">Zahl</option><option value="betrag">Betrag</option><option value="auswahl">Auswahl</option><option value="kontrollfeld">Kontrollkästchen</option><option value="unterschrift">Unterschrift</option><option value="bild">Bild</option><option value="tabelle">Tabelle</option></select></label><details class="workflow-erweitert"><summary>Weitere Einstellungen</summary><div><label><span>Text im Original</span><input id="workflowFeldBeispiel" placeholder="Nur nötig, wenn vorhandener Text ersetzt wird"></label><label class="workflow-schalterkarte"><input id="workflowAltenInhaltEntfernen" type="checkbox"><span><b>Vorhandenen Text entfernen</b><small>Nur aktivieren, wenn hier bereits ein Beispielwert steht.</small></span></label><label class="workflow-schalterkarte"><input id="workflowFeldPflicht" type="checkbox"><span><b>Pflichtfeld</b><small>Standardmäßig bleibt das Feld freiwillig.</small></span></label></div></details><div class="workflow-drawer-aktionen"><button id="workflowFeldEntfernen" class="schaltflaeche gefahr" type="button">Entfernen</button><button id="workflowFeldUebernehmen" class="schaltflaeche primaer" type="button">Übernehmen</button></div></aside>
   <script id="workflowSchema" type="application/json">{{ eintrag.schema|tojson }}</script><input type="hidden" id="workflowVorlageId" value="{{ eintrag.id }}">
-
   <div id="workflowTestDialog" class="dialoghintergrund versteckt" data-kompatibilitaet="vergleichOriginal vergleichTest"><section class="workflow-testdialog workflow-testdialog-einfach"><header><div><span class="uebertitel">Letzter Blick</span><h2>Sieht das Ergebnis richtig aus?</h2><p>Links ist das Original, rechts die Testausfüllung.</p></div><button id="workflowTestSchliessen" type="button">×</button></header><div class="workflow-testvergleich"><iframe id="workflowTestOriginal" title="Original"></iframe><iframe id="workflowTestAusgabe" title="Testausfüllung"></iframe></div><footer><label class="workflow-bestaetigung"><input id="workflowTestBestaetigt" type="checkbox"><span><b>Ja, die Felder sitzen richtig.</b></span></label><button id="workflowTestAbschliessen" class="schaltflaeche primaer" type="button">Fertig</button></footer></section></div>
 </section>
 {% endblock %}
