@@ -19,7 +19,7 @@ Antworte ausschließlich als gültiges JSON mit dieser Struktur:
       "schluessel": "maschinenlesbarer_schluessel",
       "bezeichnung": "deutsche Feldbezeichnung",
       "typ": "text|mehrzeilig|datum|zahl|betrag|auswahl|kontrollfeld|unterschrift|bild|bilderliste|tabelle",
-      "pflichtfeld": true,
+      "pflichtfeld": false,
       "beispiel": "exakt sichtbarer Beispielinhalt oder leer",
       "seite": 1,
       "hinweis": "kurze Erklärung",
@@ -27,7 +27,9 @@ Antworte ausschließlich als gültiges JSON mit dieser Struktur:
       "position": {"x": 0.10, "y": 0.20, "breite": 0.35, "hoehe": 0.035},
       "schriftgroesse": 10,
       "ausrichtung": "links",
-      "hintergrundmodus": "automatisch"
+      "hintergrundmodus": "automatisch",
+      "alten_inhalt_entfernen": true,
+      "vorschlag_status": "vorgeschlagen"
     }
   ],
   "rueckfragen": ["nur Fragen, die für eine sichere Vorlagenerstellung nötig sind"]
@@ -40,14 +42,15 @@ WICHTIG FÜR DIE POSITION:
 - Bei einem vorhandenen Beispielwert muss "beispiel" dessen sichtbaren Text möglichst buchstabengetreu enthalten. Dadurch kann die Anwendung seine echte PDF-Position zusätzlich verifizieren.
 - Für Unterschriften und Bilder muss das Rechteck die freie Einfügefläche enthalten, nicht die Feldüberschrift.
 - Schätze Breite und Höhe so, dass ein neuer Wert hineinpasst, aber keine benachbarten Inhalte überdeckt.
-- "hintergrundmodus" ist normalerweise "automatisch": Der bestehende Beispielwert wird entfernt und die echte Hintergrundfarbe beibehalten. Verwende "transparent" nur, wenn kein alter Inhalt entfernt werden soll.
+- "alten_inhalt_entfernen" ist nur dann true, wenn an dieser Stelle tatsächlich ein vorhandener Beispielwert entfernt werden soll. Bei leeren Eingabeflächen ist es false.
+- Alle vorgeschlagenen Felder sind zunächst freiwillig. Setze "pflichtfeld" deshalb immer auf false. Erst ein ausdrücklicher späterer Benutzerwunsch darf ein Feld verpflichtend machen.
 
 Sei vorsichtig: Markiere nicht jeden Text als variabel. Firmenlogo, Überschriften, rechtliche Standardtexte und Layoutbestandteile sind in der Regel fest. Alle sichtbaren Texte deiner Antwort müssen deutsch sein.
 """.strip()
 
 
 KORREKTUR_ANWEISUNG = """
-Du bist der deutschsprachige Vorlagenassistent von A+ SmartDocs. Du erhältst ein bestehendes Vorlagenschema und eine Änderungsanweisung des Benutzers. Aktualisiere das Schema exakt nach der Anweisung. Bewahre nicht betroffene Felder, deren Beispielwerte, Positionen, Ausrichtung und Hintergrundmodus. Positionen beziehen sich ausschließlich auf den variablen Inhalt und werden vom linken oberen Seitenrand gemessen. Antworte ausschließlich als gültiges JSON in derselben Struktur. Alle Bezeichnungen, Hinweise, Zusammenfassungen und Rückfragen müssen deutsch sein.
+Du bist der deutschsprachige Vorlagenassistent von A+ SmartDocs. Du erhältst ein bestehendes Vorlagenschema und eine Änderungsanweisung des Benutzers. Aktualisiere das Schema exakt nach der Anweisung. Bewahre nicht betroffene Felder, deren Beispielwerte, Positionen, Ausrichtung, Bereinigungsmodus und Hintergrundmodus. Positionen beziehen sich ausschließlich auf den variablen Inhalt und werden vom linken oberen Seitenrand gemessen. Felder bleiben freiwillig, außer der Benutzer verlangt ausdrücklich ein Pflichtfeld. Antworte ausschließlich als gültiges JSON in derselben Struktur. Alle Bezeichnungen, Hinweise, Zusammenfassungen und Rückfragen müssen deutsch sein.
 """.strip()
 
 
@@ -57,8 +60,6 @@ def _client():
     cfg = einstellungen()
     if not cfg.openai_api_key:
         raise RuntimeError("Für die Dokumentanalyse ist noch kein KI-Schlüssel hinterlegt.")
-    # Ein externer Dienst darf die Webanfrage nicht unbegrenzt blockieren.
-    # Nach Ablauf übernimmt SmartDocs die vollständig bearbeitbare Grundstruktur.
     return OpenAI(api_key=cfg.openai_api_key, timeout=45.0, max_retries=1)
 
 
