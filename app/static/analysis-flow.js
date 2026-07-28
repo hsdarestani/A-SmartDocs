@@ -117,7 +117,7 @@
     ereignis.stopImmediatePropagation();
     if (laeuft) return;
 
-    const datei = dateiEingabe.files?.[0];
+    const datei = window.smartDocsAusgewaehlteDatei || dateiEingabe.files?.[0];
     if (!datei) {
       nachricht('Bitte wählen Sie zuerst ein Quelldokument aus.');
       return;
