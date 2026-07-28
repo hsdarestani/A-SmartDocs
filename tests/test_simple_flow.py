@@ -1,13 +1,15 @@
 from pathlib import Path
 
 
-def test_chat_anfrage_hat_timeout_und_entsperrt_oberflaeche():
+def test_chat_anfrage_laeuft_als_hintergrundauftrag_und_pollt_status():
     skript = Path("app/static/simple-flow.js").read_text(encoding="utf-8")
-    assert "AbortController" in skript
-    assert "30000" in skript
-    assert "Die Änderung dauert zu lange" in skript
-    assert "form.classList.remove('verarbeitet')" in skript
-    assert "textfeld.disabled = false" in skript
+    assert "/api/vorlagen/korrigieren-async" in skript
+    assert "/korrektur-status/" in skript
+    assert "statusAbwarten" in skript
+    assert "A+ bearbeitet die Änderung im Hintergrund" in skript
+    assert "window.location.reload()" in skript
+    assert "Bitte senden Sie sie erneut" not in skript
+    assert "AbortController" in skript  # nur für einzelne kurze Netzwerkaufrufe, nicht als Gesamtlimit
 
 
 def test_vorlageneditor_zeigt_nur_einfache_hauptaktionen():
