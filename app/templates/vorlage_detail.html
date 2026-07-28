@@ -1,101 +1,104 @@
 {% extends "base.html" %}
 {% block titel %}{{ eintrag.name }} – A+ SmartDocs{% endblock %}
 {% block inhalt %}
-<section class="editorseite">
-  <div class="editor-kopf">
+<section class="workflow-editor">
+  <header class="workflow-kopf">
     <div>
       <a href="/vorlagen" class="zuruecklink">← Vorlagenbibliothek</a>
-      <span class="uebertitel">Vorlageneditor</span>
+      <span class="uebertitel">Intelligente Vorlageneinrichtung</span>
       <h1>{{ eintrag.name }}</h1>
-      <p>{{ eintrag.zusammenfassung }}</p>
+      <p>Beschreiben Sie im Chat, was variabel sein soll. SmartDocs zeigt jede Änderung sofort direkt auf dem Original.</p>
     </div>
-    <div class="editor-aktionen">
-      <span class="zustandsmarke {% if eintrag.status == 'bereit' %}bereit{% endif %}" id="vorlagenStatus">{{ eintrag.status }}</span>
-      <button id="schemaSpeichern" class="schaltflaeche sekundaer">Änderungen speichern</button>
-      {% if eintrag.status == 'bereit' %}<a href="/vorlagen/{{ eintrag.id }}/verwenden" class="schaltflaeche primaer">Vorlage verwenden →</a>{% else %}<button id="detailBestaetigen" data-vorlage="{{ eintrag.id }}" class="schaltflaeche primaer">Vorlage bestätigen ✓</button>{% endif %}
+    <div class="workflow-kopfaktionen">
+      <span class="zustandsmarke {% if eintrag.status == 'bereit' %}bereit{% endif %}" id="workflowStatus">{{ eintrag.status }}</span>
+      <button id="workflowSpeichern" class="schaltflaeche sekundaer" type="button">Speichern</button>
+      <button id="workflowTesten" class="schaltflaeche sekundaer" type="button">Testausfüllung</button>
+      {% if eintrag.status == 'bereit' %}
+      <a href="/vorlagen/{{ eintrag.id }}/verwenden" class="schaltflaeche primaer">Vorlage verwenden →</a>
+      {% else %}
+      <button id="workflowFreigeben" class="schaltflaeche primaer" type="button">Vorlage freigeben</button>
+      {% endif %}
     </div>
+  </header>
+
+  <div class="workflow-modusleiste" role="tablist" aria-label="Bearbeitungsmodus">
+    <button type="button" class="aktiv" data-workflow-modus="chat"><span>A+</span><b>Mit Assistent bearbeiten</b><small>Einfach beschreiben, was geändert werden soll</small></button>
+    <button type="button" data-workflow-modus="manuell"><span>✥</span><b>Manuell bearbeiten</b><small>Direkt wie in Acrobat auf das Dokument klicken</small></button>
+    <div class="workflow-legende"><i class="vorgeschlagen"></i>Vorschlag <i class="bestaetigt"></i>Bestätigt <i class="ausgewaehlt"></i>Aktuelles Feld</div>
   </div>
 
-  <section class="qualitaetsleiste" id="qualitaetsleiste">
-    <div class="qualitaets-einleitung">
-      <small>Automatische Qualitätskontrolle</small>
-      <strong id="qualitaetsKurzstatus">Erkannte Felder werden bewertet</strong>
-      <p>Grüne Felder stammen aus einer belastbaren PDF-Struktur. Gelbe und rote Felder werden in der Testausfüllung gezielt geprüft.</p>
-      <div class="qualitaets-legende"><span><i class="gruen"></i>sicher</span><span><i class="gelb"></i>kurz prüfen</span><span><i class="rot"></i>unsicher</span></div>
-    </div>
-    <div class="qualitaetszahl sicher"><b id="qSicher">0</b><span>Sicher erkannt</span></div>
-    <div class="qualitaetszahl pruefen"><b id="qPruefen">0</b><span>Gelb markiert</span></div>
-    <div class="qualitaetszahl unsicher"><b id="qUnsicher">0</b><span>Rot markiert</span></div>
-    <div class="qualitaetszahl offen"><b id="qDurchschnitt">0 %</b><span>Durchschnitt</span><small class="pruefstatus-klein"><span id="qOffen">0</span> offen · <span id="qGesamt">0</span> gesamt</small></div>
-    <div class="qualitaetsaktion"><button id="testausfuellungStarten" class="schaltflaeche primaer">Testausfüllung prüfen →</button></div>
-  </section>
-
-  <div class="editor-gitter">
-    <section class="dokument-editor">
-      <div class="editor-werkzeuge">
-        <div><button class="aktiv">Felder positionieren</button><button id="feldHinzufuegen">＋ Feld</button></div>
-        <div><button id="zoomMinus">−</button><span id="zoomWert">85 %</span><button id="zoomPlus">＋</button></div>
+  <div class="workflow-arbeitsbereich">
+    <section class="workflow-dokumentbereich">
+      <div class="workflow-dokumentkopf">
+        <div><strong>Originaldokument</strong><small id="workflowDokumentHinweis">Klicken Sie links auf einen Feldvorschlag, um seine genaue Position zu sehen.</small></div>
+        <div class="workflow-zoom"><button type="button" id="workflowZoomMinus">−</button><span id="workflowZoomWert">100 %</span><button type="button" id="workflowZoomPlus">＋</button></div>
       </div>
-      <div class="dokument-arbeitsflaeche">
-        <div class="seiten-container" id="seitenContainer">
-          <iframe src="/vorlagen/{{ eintrag.id }}/datei#toolbar=0&navpanes=0&view=FitH" title="Dokumentvorschau"></iframe>
-          <div id="feldOverlay" class="feld-overlay"></div>
+      <div class="workflow-dokument-scroll" id="workflowDokumentScroll">
+        <div class="workflow-seiten" id="workflowSeiten">
+          {% for seite in range(1, eintrag.seiten + 1) %}
+          <article class="workflow-seite" data-seite="{{ seite }}">
+            <img src="/vorlagen/{{ eintrag.id }}/seiten/{{ seite }}.png" alt="Seite {{ seite }} der Vorlage" draggable="false">
+            <div class="workflow-overlay" data-seite="{{ seite }}"></div>
+            <span class="workflow-seitennummer">Seite {{ seite }}</span>
+          </article>
+          {% endfor %}
         </div>
       </div>
-      <p class="editor-hinweis"><strong>Wenig Nacharbeit:</strong><span>Prüfen Sie zuerst nur gelbe und rote Felder. Verschieben oder bearbeiten Sie ein Feld, gilt es automatisch als manuell bestätigt. Anschließend erzeugt SmartDocs eine vollständige Testausfüllung.</span></p>
-      <div class="seiten-fuss"><span>{{ eintrag.dateiname }}</span><span>{{ eintrag.seiten }} Seite{% if eintrag.seiten != 1 %}n{% endif %}</span></div>
     </section>
 
-    <aside class="editor-seitenpanel">
-      <div class="panel-register"><button class="aktiv" data-panel="felderPanel">Felder <b>{{ eintrag.erkannte_felder }}</b></button><button data-panel="dialogPanel">Assistent</button></div>
-      <div id="felderPanel" class="panel-inhalt aktiv">
-        <div class="panel-suche"><span>⌕</span><input id="feldSuche" type="search" placeholder="Feld suchen …"></div>
-        <div id="detailFelderListe" class="detail-felderliste"></div>
-        <button id="neuesFeldUnten" class="gestrichelter-knopf">＋ Neues Feld hinzufügen</button>
-      </div>
-      <div id="dialogPanel" class="panel-inhalt">
-        <div class="detail-dialogverlauf" id="detailDialogVerlauf">{% for dialog in dialoge %}<div class="dialognachricht {{ 'nutzer' if dialog.rolle == 'nutzer' else 'assistent' }}">{{ dialog.nachricht }}</div>{% endfor %}</div>
-        <form id="detailDialogForm" class="assistenteneingabe" data-vorlage="{{ eintrag.id }}"><textarea id="detailDialogText" rows="2" placeholder="Zum Beispiel: Das Datum soll exakt auf dem bisherigen Beispielwert liegen."></textarea><button type="submit">↑</button></form>
-      </div>
+    <aside class="workflow-assistent">
+      <section id="workflowChatPanel" class="workflow-panel aktiv">
+        <header class="workflow-panelkopf"><span class="assistentenbild gross">A+</span><div><strong>Vorlagenassistent</strong><small>Änderungen erscheinen live im Dokument</small></div></header>
+        <div class="workflow-startkarte">
+          <strong>Ich habe {{ eintrag.erkannte_felder }} mögliche variable Bereiche vorgeschlagen.</strong>
+          <p>Bestätigen Sie passende Vorschläge einzeln, entfernen Sie unnötige oder schreiben Sie mir einfach, was anders sein soll.</p>
+          <div class="workflow-schnellaktionen">
+            <button type="button" data-chat-vorschlag="Bestätige alle plausiblen Vorschläge und entferne offensichtliche Duplikate.">Vorschläge bereinigen</button>
+            <button type="button" data-chat-vorschlag="Zeige mir nur unsichere Felder, die ich prüfen sollte.">Nur Unsicheres zeigen</button>
+            <button type="button" data-chat-vorschlag="Entferne alle Vorschläge. Ich möchte die Felder selbst definieren.">Ohne Vorschläge starten</button>
+          </div>
+        </div>
+        <div class="workflow-dialog" id="workflowDialog">
+          {% for dialog in dialoge %}<div class="dialognachricht {{ 'nutzer' if dialog.rolle == 'nutzer' else 'assistent' }}">{{ dialog.nachricht }}</div>{% endfor %}
+        </div>
+        <form id="workflowChatForm" class="workflow-chat-eingabe">
+          <textarea id="workflowChatText" rows="2" placeholder="z. B. Vorname und Nachname sind variabel. Die Überschrift bleibt fest."></textarea>
+          <button type="submit" aria-label="Nachricht senden">↑</button>
+        </form>
+      </section>
+
+      <section id="workflowManuellPanel" class="workflow-panel">
+        <header class="workflow-panelkopf"><span class="assistentenbild gross">✥</span><div><strong>Manueller Modus</strong><small>Direkt auf die gewünschte Stelle klicken</small></div></header>
+        <div class="workflow-anleitung"><b>1</b><span>Klicken Sie auf eine freie oder zu ersetzende Stelle im Dokument.</span><b>2</b><span>Ziehen Sie das Feld an die richtige Position und skalieren Sie es am Griff.</span><b>3</b><span>Wählen Sie nur bei vorhandenem Beispieltext „alten Inhalt entfernen“.</span></div>
+        <button id="workflowFeldWerkzeug" type="button" class="workflow-werkzeug aktiv">＋ Neues Feld auf Dokument setzen</button>
+      </section>
+
+      <section class="workflow-feldliste-bereich">
+        <div class="workflow-feldliste-kopf"><div><strong>Variable Felder</strong><small><span id="workflowFeldAnzahl">0</span> vorgeschlagen</small></div><input id="workflowFeldSuche" type="search" placeholder="Suchen …"></div>
+        <div id="workflowFeldListe" class="workflow-feldliste"></div>
+      </section>
     </aside>
   </div>
 
-  <script id="vorlagenSchema" type="application/json">{{ eintrag.schema|tojson }}</script>
-  <input type="hidden" id="aktuelleVorlageId" value="{{ eintrag.id }}">
-  <div id="feldDialog" class="dialoghintergrund versteckt">
-    <form id="feldFormular" class="einstellungsdialog">
-      <div class="dialogtitel"><div><span class="uebertitel">Feld bearbeiten</span><h2 id="feldDialogTitel">Variables Feld</h2></div><button type="button" class="dialogSchliessen">×</button></div>
-      <input type="hidden" id="feldIndex">
-      <div class="formularraster">
-        <label><span>Feldbezeichnung</span><input id="feldBezeichnung" required></label>
-        <label><span>Feldschlüssel</span><input id="feldSchluessel" required></label>
-        <label><span>Feldart</span><select id="feldTyp"><option value="text">Text</option><option value="mehrzeilig">Mehrzeiliger Text</option><option value="datum">Datum</option><option value="zahl">Zahl</option><option value="betrag">Betrag</option><option value="auswahl">Auswahl</option><option value="kontrollfeld">Kontrollfeld</option><option value="unterschrift">Unterschrift</option><option value="bild">Bild</option><option value="tabelle">Tabelle</option></select></label>
-        <label><span>Seite</span><input id="feldSeite" type="number" min="1" value="1"></label>
-        <label><span>Position X in %</span><input id="feldX" type="number" min="0" max="100" step="0.1"></label>
-        <label><span>Position Y in %</span><input id="feldY" type="number" min="0" max="100" step="0.1"></label>
-        <label><span>Breite in %</span><input id="feldBreite" type="number" min="1" max="100" step="0.1"></label>
-        <label><span>Höhe in %</span><input id="feldHoehe" type="number" min="1" max="100" step="0.1"></label>
-        <label class="volle-breite kontrollzeile"><input id="feldPflicht" type="checkbox"><span>Dieses Feld ist verpflichtend</span></label>
-      </div>
-      <div class="vergleich-hinweis">Jede manuelle Änderung markiert dieses Feld automatisch als geprüft. Eine neue Testausfüllung kontrolliert danach die tatsächliche PDF-Ausgabe.</div>
-      <div class="dialogaktionen"><button type="button" id="feldLoeschen" class="schaltflaeche gefahr">Feld löschen</button><span></span><button type="button" class="schaltflaeche sekundaer dialogSchliessen">Abbrechen</button><button type="submit" class="schaltflaeche primaer">Feld übernehmen</button></div>
-    </form>
-  </div>
+  <aside id="workflowFeldDrawer" class="workflow-feld-drawer" aria-hidden="true">
+    <header><div><span class="uebertitel">Feld bearbeiten</span><h2 id="workflowFeldTitel">Variables Feld</h2></div><button id="workflowDrawerSchliessen" type="button">×</button></header>
+    <input type="hidden" id="workflowFeldIndex">
+    <label><span>Bezeichnung</span><input id="workflowFeldBezeichnung"></label>
+    <label><span>Feldart</span><select id="workflowFeldTyp"><option value="text">Text</option><option value="mehrzeilig">Mehrzeiliger Text</option><option value="datum">Datum</option><option value="zahl">Zahl</option><option value="betrag">Betrag</option><option value="auswahl">Auswahl</option><option value="kontrollfeld">Kontrollkästchen</option><option value="unterschrift">Unterschrift</option><option value="bild">Bild</option><option value="tabelle">Tabelle</option></select></label>
+    <label><span>Beispielinhalt im Original</span><input id="workflowFeldBeispiel" placeholder="Nur ausfüllen, wenn bestehender Text ersetzt werden soll"></label>
+    <label class="workflow-schalterkarte"><input id="workflowAltenInhaltEntfernen" type="checkbox"><span><b>Vorhandenen Inhalt sauber entfernen</b><small>Nur aktivieren, wenn an dieser Stelle bereits ein Beispielwert steht.</small></span></label>
+    <label class="workflow-schalterkarte"><input id="workflowFeldPflicht" type="checkbox"><span><b>Als Pflichtfeld festlegen</b><small>Standardmäßig ist kein Feld verpflichtend.</small></span></label>
+    <div class="workflow-drawer-aktionen"><button id="workflowFeldEntfernen" class="schaltflaeche gefahr" type="button">Nicht variabel</button><button id="workflowFeldUebernehmen" class="schaltflaeche primaer" type="button">Änderung übernehmen</button></div>
+  </aside>
 
-  <div id="testausfuellungDialog" class="dialoghintergrund versteckt">
-    <section class="vergleich-dialog">
-      <header class="vergleich-kopf">
-        <div><span class="uebertitel">Automatische Testausfüllung</span><h2>Original und tatsächliche PDF-Ausgabe vergleichen</h2><p>SmartDocs füllt jedes erkannte Feld mit gut sichtbaren Musterwerten. Achten Sie besonders auf gelbe und rote Positionen.</p></div>
-        <button type="button" id="testausfuellungSchliessen" aria-label="Vergleich schließen">×</button>
-      </header>
-      <div class="vergleich-raster">
-        <section class="vergleich-spalte"><header><span>01 · Original</span><span>unverändert</span></header><iframe id="vergleichOriginal" title="Originaldokument"></iframe></section>
-        <section class="vergleich-spalte"><header><span>02 · Testausfüllung</span><span>echter PDF-Renderer</span></header><iframe id="vergleichTest" title="Testausfüllung"></iframe></section>
-      </div>
-      <footer class="vergleich-freigabe">
-        <label><input id="testausfuellungBestaetigt" type="checkbox"><span>Ich habe Original und Testausfüllung verglichen. Positionen, Feldarten, Textüberlagerungen und Bild-/Unterschriftsfelder sind korrekt.</span></label>
-        <button id="qualitaetsPruefungAbschliessen" type="button" class="schaltflaeche primaer">Prüfung abschließen ✓</button>
-      </footer>
+  <script id="workflowSchema" type="application/json">{{ eintrag.schema|tojson }}</script>
+  <input type="hidden" id="workflowVorlageId" value="{{ eintrag.id }}">
+
+  <div id="workflowTestDialog" class="dialoghintergrund versteckt">
+    <section class="workflow-testdialog">
+      <header><div><span class="uebertitel">Testausfüllung</span><h2>Original und Ausgabe direkt vergleichen</h2><p>Erst nach diesem kurzen Vergleich wird die Vorlage freigegeben.</p></div><button id="workflowTestSchliessen" type="button">×</button></header>
+      <div class="workflow-testvergleich"><iframe id="workflowTestOriginal" title="Original"></iframe><iframe id="workflowTestAusgabe" title="Testausfüllung"></iframe></div>
+      <footer><label class="workflow-bestaetigung"><input id="workflowTestBestaetigt" type="checkbox"><span><i>✓</i><b>Die Positionen und Ersetzungen sehen korrekt aus.</b><small>Der Schalter ist auf Mobilgeräten und Desktop vollständig klickbar.</small></span></label><button id="workflowTestAbschliessen" class="schaltflaeche primaer" type="button">Prüfung abschließen</button></footer>
     </section>
   </div>
 </section>
