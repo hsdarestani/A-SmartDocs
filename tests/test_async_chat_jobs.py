@@ -118,7 +118,10 @@ def test_eindeutige_zuweisung_wird_lokal_ohne_ki_ausgefuehrt(client, monkeypatch
             vorlage = db.get(Dokumentvorlage, vorlage_id)
             assert vorlage is not None
             feld = vorlage.schema["felder"][0]
-            assert feld["beispiel"] == "A+ Solution GmbH"
+            # Der Originalwert bleibt als Suchtext für die präzise PDF-Bereinigung erhalten.
+            assert feld["beispiel"] == "Musterfirma GmbH"
+            assert feld["standardwert"] == "A+ Solution GmbH"
+            assert feld["vorschauwert"] == "A+ Solution GmbH"
             assert feld["alten_inhalt_entfernen"] is True
             assert feld["vorschlag_status"] == "bestaetigt"
             assert vorlage.schema["testausfuellung_geprueft"] is False
