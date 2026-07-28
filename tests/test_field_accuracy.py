@@ -62,7 +62,7 @@ def test_fruehere_fehlzuordnung_wird_beim_korrigieren_entfernt():
 def test_uneindeutige_zuordnung_aendert_keinen_wert():
     schema, antwort = _lokale_korrektur_praezise(_schema(), "employee is vfvuinr")
     assert all(not feld.get("standardwert") for feld in schema["felder"])
-    assert "nicht eindeutig" in antwort
+    assert "keinem Feld eindeutig" in antwort
 
 
 def test_beispieltext_korrigiert_die_position_und_entfernt_unplausible_felder(tmp_path: Path):
