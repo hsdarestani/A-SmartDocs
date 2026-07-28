@@ -4,43 +4,27 @@
 {% macro feld_eingabe(feld) -%}
   {% set pos = feld.position or {} %}
   <div class="dynamisches-feld {% if feld.typ in ['mehrzeilig','tabelle','bilderliste'] %}volle-breite{% endif %}" data-feld-schluessel="{{ feld.schluessel }}" data-feld-label="{{ feld.bezeichnung }}" data-seite="{{ feld.seite or 1 }}" data-x="{{ pos.x or 0 }}" data-y="{{ pos.y or 0 }}" data-breite="{{ pos.breite or 0.25 }}" data-hoehe="{{ pos.hoehe or 0.04 }}">
-    <label class="feldkopf" for="feld-{{ feld.schluessel }}"><span>{{ feld.bezeichnung }} {% if feld.pflichtfeld %}<b>*</b>{% endif %}</span>{% if feld.anzeige_hinweis %}<small>{{ feld.anzeige_hinweis }}</small>{% endif %}</label>
+    <label class="feldkopf" for="feld-{{ feld.schluessel }}"><span>{{ feld.bezeichnung }} {% if feld.pflichtfeld %}<b>*</b>{% endif %}</span></label>
     {% if feld.typ == 'mehrzeilig' or feld.typ == 'tabelle' %}<textarea id="feld-{{ feld.schluessel }}" name="{{ feld.schluessel }}" rows="4" placeholder="{{ feld.beispiel or '' }}" {% if feld.pflichtfeld %}required{% endif %}></textarea>
     {% elif feld.typ == 'datum' %}<input id="feld-{{ feld.schluessel }}" type="date" name="{{ feld.schluessel }}" {% if feld.pflichtfeld %}required{% endif %}>
     {% elif feld.typ == 'zahl' %}<input id="feld-{{ feld.schluessel }}" type="number" name="{{ feld.schluessel }}" placeholder="{{ feld.beispiel or '' }}" {% if feld.pflichtfeld %}required{% endif %}>
     {% elif feld.typ == 'betrag' %}<div class="betragfeld"><input id="feld-{{ feld.schluessel }}" type="number" step="0.01" name="{{ feld.schluessel }}" placeholder="0,00" {% if feld.pflichtfeld %}required{% endif %}><span>€</span></div>
     {% elif feld.typ == 'auswahl' and feld.optionen %}<div class="auswahloptionen" id="feld-{{ feld.schluessel }}" role="radiogroup" aria-label="{{ feld.bezeichnung }}">{% for option in feld.optionen %}<label class="auswahlchip"><input type="radio" name="{{ feld.schluessel }}" value="{{ option }}" {% if feld.pflichtfeld and loop.first %}required{% endif %}><span>{{ option }}</span></label>{% endfor %}</div>
-    {% elif feld.typ == 'kontrollfeld' %}<label class="kontrollkarte" id="feld-{{ feld.schluessel }}"><input type="checkbox" name="{{ feld.schluessel }}" value="ja" {% if feld.pflichtfeld %}required{% endif %}><span><b>Markierung setzen</b><small>Das Kästchen wird an der Originalposition ausgefüllt.</small></span></label>
-    {% elif feld.typ in ['unterschrift','bild','bilderliste'] %}<label class="datei-upload-klein" id="feld-{{ feld.schluessel }}"><input type="file" name="{{ feld.schluessel }}" accept="image/*" {% if feld.pflichtfeld %}required{% endif %}><span>Bilddatei auswählen</span></label>
+    {% elif feld.typ == 'kontrollfeld' %}<label class="kontrollkarte" id="feld-{{ feld.schluessel }}"><input type="checkbox" name="{{ feld.schluessel }}" value="ja" {% if feld.pflichtfeld %}required{% endif %}><span><b>Ja</b></span></label>
+    {% elif feld.typ in ['unterschrift','bild','bilderliste'] %}<label class="datei-upload-klein" id="feld-{{ feld.schluessel }}"><input type="file" name="{{ feld.schluessel }}" accept="image/*" {% if feld.pflichtfeld %}required{% endif %}><span>Bild auswählen</span></label>
     {% else %}<input id="feld-{{ feld.schluessel }}" type="text" name="{{ feld.schluessel }}" placeholder="{{ feld.beispiel or '' }}" {% if feld.pflichtfeld %}required{% endif %}>{% endif %}
-    <small class="feld-position-hinweis">⌖ Die Position wird rechts im Original hervorgehoben.</small>
   </div>
 {%- endmacro %}
-
-<section class="ausfuellseite">
-  <div class="seitenkopf ausfuell-kopf">
-    <div>
-      <a href="/vorlagen/{{ eintrag.id }}?modus=chat" class="zuruecklink">← Vorlageneditor öffnen</a>
-      <span class="uebertitel">Neues Dokument</span>
-      <h1>{{ eintrag.name }} ausfüllen</h1>
-      <p>Feld anklicken, Position rechts sehen, Wert eintragen. Mehr ist nicht nötig.</p>
-    </div>
-    <div class="ausfuell-kopfaktionen">
-      <a href="/vorlagen/{{ eintrag.id }}?modus=chat" class="schaltflaeche sekundaer klein">Mit Assistent bearbeiten</a>
-      <a href="/vorlagen/{{ eintrag.id }}?modus=manuell" class="schaltflaeche sekundaer klein">Manuell bearbeiten</a>
-      <span class="zustandsmarke bereit">Vorlage bereit</span>
-      {% if darf_loeschen %}<form action="/vorlagen/{{ eintrag.id }}/loeschen" method="post" onsubmit="return confirm('Vorlage und alle daraus erstellten Dokumente dauerhaft löschen?')"><button class="schaltflaeche gefahr klein" type="submit">Vorlage löschen</button></form>{% endif %}
-    </div>
-  </div>
-
+<section class="ausfuellseite ausfuellseite-einfach">
+  <div class="seitenkopf ausfuell-kopf ausfuell-kopf-einfach"><div><a href="/vorlagen" class="zuruecklink">← Dokumentvorlagen</a><span class="uebertitel">Neues Dokument</span><h1>{{ eintrag.name }}</h1><p>Felder ausfüllen und PDF erstellen.</p></div><div class="ausfuell-kopfaktionen"><a href="/vorlagen/{{ eintrag.id }}?modus=chat" class="schaltflaeche sekundaer klein">Vorlage bearbeiten</a><span class="zustandsmarke bereit">Bereit</span></div></div>
   <form action="/vorlagen/{{ eintrag.id }}/verwenden" method="post" enctype="multipart/form-data" class="ausfuell-gitter live-ausfuell-gitter">
     <section class="inhaltskarte ausfuellformular">
-      <div class="formular-start"><label class="eingabefeld"><span>Bezeichnung des neuen Dokuments</span><input name="dokumenttitel" value="{{ eintrag.name }} – {{ organisation.name }}" required></label><div class="formular-uebersicht"><span><b>{{ formular_felder|length }}</b> Felder</span><span><b>{{ formular_abschnitte|length }}</b> Abschnitte</span><button type="button" id="formularAlleUmschalten">Alle öffnen</button></div></div>
-      <div class="formular-abschnitte">{% for abschnitt in formular_abschnitte %}<details class="formular-abschnitt" {% if loop.first %}open{% endif %}><summary><span><b>{{ '%02d'|format(loop.index) }}</b><strong>{{ abschnitt.titel }}</strong><small>{{ abschnitt.beschreibung }}</small></span><i>＋</i></summary><div class="dynamische-felder">{% for feld in abschnitt.felder %}{{ feld_eingabe(feld) }}{% endfor %}</div></details>{% else %}<div class="leerzustand"><h2>Keine ausfüllbaren Felder vorhanden.</h2><p>Öffnen Sie den Vorlageneditor und definieren Sie die gewünschten Variablen.</p></div>{% endfor %}</div>
-      <div class="formularabschluss"><span>Nicht benötigte Felder dürfen leer bleiben. Das Dokument wird im Firmenarchiv gespeichert.</span><button class="schaltflaeche primaer gross" type="submit">PDF-Dokument erstellen <span>→</span></button></div>
+      <div class="formular-start"><label class="eingabefeld"><span>Dateiname</span><input name="dokumenttitel" value="{{ eintrag.name }} – {{ organisation.name }}" required></label><div class="formular-uebersicht"><span><b>{{ formular_felder|length }}</b> Felder</span><span id="formularSchrittAnzeige">1 / {{ formular_abschnitte|length }}</span><button type="button" id="formularAlleUmschalten" hidden>Alle öffnen</button></div></div>
+      <div class="formular-abschnitte">{% for abschnitt in formular_abschnitte %}<details class="formular-abschnitt" {% if loop.first %}open{% endif %}><summary><span><b>{{ '%02d'|format(loop.index) }}</b><strong>{{ abschnitt.titel }}</strong></span><i>＋</i></summary><div class="dynamische-felder">{% for feld in abschnitt.felder %}{{ feld_eingabe(feld) }}{% endfor %}</div></details>{% else %}<div class="leerzustand"><h2>Keine Felder vorhanden.</h2><p>Öffnen Sie die Vorlage und markieren Sie die gewünschten Bereiche.</p></div>{% endfor %}</div>
+      <div class="formular-schritte" id="formularSchritte"><button type="button" id="formularZurueck" class="schaltflaeche sekundaer">← Zurück</button><button type="button" id="formularWeiter" class="schaltflaeche primaer">Weiter →</button></div>
+      <div class="formularabschluss"><span>Leere Felder bleiben unverändert.</span><button class="schaltflaeche primaer gross" type="submit">PDF erstellen <span>→</span></button></div>
     </section>
-
-    <aside class="inhaltskarte ausfuell-vorschau live-form-preview"><div class="kartenkopf"><div><h2>Position im Original</h2><p id="livePreviewHinweis">Klicken Sie links auf ein Feld.</p></div><a class="vorschau-extern" href="/vorlagen/{{ eintrag.id }}/datei" target="_blank" rel="noopener">Original in neuem Tab öffnen ↗</a></div><div class="live-form-pages" id="liveFormPages">{% for seite in range(1, eintrag.seiten + 1) %}<article class="live-form-page" data-seite="{{ seite }}"><img src="/vorlagen/{{ eintrag.id }}/seiten/{{ seite }}.png" alt="Originalseite {{ seite }}"><div class="live-form-overlay"><div class="live-form-marker"><span>Aktuelles Feld</span><output></output></div></div></article>{% endfor %}</div><div class="vorschauwerte"><span><strong>{{ eintrag.seiten }}</strong><small>Seiten</small></span><span><strong>{{ formular_felder|length }}</strong><small>Felder</small></span><span><strong>Live</strong><small>Position</small></span></div></aside>
+    <aside class="inhaltskarte ausfuell-vorschau live-form-preview"><div class="kartenkopf"><div><h2>Vorschau</h2><p id="livePreviewHinweis">Feld anklicken, um die Position zu sehen.</p></div><a class="vorschau-extern" href="/vorlagen/{{ eintrag.id }}/datei" target="_blank" rel="noopener" title="Original in neuem Tab öffnen">Original öffnen ↗</a></div><div class="live-form-pages" id="liveFormPages">{% for seite in range(1, eintrag.seiten + 1) %}<article class="live-form-page" data-seite="{{ seite }}"><img src="/vorlagen/{{ eintrag.id }}/seiten/{{ seite }}.png" alt="Originalseite {{ seite }}"><div class="live-form-overlay"><div class="live-form-marker"><span>Aktuelles Feld</span><output></output></div></div></article>{% endfor %}</div></aside>
   </form>
 </section>
 {% endblock %}
