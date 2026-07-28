@@ -18,7 +18,20 @@
 {%- endmacro %}
 
 <section class="ausfuellseite">
-  <div class="seitenkopf ausfuell-kopf"><div><a href="/vorlagen/{{ eintrag.id }}" class="zuruecklink">← Zur Vorlage</a><span class="uebertitel">Neues Dokument</span><h1>{{ eintrag.name }} ausfüllen</h1><p>Feld anklicken, Position rechts sehen, Wert eintragen. Mehr ist nicht nötig.</p></div><div class="ausfuell-kopfaktionen"><span class="zustandsmarke bereit">Vorlage bereit</span>{% if darf_loeschen %}<form action="/vorlagen/{{ eintrag.id }}/loeschen" method="post" onsubmit="return confirm('Vorlage und alle daraus erstellten Dokumente dauerhaft löschen?')"><button class="schaltflaeche gefahr klein" type="submit">Vorlage löschen</button></form>{% endif %}</div></div>
+  <div class="seitenkopf ausfuell-kopf">
+    <div>
+      <a href="/vorlagen/{{ eintrag.id }}?modus=chat" class="zuruecklink">← Vorlageneditor öffnen</a>
+      <span class="uebertitel">Neues Dokument</span>
+      <h1>{{ eintrag.name }} ausfüllen</h1>
+      <p>Feld anklicken, Position rechts sehen, Wert eintragen. Mehr ist nicht nötig.</p>
+    </div>
+    <div class="ausfuell-kopfaktionen">
+      <a href="/vorlagen/{{ eintrag.id }}?modus=chat" class="schaltflaeche sekundaer klein">Mit Assistent bearbeiten</a>
+      <a href="/vorlagen/{{ eintrag.id }}?modus=manuell" class="schaltflaeche sekundaer klein">Manuell bearbeiten</a>
+      <span class="zustandsmarke bereit">Vorlage bereit</span>
+      {% if darf_loeschen %}<form action="/vorlagen/{{ eintrag.id }}/loeschen" method="post" onsubmit="return confirm('Vorlage und alle daraus erstellten Dokumente dauerhaft löschen?')"><button class="schaltflaeche gefahr klein" type="submit">Vorlage löschen</button></form>{% endif %}
+    </div>
+  </div>
 
   <form action="/vorlagen/{{ eintrag.id }}/verwenden" method="post" enctype="multipart/form-data" class="ausfuell-gitter live-ausfuell-gitter">
     <section class="inhaltskarte ausfuellformular">
