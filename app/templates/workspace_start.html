@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titel %}SmartDocs – Dokument bearbeiten{% endblock %}
+{% block inhalt %}
+<section class="live-shell live-start">
+  <header class="live-topbar">
+    <a class="live-brand" href="/arbeitsbereich"><span>A+</span><div><strong>SmartDocs</strong><small>von A+ Solution</small></div></a>
+    <div class="live-topbar-actions">
+      <details class="live-more"><summary>Mehr</summary><nav><a href="/verlauf">Verlauf</a><a href="/vorlagen">Vorlagen</a><a href="/team">Team</a><a href="/abrechnung">Tarif & Abrechnung</a><a href="/einstellungen">Einstellungen</a></nav></details>
+      <a class="live-account" href="/einstellungen">{{ mitglied.name[:2]|upper }}</a>
+    </div>
+  </header>
+
+  <main class="live-start-main">
+    <div class="live-start-copy">
+      <span class="live-kicker">A+ SmartDocs</span>
+      <h1>PDF rein.<br>Ändern. Fertig.</h1>
+      <p>Laden Sie ein Dokument hoch, ändern Sie Inhalte direkt per Chat oder Klick und laden Sie das fertige PDF herunter.</p>
+    </div>
+
+    <section class="live-upload-card" id="liveUploadZone" tabindex="0" role="button" aria-label="PDF hochladen">
+      <input id="liveUploadInput" type="file" accept="application/pdf,.pdf" hidden>
+      <div class="live-upload-icon">↑</div>
+      <h2>PDF hier ablegen</h2>
+      <p>oder klicken, um eine Datei auszuwählen</p>
+      <button class="live-primary" type="button" id="liveUploadButton">PDF auswählen</button>
+      <small>Nach dem Upload geht es sofort weiter. Kein Einrichtungsassistent.</small>
+      <div class="live-upload-progress" id="liveUploadProgress" hidden><i></i><span>Dokument wird geöffnet …</span></div>
+    </section>
+
+    <div class="live-three-steps" aria-label="Ablauf"><span><b>1</b> Upload</span><i>→</i><span><b>2</b> Chat</span><i>→</i><span><b>3</b> PDF</span></div>
+
+    {% if entwuerfe %}
+    <details class="live-recent">
+      <summary>Zuletzt bearbeitet <span>{{ entwuerfe|length }}</span></summary>
+      <div class="live-recent-list">
+        {% for entwurf in entwuerfe %}<a href="/workspace/{{ entwurf.id }}"><span class="live-file-icon">PDF</span><div><strong>{{ entwurf.name }}</strong><small>{{ entwurf.aktualisiert_am|datum }} · {{ entwurf.seiten }} Seite{% if entwurf.seiten != 1 %}n{% endif %}</small></div><b>Öffnen →</b></a>{% endfor %}
+      </div>
+    </details>
+    {% endif %}
+  </main>
+</section>
+{% endblock %}
