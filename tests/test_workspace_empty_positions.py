@@ -97,12 +97,12 @@ def test_editor_bindet_scroll_und_leerstellen_fixes_ein(client):
     assert "live-scroll-fix.js" in seite.text
     assert "live-empty-position.js" in seite.text
 
-    scroll_js = client.get("/static/live-scroll-fix.js")
+    scroll_js = client.get("/statisch/live-scroll-fix.js")
     assert scroll_js.status_code == 200
     assert "scrollTop" in scroll_js.text
     assert "requestAnimationFrame" in scroll_js.text
 
-    css = client.get("/static/live-interaction-fix.css")
+    css = client.get("/statisch/live-interaction-fix.css")
     assert css.status_code == 200
     assert "min-height:0" in css.text
     assert "pointer-events:auto" in css.text
