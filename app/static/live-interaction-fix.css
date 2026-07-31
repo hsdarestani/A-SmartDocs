@@ -1,0 +1,38 @@
+body.hauptfluss .live-editor-grid,
+body.hauptfluss .live-document-panel,
+body.hauptfluss .live-chat-panel{min-height:0}
+
+body.hauptfluss .live-document-scroll{
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  touch-action:pan-y;
+}
+
+body.hauptfluss .live-text-layer{
+  pointer-events:auto;
+  cursor:crosshair;
+}
+
+body.hauptfluss .live-text-anchor{
+  cursor:text;
+}
+
+.live-free-editor{
+  position:absolute;
+  z-index:20;
+  width:min(250px,42%);
+  min-width:120px;
+  height:34px;
+  transform:translateY(-2px);
+  border:1px solid #0d79a8;
+  outline:2px solid rgba(13,121,168,.12);
+  background:#fff;
+  color:#071c2e;
+  padding:6px 9px;
+  font:500 11px/1.2 "IBM Plex Sans",sans-serif;
+  box-shadow:0 8px 22px rgba(7,28,46,.14);
+}
+
+.live-free-editor.saving{opacity:.65;cursor:wait}
