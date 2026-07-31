@@ -57,7 +57,6 @@ def _route_entfernen(pfad: str, methode: str) -> None:
     ]
 
 
-# Der bisherige KPI-Dashboard ist nicht mehr der Hauptfluss.
 _route_entfernen("/arbeitsbereich", "GET")
 
 
@@ -479,5 +478,7 @@ def live_verlauf(request: Request, db=Depends(datenbank_sitzung)):
     kontext.update({"hauptfluss": False, "live_ausgaben": live_ausgaben, "alte_ausgaben": alte_ausgaben})
     return vorlagen.TemplateResponse("workspace_history.html", kontext)
 
+
+from . import workspace_interaction_v2 as _workspace_interaction_v2  # noqa: E402,F401
 
 __all__ = ["app", "LiveEditEingabe"]
