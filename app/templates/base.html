@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#071c2e">
   <title>{% block titel %}A+ SmartDocs{% endblock %}</title>
-  <meta name="description" content="Dokumentvorlagen erkennen, bestätigen, ausfüllen und als kontrollierten Arbeitsablauf wiederverwenden.">
+  <meta name="description" content="PDF hochladen, direkt bearbeiten und fertig exportieren.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
@@ -18,19 +18,20 @@
   <link rel="stylesheet" href="{{ url_for('statisch', path='/workflow-v2.css') }}?v=20260728-1">
   <link rel="stylesheet" href="{{ url_for('statisch', path='/simple-flow.css') }}?v=20260728-1">
   <link rel="stylesheet" href="{{ url_for('statisch', path='/field-live-preview.css') }}?v=20260729-1">
+  <link rel="stylesheet" href="{{ url_for('statisch', path='/live-workspace.css') }}?v=20260731-1">
 </head>
-<body class="bereich-{{ bereich|default('start') }} {% if mitglied %}angemeldet{% endif %}">
+<body class="bereich-{{ bereich|default('start') }} {% if mitglied %}angemeldet{% endif %} {% if hauptfluss %}hauptfluss{% endif %}">
   {% if mitglied %}
   <aside class="seitenleiste" id="seitenleiste">
     <a class="marke" href="/arbeitsbereich" aria-label="A+ SmartDocs Arbeitsbereich"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span></a>
     <nav class="seitennavigation" aria-label="Produktnavigation">
-      <span class="navigationsgruppe">Arbeitsbereich</span><a href="/arbeitsbereich" class="{% if bereich == 'arbeitsbereich' %}aktiv{% endif %}"><i>01</i><span>Übersicht</span></a><a href="/vorlagen" class="{% if bereich == 'vorlagen' %}aktiv{% endif %}"><i>02</i><span>Dokumentvorlagen</span></a><a href="/dokumente" class="{% if bereich == 'dokumente' %}aktiv{% endif %}"><i>03</i><span>Erstellte Dokumente</span></a>
-      <span class="navigationsgruppe">Unternehmen</span><a href="/team" class="{% if bereich == 'team' %}aktiv{% endif %}"><i>04</i><span>Team und Rollen</span></a><a href="/abrechnung" class="{% if bereich == 'abrechnung' %}aktiv{% endif %}"><i>05</i><span>Tarif und Abrechnung</span></a><a href="/einstellungen" class="{% if bereich == 'einstellungen' %}aktiv{% endif %}"><i>06</i><span>Einstellungen</span></a>
+      <span class="navigationsgruppe">Arbeitsbereich</span><a href="/arbeitsbereich" class="{% if bereich == 'arbeitsbereich' %}aktiv{% endif %}"><i>01</i><span>Neues Dokument</span></a><a href="/verlauf" class="{% if bereich == 'verlauf' %}aktiv{% endif %}"><i>02</i><span>Verlauf</span></a><a href="/vorlagen" class="{% if bereich == 'vorlagen' %}aktiv{% endif %}"><i>03</i><span>Dokumentvorlagen</span></a><a href="/dokumente" class="{% if bereich == 'dokumente' %}aktiv{% endif %}"><i>04</i><span>Vorlagen-Ausgaben</span></a>
+      <span class="navigationsgruppe">Unternehmen</span><a href="/team" class="{% if bereich == 'team' %}aktiv{% endif %}"><i>05</i><span>Team und Rollen</span></a><a href="/abrechnung" class="{% if bereich == 'abrechnung' %}aktiv{% endif %}"><i>06</i><span>Tarif und Abrechnung</span></a><a href="/einstellungen" class="{% if bereich == 'einstellungen' %}aktiv{% endif %}"><i>07</i><span>Einstellungen</span></a>
       {% if mitglied.ist_superadmin %}<span class="navigationsgruppe">A+ Verwaltung</span><a href="/verwaltung" class="{% if bereich == 'verwaltung' %}aktiv{% endif %}"><i>A+</i><span>Verwaltungszentrale</span></a>{% endif %}
     </nav>
     <div class="seitenleisten-fuss"><div class="konto-mini"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ organisation.name }}</small></div></div><form action="/abmelden" method="post"><button type="submit" class="abmelden-knopf" title="Abmelden">↗</button></form></div>
   </aside>
-  <header class="app-kopfzeile"><button class="menueknopf" id="menueknopf" aria-label="Navigation öffnen">☰</button><div class="kopf-suche"><span>⌕</span><input type="search" placeholder="Vorlagen und Dokumente durchsuchen …"><kbd>⌘ K</kbd></div><a class="kopf-neu" href="/vorlagen/neu">＋ Neue Vorlage</a><button class="symbolknopf" aria-label="Benachrichtigungen">□<i></i></button><a class="profilchip" href="/einstellungen"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ mitglied.rolle.value|capitalize }}</small></div></a></header>
+  <header class="app-kopfzeile"><button class="menueknopf" id="menueknopf" aria-label="Navigation öffnen">☰</button><div class="kopf-suche"><span>⌕</span><input type="search" placeholder="Vorlagen und Dokumente durchsuchen …"><kbd>⌘ K</kbd></div><a class="kopf-neu" href="/arbeitsbereich">＋ Neues Dokument</a><button class="symbolknopf" aria-label="Benachrichtigungen">□<i></i></button><a class="profilchip" href="/einstellungen"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ mitglied.rolle.value|capitalize }}</small></div></a></header>
   {% if rueckkehr_admin %}<div class="ansichtsleiste"><span>Sie sehen das Produkt aus Kundensicht: <strong>{{ organisation.name }}</strong></span><form action="/verwaltung/zurueck" method="post"><button type="submit">Zur A+ Verwaltung zurückkehren</button></form></div>{% endif %}
   <main class="app-inhalt">{% block inhalt %}{% endblock %}</main>
   {% else %}
@@ -49,5 +50,6 @@
   <script src="{{ url_for('statisch', path='/field-live-preview.js') }}?v=20260729-1" defer></script>
   <script src="{{ url_for('statisch', path='/editor-entry-mode.js') }}?v=20260728-1" defer></script>
   <script src="{{ url_for('statisch', path='/workflow-use-v2.js') }}?v=20260728-1" defer></script>
+  <script src="{{ url_for('statisch', path='/live-workspace.js') }}?v=20260731-1" defer></script>
 </body>
 </html>
