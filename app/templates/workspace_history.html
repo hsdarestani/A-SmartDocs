@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titel %}Verlauf – A+ SmartDocs{% endblock %}
+{% block inhalt %}
+<section class="seitenrahmen">
+  <div class="seitenkopf"><div><span class="uebertitel">Spezialbereich</span><h1>Verlauf</h1><p>Fertige PDF-Ausgaben aus dem direkten Arbeitsfluss und aus gespeicherten Vorlagen.</p></div><div class="seitenaktionen"><a class="schaltflaeche primaer" href="/arbeitsbereich">Neues Dokument</a></div></div>
+  <div class="hauptgitter">
+    <section class="inhaltskarte breite-karte"><div class="kartenkopf"><div><h2>Direkte PDF-Ausgaben</h2><p>Upload → Chat → Export</p></div></div><div class="vorlagenliste">{% for dokument in live_ausgaben %}<article class="vorlagenzeile"><div class="dateizeichen pdf">PDF</div><div class="vorlageninfo"><strong>{{ dokument.titel }}</strong><small>{{ dokument.erstellt_am|datum }} · {{ dokument.seiten }} Seite{% if dokument.seiten != 1 %}n{% endif %} · {{ dokument.dateigroesse|dateigroesse }}</small></div><a class="zeilenaktion" href="/live-ausgaben/{{ dokument.id }}/download">Herunterladen</a></article>{% else %}<div class="leerzustand klein"><strong>Noch keine direkte Ausgabe</strong><p>Bearbeiten Sie ein PDF im neuen Arbeitsfluss.</p></div>{% endfor %}</div></section>
+    <aside class="inhaltskarte"><div class="kartenkopf"><div><h2>Vorlagen-Ausgaben</h2><p>Aus dem erweiterten Vorlagenbereich</p></div></div><div class="aktivitaetsliste">{% for dokument in alte_ausgaben %}<article><span class="aktivitaetszeichen gruen">PDF</span><div><strong>{{ dokument.titel }}</strong><small>{{ dokument.erstellt_am|datum }}</small></div><a href="/dokumente/{{ dokument.id }}/herunterladen">↓</a></article>{% else %}<div class="leerzustand mini"><p>Keine älteren Vorlagen-Ausgaben.</p></div>{% endfor %}</div></aside>
+  </div>
+</section>
+{% endblock %}
