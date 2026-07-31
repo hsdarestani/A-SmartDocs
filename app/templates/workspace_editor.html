@@ -13,7 +13,7 @@
 
   <main class="live-editor-grid">
     <section class="live-document-panel">
-      <div class="live-document-toolbar"><div><strong>Dokument</strong><span id="liveDocumentHint">Text anklicken oder Änderung rechts schreiben.</span></div><div class="live-zoom"><button type="button" id="liveZoomOut">−</button><output id="liveZoomValue">100%</output><button type="button" id="liveZoomIn">＋</button></div></div>
+      <div class="live-document-toolbar"><div><strong>Dokument</strong><span id="liveDocumentHint">Text anklicken zum Ersetzen · freie Stelle anklicken zum Einfügen.</span></div><div class="live-zoom"><button type="button" id="liveZoomOut">−</button><output id="liveZoomValue">100%</output><button type="button" id="liveZoomIn">＋</button></div></div>
       <div class="live-document-scroll" id="liveDocumentScroll">
         <div class="live-pages" id="livePages">
           {% for seiteninfo in dokument_index.seiten %}
@@ -30,12 +30,12 @@
     </section>
 
     <aside class="live-chat-panel">
-      <header class="live-chat-head"><span class="live-ai-mark">A+</span><div><strong>Was soll geändert werden?</strong><small>Ein Satz reicht. Oder klicken Sie Text direkt an.</small></div></header>
+      <header class="live-chat-head"><span class="live-ai-mark">A+</span><div><strong>Was soll geändert werden?</strong><small>Beschreiben oder vorhandenen Text anklicken.</small></div></header>
       <div class="live-chat-messages" id="liveChatMessages">
         {% if dialog %}
           {% for nachricht in dialog %}<div class="live-message {{ 'user' if nachricht.rolle == 'nutzer' else 'assistant' }}">{{ nachricht.text }}</div>{% endfor %}
         {% else %}
-          <div class="live-message assistant">Sie können z. B. „Perla Demirova → Maria Keller“ schreiben. Noch schneller: Text im Dokument anklicken und nur den neuen Wert eingeben.</div>
+          <div class="live-message assistant">Vorhandenen Text ersetzen: anklicken und neuen Wert rechts schreiben. Leeres Feld: direkt auf die freie Stelle im Dokument klicken und dort tippen.</div>
         {% endif %}
       </div>
       <div class="live-selection" id="liveSelection" hidden><span>Ausgewählt</span><strong id="liveSelectionText"></strong><button type="button" id="liveSelectionClear" aria-label="Auswahl aufheben">×</button></div>
