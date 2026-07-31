@@ -19,5 +19,9 @@ from . import field_accuracy as _field_accuracy  # noqa: E402,F401
 # Abrechnung und Historie bleiben als spezialisierte Bereiche erreichbar.
 from . import live_workspace as _live_workspace  # noqa: E402,F401
 
+# Freie Einfügungen sind eigenständige Objekte: verschieben und löschen muss
+# unabhängig vom Chat- und Textersetzungsweg möglich sein.
+from . import workspace_object_ops as _workspace_object_ops  # noqa: E402,F401
+
 
 __all__ = ["app"]
