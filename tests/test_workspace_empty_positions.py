@@ -31,6 +31,8 @@ def _pdf_mit_leerem_feld() -> bytes:
     c.line(320, 665, 520, 665)
     c.drawString(70, 610, "Adresse")
     c.line(70, 585, 520, 585)
+    c.rect(70, 520, 10, 10, stroke=1, fill=0)
+    c.drawString(88, 520, "Ich stimme zu")
     c.save()
     return stream.getvalue()
 
@@ -73,6 +75,59 @@ def test_freie_position_kann_ohne_vorhandenen_text_beschrieben_werden(client):
     assert "Adresse" in text
 
 
+def test_eingefuegter_text_bleibt_anklickbar_und_wird_statt_gedoppelt_aktualisiert(client):
+    _anmelden(client)
+    entwurf_id = _upload(client)
+    erster = client.post(
+        f"/api/workspace/{entwurf_id}/edit",
+        json={"nachricht": "Hossein", "seite": 1, "x": 0.13, "y": 0.19},
+    )
+    assert erster.status_code == 200, erster.text
+    edit_id = erster.json()["edits"][0]["id"]
+
+    zweiter = client.post(
+        f"/api/workspace/{entwurf_id}/edit",
+        json={"nachricht": "Ali", "edit_id": edit_id},
+    )
+    assert zweiter.status_code == 200, zweiter.text
+    assert zweiter.json()["modus"] == "freie-position-edit"
+    assert zweiter.json()["edits"][0]["id"] == edit_id
+
+    seite = client.get(f"/workspace/{entwurf_id}")
+    assert seite.status_code == 200
+    assert '"neuer_text": "Ali"' in seite.text
+
+    export = client.post(f"/api/workspace/{entwurf_id}/export")
+    pdf = client.get(export.json()["download_url"])
+    dokument = fitz.open(stream=pdf.content, filetype="pdf")
+    try:
+        text = "\n".join(pdf_seite.get_text("text") for pdf_seite in dokument)
+    finally:
+        dokument.close()
+    assert "Ali" in text
+    assert "Hossein" not in text
+
+
+def test_checkbox_wird_mit_einem_klick_gesetzt_und_mit_naechstem_entfernt(client):
+    _anmelden(client)
+    entwurf_id = _upload(client)
+    # ReportLab zeichnet das 10pt-Kästchen bei x=70/y=520 von unten; PyMuPDF misst y von oben.
+    payload = {"seite": 1, "x": 75 / A4[0], "y": (A4[1] - 525) / A4[1]}
+    setzen = client.post(f"/api/workspace/{entwurf_id}/checkbox-at", json=payload)
+    assert setzen.status_code == 200, setzen.text
+    assert setzen.json()["treffer"] is True
+    assert setzen.json()["checked"] is True
+
+    preview = client.get(f"/workspace/{entwurf_id}/seiten/1.png?rev={setzen.json()['revision']}")
+    assert preview.status_code == 200
+    assert len(preview.content) > 1000
+
+    entfernen = client.post(f"/api/workspace/{entwurf_id}/checkbox-at", json=payload)
+    assert entfernen.status_code == 200, entfernen.text
+    assert entfernen.json()["treffer"] is True
+    assert entfernen.json()["checked"] is False
+
+
 def test_freie_position_wird_auch_in_der_live_vorschau_gerendert(client):
     _anmelden(client)
     entwurf_id = _upload(client)
@@ -87,12 +142,14 @@ def test_freie_position_wird_auch_in_der_live_vorschau_gerendert(client):
     assert len(preview.content) > 1000
 
 
-def test_editor_bindet_scroll_und_leerstellen_fixes_ein(client):
+def test_editor_bindet_scroll_leerstellen_und_checkbox_fixes_ein(client):
     _anmelden(client)
     entwurf_id = _upload(client)
     seite = client.get(f"/workspace/{entwurf_id}")
     assert seite.status_code == 200
     assert "freie Stelle anklicken" in seite.text
+    assert "Checkbox direkt anklicken" in seite.text
+    assert "data-page-width" in seite.text
     assert "live-interaction-fix.css" in seite.text
     assert "live-scroll-fix.js" in seite.text
     assert "live-empty-position.js" in seite.text
@@ -102,7 +159,14 @@ def test_editor_bindet_scroll_und_leerstellen_fixes_ein(client):
     assert "scrollTop" in scroll_js.text
     assert "requestAnimationFrame" in scroll_js.text
 
+    empty_js = client.get("/statisch/live-empty-position.js")
+    assert empty_js.status_code == 200
+    assert "Speichern" in empty_js.text
+    assert "edit_id" in empty_js.text
+    assert "checkbox-at" in empty_js.text
+
     css = client.get("/statisch/live-interaction-fix.css")
     assert css.status_code == 200
     assert "min-height:0" in css.text
     assert "pointer-events:auto" in css.text
+    assert "live-free-save" in css.text

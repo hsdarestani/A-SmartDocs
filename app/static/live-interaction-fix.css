@@ -15,24 +15,81 @@ body.hauptfluss .live-text-layer{
   cursor:crosshair;
 }
 
-body.hauptfluss .live-text-anchor{
-  cursor:text;
-}
+body.hauptfluss .live-text-layer.checking-click{cursor:progress}
 
-.live-free-editor{
+body.hauptfluss .live-text-anchor{cursor:text}
+
+.live-free-editor-shell{
   position:absolute;
-  z-index:20;
-  width:min(250px,42%);
-  min-width:120px;
-  height:34px;
-  transform:translateY(-2px);
+  z-index:30;
+  display:grid;
+  grid-template-columns:minmax(130px,220px) auto auto;
+  align-items:stretch;
+  transform:translateY(-3px);
   border:1px solid #0d79a8;
   outline:2px solid rgba(13,121,168,.12);
   background:#fff;
-  color:#071c2e;
-  padding:6px 9px;
-  font:500 11px/1.2 "IBM Plex Sans",sans-serif;
-  box-shadow:0 8px 22px rgba(7,28,46,.14);
+  box-shadow:0 9px 28px rgba(7,28,46,.17);
+  max-width:min(390px,88%);
 }
 
-.live-free-editor.saving{opacity:.65;cursor:wait}
+.live-free-editor{
+  min-width:0;
+  height:36px;
+  border:0;
+  outline:0;
+  background:#fff;
+  color:#071c2e;
+  padding:7px 10px;
+  font:500 11px/1.2 "IBM Plex Sans",sans-serif;
+}
+
+.live-free-save,
+.live-free-cancel{
+  height:36px;
+  border:0;
+  border-left:1px solid #c8dce5;
+  font:600 10px/1 "IBM Plex Sans",sans-serif;
+  cursor:pointer;
+}
+
+.live-free-save{
+  padding:0 11px;
+  background:#0d79a8;
+  color:#fff;
+}
+
+.live-free-save:hover{background:#096b96}
+.live-free-cancel{width:34px;background:#f5f9fb;color:#456170;font-size:16px}
+.live-free-cancel:hover{background:#eaf3f7}
+.live-free-editor-shell.saving{opacity:.65;cursor:wait}
+.live-free-editor-shell.saving button{cursor:wait}
+
+.live-free-value{
+  position:absolute;
+  z-index:15;
+  display:block;
+  min-width:12px;
+  min-height:12px;
+  padding:0;
+  margin:0;
+  border:1px solid transparent;
+  background:transparent;
+  color:transparent;
+  cursor:text;
+}
+
+.live-free-value:hover,
+.live-free-value:focus-visible{
+  border-color:#0d79a8;
+  background:rgba(13,121,168,.07);
+  outline:2px solid rgba(13,121,168,.10);
+}
+
+@media(max-width:620px){
+  .live-free-editor-shell{
+    grid-template-columns:minmax(105px,1fr) auto auto;
+    max-width:94%;
+  }
+  .live-free-save{padding:0 8px;font-size:9px}
+}

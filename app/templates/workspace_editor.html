@@ -13,11 +13,11 @@
 
   <main class="live-editor-grid">
     <section class="live-document-panel">
-      <div class="live-document-toolbar"><div><strong>Dokument</strong><span id="liveDocumentHint">Text anklicken zum Ersetzen · freie Stelle anklicken zum Einfügen.</span></div><div class="live-zoom"><button type="button" id="liveZoomOut">−</button><output id="liveZoomValue">100%</output><button type="button" id="liveZoomIn">＋</button></div></div>
+      <div class="live-document-toolbar"><div><strong>Dokument</strong><span id="liveDocumentHint">Text anklicken zum Ersetzen · freie Stelle anklicken zum Einfügen · Checkbox direkt anklicken.</span></div><div class="live-zoom"><button type="button" id="liveZoomOut">−</button><output id="liveZoomValue">100%</output><button type="button" id="liveZoomIn">＋</button></div></div>
       <div class="live-document-scroll" id="liveDocumentScroll">
         <div class="live-pages" id="livePages">
           {% for seiteninfo in dokument_index.seiten %}
-          <article class="live-page" data-page="{{ seiteninfo.seite }}" style="--page-ratio: {{ seiteninfo.hoehe / seiteninfo.breite }}">
+          <article class="live-page" data-page="{{ seiteninfo.seite }}" data-page-width="{{ seiteninfo.breite }}" data-page-height="{{ seiteninfo.hoehe }}" style="--page-ratio: {{ seiteninfo.hoehe / seiteninfo.breite }}">
             <img class="live-page-image" data-page-image="{{ seiteninfo.seite }}" src="/workspace/{{ entwurf.id }}/seiten/{{ seiteninfo.seite }}.png?rev={{ revision }}" alt="Seite {{ seiteninfo.seite }}">
             <div class="live-text-layer" data-page-layer="{{ seiteninfo.seite }}">
               {% for anker in seiteninfo.anker %}<button type="button" class="live-text-anchor" data-anchor-id="{{ anker.id }}" data-anchor-text="{{ anker.text|e }}" data-page="{{ anker.seite }}" title="{{ anker.text|e }}" style="left:{{ anker.position.x * 100 }}%;top:{{ anker.position.y * 100 }}%;width:{{ anker.position.breite * 100 }}%;height:{{ anker.position.hoehe * 100 }}%"><span>{{ anker.text }}</span></button>{% endfor %}
@@ -35,7 +35,7 @@
         {% if dialog %}
           {% for nachricht in dialog %}<div class="live-message {{ 'user' if nachricht.rolle == 'nutzer' else 'assistant' }}">{{ nachricht.text }}</div>{% endfor %}
         {% else %}
-          <div class="live-message assistant">Vorhandenen Text ersetzen: anklicken und neuen Wert rechts schreiben. Leeres Feld: direkt auf die freie Stelle im Dokument klicken und dort tippen.</div>
+          <div class="live-message assistant">Vorhandenen Text ersetzen: anklicken und neuen Wert rechts schreiben. Leeres Feld: direkt auf die freie Stelle klicken. Checkbox: direkt auf das Kästchen klicken.</div>
         {% endif %}
       </div>
       <div class="live-selection" id="liveSelection" hidden><span>Ausgewählt</span><strong id="liveSelectionText"></strong><button type="button" id="liveSelectionClear" aria-label="Auswahl aufheben">×</button></div>
@@ -44,6 +44,6 @@
     </aside>
   </main>
 
-  <script id="liveWorkspaceData" type="application/json">{{ {"entwurf_id": entwurf.id, "revision": revision}|tojson }}</script>
+  <script id="liveWorkspaceData" type="application/json">{{ {"entwurf_id": entwurf.id, "revision": revision, "edits": (entwurf.zustand or {}).get("edits", [])}|tojson }}</script>
 </section>
 {% endblock %}
