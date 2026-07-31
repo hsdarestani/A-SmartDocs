@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block titel %}{{ entwurf.name }} – SmartDocs{% endblock %}
+{% block inhalt %}
+<section class="live-shell live-editor" data-entwurf-id="{{ entwurf.id }}" data-revision="{{ revision }}">
+  <header class="live-topbar live-editor-topbar">
+    <div class="live-topbar-left"><a class="live-back" href="/arbeitsbereich" aria-label="Zurück">←</a><a class="live-brand compact" href="/arbeitsbereich"><span>A+</span><div><strong>SmartDocs</strong><small>von A+ Solution</small></div></a><div class="live-doc-title"><strong>{{ entwurf.name }}</strong><small id="liveSaveState">Automatisch gespeichert</small></div></div>
+    <div class="live-topbar-actions">
+      <button class="live-icon-button" id="liveUndo" type="button" title="Letzte Änderung zurücknehmen">↶</button>
+      <details class="live-more"><summary>Mehr</summary><nav><a href="/verlauf">Verlauf</a><a href="/vorlagen">Vorlagen</a><a href="/team">Team</a><a href="/abrechnung">Tarif & Abrechnung</a><a href="/einstellungen">Einstellungen</a></nav></details>
+      <button class="live-primary" id="liveExport" type="button">PDF herunterladen <span>↓</span></button>
+    </div>
+  </header>
+
+  <main class="live-editor-grid">
+    <section class="live-document-panel">
+      <div class="live-document-toolbar"><div><strong>Dokument</strong><span id="liveDocumentHint">Text anklicken oder Änderung rechts schreiben.</span></div><div class="live-zoom"><button type="button" id="liveZoomOut">−</button><output id="liveZoomValue">100%</output><button type="button" id="liveZoomIn">＋</button></div></div>
+      <div class="live-document-scroll" id="liveDocumentScroll">
+        <div class="live-pages" id="livePages">
+          {% for seiteninfo in dokument_index.seiten %}
+          <article class="live-page" data-page="{{ seiteninfo.seite }}" style="--page-ratio: {{ seiteninfo.hoehe / seiteninfo.breite }}">
+            <img class="live-page-image" data-page-image="{{ seiteninfo.seite }}" src="/workspace/{{ entwurf.id }}/seiten/{{ seiteninfo.seite }}.png?rev={{ revision }}" alt="Seite {{ seiteninfo.seite }}">
+            <div class="live-text-layer" data-page-layer="{{ seiteninfo.seite }}">
+              {% for anker in seiteninfo.anker %}<button type="button" class="live-text-anchor" data-anchor-id="{{ anker.id }}" data-anchor-text="{{ anker.text|e }}" data-page="{{ anker.seite }}" title="{{ anker.text|e }}" style="left:{{ anker.position.x * 100 }}%;top:{{ anker.position.y * 100 }}%;width:{{ anker.position.breite * 100 }}%;height:{{ anker.position.hoehe * 100 }}%"><span>{{ anker.text }}</span></button>{% endfor %}
+            </div>
+            <span class="live-page-number">{{ seiteninfo.seite }}</span>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <aside class="live-chat-panel">
+      <header class="live-chat-head"><span class="live-ai-mark">A+</span><div><strong>Was soll geändert werden?</strong><small>Ein Satz reicht. Oder klicken Sie Text direkt an.</small></div></header>
+      <div class="live-chat-messages" id="liveChatMessages">
+        {% if dialog %}
+          {% for nachricht in dialog %}<div class="live-message {{ 'user' if nachricht.rolle == 'nutzer' else 'assistant' }}">{{ nachricht.text }}</div>{% endfor %}
+        {% else %}
+          <div class="live-message assistant">Sie können z. B. „Perla Demirova → Maria Keller“ schreiben. Noch schneller: Text im Dokument anklicken und nur den neuen Wert eingeben.</div>
+        {% endif %}
+      </div>
+      <div class="live-selection" id="liveSelection" hidden><span>Ausgewählt</span><strong id="liveSelectionText"></strong><button type="button" id="liveSelectionClear" aria-label="Auswahl aufheben">×</button></div>
+      <form class="live-chat-form" id="liveChatForm"><textarea id="liveChatInput" rows="2" placeholder="z. B. employee address is Mainzer Landstraße 12"></textarea><button type="submit" id="liveChatSend" aria-label="Änderung senden">↑</button></form>
+      <div class="live-chat-foot"><span id="liveLatency">Direkte Änderungen laufen ohne KI.</span><button type="button" id="liveClickHelp">Wie funktioniert Klickbearbeitung?</button></div>
+    </aside>
+  </main>
+
+  <script id="liveWorkspaceData" type="application/json">{{ {"entwurf_id": entwurf.id, "revision": revision}|tojson }}</script>
+</section>
+{% endblock %}
