@@ -16,21 +16,20 @@ body.hauptfluss .live-text-layer{
 }
 
 body.hauptfluss .live-text-layer.checking-click{cursor:progress}
-
 body.hauptfluss .live-text-anchor{cursor:text}
 
 .live-free-editor-shell{
   position:absolute;
   z-index:30;
   display:grid;
-  grid-template-columns:minmax(130px,220px) auto auto;
+  grid-template-columns:minmax(130px,220px) auto auto auto;
   align-items:stretch;
   transform:translateY(-3px);
   border:1px solid #0d79a8;
   outline:2px solid rgba(13,121,168,.12);
   background:#fff;
   box-shadow:0 9px 28px rgba(7,28,46,.17);
-  max-width:min(390px,88%);
+  max-width:min(470px,94%);
 }
 
 .live-free-editor{
@@ -45,6 +44,7 @@ body.hauptfluss .live-text-anchor{cursor:text}
 }
 
 .live-free-save,
+.live-free-delete,
 .live-free-cancel{
   height:36px;
   border:0;
@@ -60,6 +60,14 @@ body.hauptfluss .live-text-anchor{cursor:text}
 }
 
 .live-free-save:hover{background:#096b96}
+
+.live-free-delete{
+  padding:0 10px;
+  background:#fff7f6;
+  color:#a62b22;
+}
+
+.live-free-delete:hover{background:#ffe9e6;color:#8b1e17}
 .live-free-cancel{width:34px;background:#f5f9fb;color:#456170;font-size:16px}
 .live-free-cancel:hover{background:#eaf3f7}
 .live-free-editor-shell.saving{opacity:.65;cursor:wait}
@@ -76,20 +84,51 @@ body.hauptfluss .live-text-anchor{cursor:text}
   border:1px solid transparent;
   background:transparent;
   color:transparent;
-  cursor:text;
+  cursor:grab;
+  touch-action:none;
+  user-select:none;
 }
 
 .live-free-value:hover,
-.live-free-value:focus-visible{
+.live-free-value:focus-visible,
+.live-free-value.selected{
   border-color:#0d79a8;
   background:rgba(13,121,168,.07);
   outline:2px solid rgba(13,121,168,.10);
 }
 
+.live-free-value:hover::after,
+.live-free-value:focus-visible::after{
+  content:"↕";
+  position:absolute;
+  right:-9px;
+  top:-10px;
+  display:grid;
+  place-items:center;
+  width:17px;
+  height:17px;
+  border:1px solid #0d79a8;
+  background:#fff;
+  color:#0d79a8;
+  font:700 10px/1 "IBM Plex Sans",sans-serif;
+  box-shadow:0 2px 7px rgba(7,28,46,.12);
+}
+
+.live-free-value.dragging{
+  z-index:29;
+  cursor:grabbing;
+  border:1px dashed #0d79a8;
+  background:rgba(13,121,168,.13);
+  outline:3px solid rgba(13,121,168,.11);
+}
+
+.live-free-value.dragging::after{content:""}
+
 @media(max-width:620px){
   .live-free-editor-shell{
-    grid-template-columns:minmax(105px,1fr) auto auto;
-    max-width:94%;
+    grid-template-columns:minmax(100px,1fr) auto auto auto;
+    max-width:96%;
   }
-  .live-free-save{padding:0 8px;font-size:9px}
+  .live-free-save,
+  .live-free-delete{padding:0 7px;font-size:9px}
 }
