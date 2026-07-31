@@ -186,6 +186,43 @@ class Dokumentausgabe(Basis):
     erstellt_von: Mapped[Mitglied | None] = relationship(back_populates="dokumente")
 
 
+class Arbeitsdokument(Basis):
+    """Ein hochgeladenes PDF im direkten Upload → Chat → Export Arbeitsfluss."""
+
+    __tablename__ = "arbeitsdokumente"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    organisation_id: Mapped[int] = mapped_column(ForeignKey("organisationen.id", ondelete="CASCADE"), index=True)
+    erstellt_von_id: Mapped[int | None] = mapped_column(ForeignKey("mitglieder.id", ondelete="SET NULL"), nullable=True)
+    name: Mapped[str] = mapped_column(String(180))
+    dateiname: Mapped[str] = mapped_column(String(255))
+    speicherort: Mapped[str] = mapped_column(String(500))
+    inhaltstyp: Mapped[str] = mapped_column(String(100), default="application/pdf")
+    originalgroesse: Mapped[int] = mapped_column(Integer, default=0)
+    seiten: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[str] = mapped_column(String(40), default="bearbeitung")
+    zustand: Mapped[dict] = mapped_column(JSON, default=dict)
+    erstellt_am: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=jetzt)
+    aktualisiert_am: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=jetzt)
+
+
+class Arbeitsausgabe(Basis):
+    """Fertiger Export aus einem Arbeitsdokument; getrennt von der Vorlagenbibliothek."""
+
+    __tablename__ = "arbeitsausgaben"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    organisation_id: Mapped[int] = mapped_column(ForeignKey("organisationen.id", ondelete="CASCADE"), index=True)
+    arbeitsdokument_id: Mapped[int | None] = mapped_column(ForeignKey("arbeitsdokumente.id", ondelete="SET NULL"), nullable=True, index=True)
+    erstellt_von_id: Mapped[int | None] = mapped_column(ForeignKey("mitglieder.id", ondelete="SET NULL"), nullable=True)
+    titel: Mapped[str] = mapped_column(String(200))
+    dateiname: Mapped[str] = mapped_column(String(255))
+    speicherort: Mapped[str] = mapped_column(String(500))
+    seiten: Mapped[int] = mapped_column(Integer, default=1)
+    dateigroesse: Mapped[int] = mapped_column(Integer, default=0)
+    erstellt_am: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=jetzt)
+
+
 class Einladung(Basis):
     __tablename__ = "einladungen"
 
