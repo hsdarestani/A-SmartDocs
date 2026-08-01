@@ -1,11 +1,21 @@
 {% extends "base.html" %}
 {% block titel %}{{ entwurf.name }} – SmartDocs{% endblock %}
 {% block inhalt %}
+<link rel="stylesheet" href="{{ url_for('statisch', path='/font-controls.css') }}?v=20260801-1">
 <section class="live-shell live-editor" data-entwurf-id="{{ entwurf.id }}" data-revision="{{ revision }}">
   <header class="live-topbar live-editor-topbar">
     <div class="live-topbar-left"><a class="live-back" href="/arbeitsbereich" aria-label="Zurück">←</a><a class="live-brand compact" href="/arbeitsbereich"><span>A+</span><div><strong>SmartDocs</strong><small>von A+ Solution</small></div></a><div class="live-doc-title"><strong>{{ entwurf.name }}</strong><small id="liveSaveState">Automatisch gespeichert</small></div></div>
     <div class="live-topbar-actions">
       <button class="live-icon-button" id="liveUndo" type="button" title="Letzte Änderung zurücknehmen">↶</button>
+      <details class="live-font-menu" id="liveFontMenu">
+        <summary>Schrift</summary>
+        <div class="live-font-popover">
+          <strong>Gesamtes Dokument</strong>
+          <label>Dokumentschrift<select id="liveDocumentFont"><option value="auto">Schriften werden geladen …</option></select></label>
+          <label class="live-font-check"><input id="liveDocumentPreserveStyles" type="checkbox" checked>Fett und Kursiv erhalten</label>
+          <small>Diese Einstellung formatiert den gesamten Textbestand neu. Grafiken, Linien, Bilder und Checkboxen bleiben erhalten. „Wie im Original“ stellt die ursprünglichen Schriften wieder her.</small>
+        </div>
+      </details>
       <details class="live-more"><summary>Mehr</summary><nav><a href="/verlauf">Verlauf</a><a href="/vorlagen">Vorlagen</a><a href="/team">Team</a><a href="/abrechnung">Tarif & Abrechnung</a><a href="/einstellungen">Einstellungen</a></nav></details>
       <button class="live-primary" id="liveExport" type="button">PDF herunterladen <span>↓</span></button>
     </div>
@@ -20,7 +30,7 @@
           <article class="live-page" data-page="{{ seiteninfo.seite }}" data-page-width="{{ seiteninfo.breite }}" data-page-height="{{ seiteninfo.hoehe }}" style="--page-ratio: {{ seiteninfo.hoehe / seiteninfo.breite }}">
             <img class="live-page-image" data-page-image="{{ seiteninfo.seite }}" src="/workspace/{{ entwurf.id }}/seiten/{{ seiteninfo.seite }}.png?rev={{ revision }}" alt="Seite {{ seiteninfo.seite }}">
             <div class="live-text-layer" data-page-layer="{{ seiteninfo.seite }}">
-              {% for anker in seiteninfo.anker %}{% if anker.klickbar|default(true) %}<button type="button" class="live-text-anchor" data-anchor-id="{{ anker.id }}" data-anchor-text="{{ anker.text|e }}" data-page="{{ anker.seite }}" data-line-id="{{ anker.linien_id|default('') }}" data-word-order="{{ anker.wort|default(loop.index0) }}" title="{{ anker.text|e }}" style="left:{{ anker.position.x * 100 }}%;top:{{ anker.position.y * 100 }}%;width:{{ anker.position.breite * 100 }}%;height:{{ anker.position.hoehe * 100 }}%"><span>{{ anker.text }}</span></button>{% endif %}{% endfor %}
+              {% for anker in seiteninfo.anker %}{% if anker.klickbar|default(true) %}<button type="button" class="live-text-anchor" data-anchor-id="{{ anker.id }}" data-anchor-text="{{ anker.text|e }}" data-page="{{ anker.seite }}" data-line-id="{{ anker.linien_id|default('') }}" data-word-order="{{ anker.wort|default(loop.index0) }}" data-font-name="{{ anker.fontname|default('')|e }}" data-font-ref="{{ anker.font_ref|default('')|e }}" data-font-size="{{ anker.schriftgroesse|default('') }}" title="{{ anker.text|e }}" style="left:{{ anker.position.x * 100 }}%;top:{{ anker.position.y * 100 }}%;width:{{ anker.position.breite * 100 }}%;height:{{ anker.position.hoehe * 100 }}%"><span>{{ anker.text }}</span></button>{% endif %}{% endfor %}
             </div>
             <span class="live-page-number">{{ seiteninfo.seite }}</span>
           </article>
@@ -35,10 +45,17 @@
         {% if dialog %}
           {% for nachricht in dialog %}<div class="live-message {{ 'user' if nachricht.rolle == 'nutzer' else 'assistant' }}">{{ nachricht.text }}</div>{% endfor %}
         {% else %}
-          <div class="live-message assistant">Text anklicken: nur ein Wort wählen oder über mehrere Wörter ziehen. Danach rechts nur den neuen Inhalt schreiben; der Rest der Zeile bleibt erhalten.</div>
+          <div class="live-message assistant">Text anklicken: nur ein Wort wählen oder über mehrere Wörter ziehen. SmartDocs übernimmt automatisch Schrift, Größe, Farbe und Grundlinie des Originals. Bei Bedarf können Sie die Schrift darunter ändern.</div>
         {% endif %}
       </div>
-      <div class="live-selection" id="liveSelection" hidden><span>Ausgewählt</span><strong id="liveSelectionText"></strong><button type="button" id="liveSelectionClear" aria-label="Auswahl aufheben">×</button></div>
+      <div class="live-selection" id="liveSelection" hidden>
+        <div class="live-selection-main"><span>Ausgewählt</span><strong id="liveSelectionText"></strong><button type="button" id="liveSelectionClear" aria-label="Auswahl aufheben">×</button></div>
+        <div class="live-selection-format">
+          <label>Schrift<select id="liveSelectionFont"><option value="auto">Wie im Original</option></select></label>
+          <label>Größe<input id="liveSelectionFontSize" type="number" min="5" max="72" step="0.5" placeholder="Original"></label>
+        </div>
+        <div class="live-detected-font" id="liveDetectedFont"></div>
+      </div>
       <form class="live-chat-form" id="liveChatForm"><textarea id="liveChatInput" rows="2" placeholder="z. B. employee address is Mainzer Landstraße 12"></textarea><button type="submit" id="liveChatSend" aria-label="Änderung senden">↑</button></form>
       <div class="live-chat-foot"><span id="liveLatency">Direkte Änderungen laufen ohne KI.</span><button type="button" id="liveClickHelp">Wie funktioniert Klickbearbeitung?</button></div>
     </aside>
@@ -46,4 +63,5 @@
 
   <script id="liveWorkspaceData" type="application/json">{{ {"entwurf_id": entwurf.id, "revision": revision, "edits": (entwurf.zustand or {}).get("edits", [])}|tojson }}</script>
 </section>
+<script src="{{ url_for('statisch', path='/font-controls.js') }}?v=20260801-1" defer></script>
 {% endblock %}
