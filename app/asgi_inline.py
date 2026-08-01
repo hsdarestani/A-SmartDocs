@@ -23,5 +23,12 @@ from . import live_workspace as _live_workspace  # noqa: E402,F401
 # unabhängig vom Chat- und Textersetzungsweg möglich sein.
 from . import workspace_object_ops as _workspace_object_ops  # noqa: E402,F401
 
+# Zuletzt wird die Auswahl von ganzen PDF-Spans auf Wörter und zusammenhängende
+# Phrasen umgestellt. Unsichtbare Phrasenaliase halten ältere Chat- und
+# Testverträge kompatibel, ohne in der Oberfläche ganze Zeilen auswählbar zu machen.
+from . import partial_line_editing as _partial_line_editing  # noqa: E402,F401
+from . import partial_line_compat as _partial_line_compat  # noqa: E402,F401
+from . import partial_line_renderer as _partial_line_renderer  # noqa: E402,F401
+
 
 __all__ = ["app"]

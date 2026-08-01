@@ -70,10 +70,12 @@
     if (!entwurfId) return;
 
     let revision = Number(data.revision || root.dataset.revision || 0);
-    let selectedAnchorId = null;
+    let selectedAnchorIds = [];
     let selectedAnchorText = '';
     let busy = false;
     let zoom = 1;
+    let dragSelection = null;
+    let suppressClickUntil = 0;
 
     const form = $('#liveChatForm');
     const input = $('#liveChatInput');
@@ -83,6 +85,7 @@
     const selectionText = $('#liveSelectionText');
     const saveState = $('#liveSaveState');
     const latency = $('#liveLatency');
+    const hint = $('#liveDocumentHint');
 
     const addMessage = (role, text, extra = '') => {
       if (!messages) return null;
@@ -94,31 +97,104 @@
       return el;
     };
 
+    const textVerbinden = anchors => {
+      let text = '';
+      anchors.forEach(anchor => {
+        const wort = anchor.dataset.anchorText || '';
+        if (!text) text = wort;
+        else if (/^[,.;:!?%\)\]\}»”’]$/.test(wort) || /[\(\[\{«„‘]$/.test(text)) text += wort;
+        else text += ` ${wort}`;
+      });
+      return text;
+    };
+
     const clearSelection = () => {
-      selectedAnchorId = null;
+      selectedAnchorIds = [];
       selectedAnchorText = '';
       $$('.live-text-anchor.selected').forEach(el => el.classList.remove('selected'));
       if (selection) selection.hidden = true;
       if (input) input.placeholder = 'z. B. employee address is Mainzer Landstraße 12';
     };
 
-    const selectAnchor = anchor => {
+    const anchorsInLine = lineId => $$('.live-text-anchor')
+      .filter(anchor => anchor.dataset.lineId === lineId)
+      .sort((a, b) => Number(a.dataset.wordOrder || 0) - Number(b.dataset.wordOrder || 0));
+
+    const rangeBetween = (start, end) => {
+      if (!start || !end || start.dataset.lineId !== end.dataset.lineId) return [end || start].filter(Boolean);
+      const line = anchorsInLine(start.dataset.lineId);
+      const a = line.indexOf(start);
+      const b = line.indexOf(end);
+      if (a < 0 || b < 0) return [end];
+      return line.slice(Math.min(a, b), Math.max(a, b) + 1);
+    };
+
+    const setSelection = (anchors, focusInput = false) => {
+      const unique = [...new Set((anchors || []).filter(Boolean))];
       clearSelection();
-      selectedAnchorId = anchor.dataset.anchorId;
-      selectedAnchorText = anchor.dataset.anchorText || '';
-      anchor.classList.add('selected');
+      if (!unique.length) return;
+      unique.forEach(anchor => anchor.classList.add('selected'));
+      selectedAnchorIds = unique.map(anchor => anchor.dataset.anchorId).filter(Boolean);
+      selectedAnchorText = textVerbinden(unique);
       if (selection) selection.hidden = false;
       if (selectionText) selectionText.textContent = selectedAnchorText;
       if (input) {
-        input.placeholder = 'Neuen Text eingeben …';
-        input.focus();
+        input.placeholder = 'Nur den neuen Inhalt eingeben …';
+        if (focusInput) {
+          try { input.focus({ preventScroll: true }); } catch { input.focus(); }
+        }
       }
-      $('#liveDocumentHint').textContent = `„${selectedAnchorText.slice(0, 90)}“ ausgewählt · nur neuen Wert schreiben.`;
+      if (hint) hint.textContent = `„${selectedAnchorText.slice(0, 120)}“ ausgewählt · nur dieser Teil der Zeile wird ersetzt.`;
     };
 
-    $$('.live-text-anchor').forEach(anchor => anchor.addEventListener('click', event => {
-      event.preventDefault(); event.stopPropagation(); selectAnchor(anchor);
-    }));
+    const anchorElements = $$('.live-text-anchor');
+    anchorElements.forEach(anchor => {
+      anchor.addEventListener('pointerdown', event => {
+        if (event.button !== undefined && event.button !== 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+        dragSelection = {
+          start: anchor,
+          current: anchor,
+          x: event.clientX,
+          y: event.clientY,
+          moved: false,
+        };
+        setSelection([anchor], false);
+      });
+
+      anchor.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (Date.now() < suppressClickUntil) return;
+        if (event.shiftKey && selectedAnchorIds.length) {
+          const first = $(`.live-text-anchor[data-anchor-id="${CSS.escape(selectedAnchorIds[0])}"]`);
+          setSelection(rangeBetween(first, anchor), true);
+        } else {
+          setSelection([anchor], true);
+        }
+      });
+    });
+
+    document.addEventListener('pointermove', event => {
+      if (!dragSelection || !(event.buttons & 1)) return;
+      if (Math.hypot(event.clientX - dragSelection.x, event.clientY - dragSelection.y) >= 4) dragSelection.moved = true;
+      const ziel = document.elementFromPoint(event.clientX, event.clientY)?.closest?.('.live-text-anchor');
+      if (!ziel || ziel.dataset.lineId !== dragSelection.start.dataset.lineId) return;
+      dragSelection.current = ziel;
+      setSelection(rangeBetween(dragSelection.start, ziel), false);
+    }, true);
+
+    document.addEventListener('pointerup', () => {
+      if (!dragSelection) return;
+      const moved = dragSelection.moved;
+      dragSelection = null;
+      if (moved) {
+        suppressClickUntil = Date.now() + 350;
+        try { input?.focus({ preventScroll: true }); } catch { input?.focus(); }
+      }
+    }, true);
+
     $('#liveSelectionClear')?.addEventListener('click', clearSelection);
 
     const refreshPages = async pages => {
@@ -148,8 +224,9 @@
       const text = input?.value.trim() || '';
       if (!text) return;
       addMessage('user', text);
-      const pending = addMessage('assistant', selectedAnchorId ? 'Wird direkt im Dokument ersetzt …' : 'Änderung wird verstanden …', 'pending');
-      const anchorForRequest = selectedAnchorId;
+      const hasSelection = selectedAnchorIds.length > 0;
+      const pending = addMessage('assistant', hasSelection ? 'Nur der markierte Textteil wird ersetzt …' : 'Änderung wird verstanden …', 'pending');
+      const anchorForRequest = selectedAnchorIds.join('|') || null;
       input.value = '';
       setBusy(true);
       const started = performance.now();
@@ -169,13 +246,13 @@
             ? `KI nur zur Zuordnung · ${browserMs} ms gesamt`
             : `Direkt ohne KI · ${Number(result.dauer_ms || browserMs)} ms Server`;
         }
-        if (result.braucht_auswahl) $('#liveDocumentHint').textContent = 'Stelle unklar: gewünschten Text direkt im Dokument anklicken.';
+        if (result.braucht_auswahl && hint) hint.textContent = 'Stelle unklar: gewünschtes Wort oder mehrere Wörter direkt markieren.';
       } catch (error) {
         if (pending) { pending.textContent = error.message; pending.classList.remove('pending'); }
         window.meldung?.(error.message, 'fehler');
       } finally {
         setBusy(false);
-        input?.focus();
+        try { input?.focus({ preventScroll: true }); } catch { input?.focus(); }
       }
     });
 
@@ -227,7 +304,7 @@
     $('#liveZoomOut')?.addEventListener('click', () => { zoom -= .1; zoomApply(); });
 
     $('#liveClickHelp')?.addEventListener('click', () => {
-      addMessage('assistant', 'Bewegen Sie die Maus über einen Text im PDF. Klick = Text auswählen. Danach schreiben Sie nur den neuen Wert und drücken Enter. Dabei wird keine KI benötigt.');
+      addMessage('assistant', 'Ein einzelnes Wort ändern: anklicken. Mehrere Wörter ändern: mit gedrückter Maustaste darüber ziehen oder erstes Wort anklicken und das letzte mit Shift anklicken. Danach nur den neuen Inhalt schreiben. Der Rest der Zeile bleibt unverändert.');
     });
 
     input?.addEventListener('keydown', event => {
