@@ -16,7 +16,18 @@ body.hauptfluss .live-text-layer{
 }
 
 body.hauptfluss .live-text-layer.checking-click{cursor:progress}
-body.hauptfluss .live-text-anchor{cursor:text}
+body.hauptfluss .live-text-anchor{
+  cursor:text;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+body.hauptfluss .live-text-anchor.selected{
+  border-color:#0d79a8;
+  background:rgba(13,121,168,.16);
+  box-shadow:0 0 0 1px rgba(255,255,255,.72) inset;
+}
 
 .live-free-editor-shell{
   position:absolute;
