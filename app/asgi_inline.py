@@ -27,6 +27,7 @@ from . import workspace_object_ops as _workspace_object_ops  # noqa: E402,F401
 # Phrasen umgestellt. Dadurch löscht eine Änderung niemals mehr automatisch die
 # komplette Textzeile.
 from . import partial_line_editing as _partial_line_editing  # noqa: E402,F401
+from . import partial_line_renderer as _partial_line_renderer  # noqa: E402,F401
 
 
 __all__ = ["app"]
