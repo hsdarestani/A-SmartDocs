@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="{{ url_for('statisch', path='/workflow-v2.css') }}?v=20260728-1">
   <link rel="stylesheet" href="{{ url_for('statisch', path='/simple-flow.css') }}?v=20260728-1">
   <link rel="stylesheet" href="{{ url_for('statisch', path='/field-live-preview.css') }}?v=20260729-1">
-  <link rel="stylesheet" href="{{ url_for('statisch', path='/live-workspace.css') }}?v=20260731-1">
-  <link rel="stylesheet" href="{{ url_for('statisch', path='/live-interaction-fix.css') }}?v=20260731-4">
+  <link rel="stylesheet" href="{{ url_for('statisch', path='/live-workspace.css') }}?v=20260801-1">
+  <link rel="stylesheet" href="{{ url_for('statisch', path='/live-interaction-fix.css') }}?v=20260801-1">
 </head>
 <body class="bereich-{{ bereich|default('start') }} {% if mitglied %}angemeldet{% endif %} {% if hauptfluss %}hauptfluss{% endif %}">
   {% if mitglied %}
@@ -51,7 +51,7 @@
   <script src="{{ url_for('statisch', path='/field-live-preview.js') }}?v=20260729-1" defer></script>
   <script src="{{ url_for('statisch', path='/editor-entry-mode.js') }}?v=20260728-1" defer></script>
   <script src="{{ url_for('statisch', path='/workflow-use-v2.js') }}?v=20260728-1" defer></script>
-  <script src="{{ url_for('statisch', path='/live-workspace.js') }}?v=20260731-1" defer></script>
+  <script src="{{ url_for('statisch', path='/live-workspace.js') }}?v=20260801-1" defer></script>
   <script src="{{ url_for('statisch', path='/live-scroll-fix.js') }}?v=20260731-2" defer></script>
   <script src="{{ url_for('statisch', path='/live-empty-position.js') }}?v=20260731-4" defer></script>
 </body>
