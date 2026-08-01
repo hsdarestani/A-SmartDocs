@@ -23,5 +23,10 @@ from . import live_workspace as _live_workspace  # noqa: E402,F401
 # unabhängig vom Chat- und Textersetzungsweg möglich sein.
 from . import workspace_object_ops as _workspace_object_ops  # noqa: E402,F401
 
+# Zuletzt wird die Auswahl von ganzen PDF-Spans auf Wörter und zusammenhängende
+# Phrasen umgestellt. Dadurch löscht eine Änderung niemals mehr automatisch die
+# komplette Textzeile.
+from . import partial_line_editing as _partial_line_editing  # noqa: E402,F401
+
 
 __all__ = ["app"]
