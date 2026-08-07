@@ -10,7 +10,7 @@ jobs:
   android-release:
     runs-on: ubuntu-latest
     env:
-      SMARTDOCS_APP_URL: ${{ vars.SMARTDOCS_APP_URL }}
+      SMARTDOCS_APP_URL: ${{ vars.SMARTDOCS_APP_URL || secrets.SMARTDOCS_APP_URL }}
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
