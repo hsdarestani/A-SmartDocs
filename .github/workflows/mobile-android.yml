@@ -53,6 +53,8 @@ jobs:
           node scripts/configure-native.mjs android
           npx cap sync android
           node scripts/configure-native.mjs android
+          npm run assets:android
+          find android/app/src/main/res -path '*mipmap*' -name 'ic_launcher*' -print | grep -q .
 
       - name: Release-Signatur einrichten
         working-directory: mobile/android
