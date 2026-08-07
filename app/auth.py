@@ -56,9 +56,9 @@ def _schreibzugriff_erlaubt(request: Request, mitglied: Mitglied) -> bool:
         return True
 
     # Store-Richtlinien verlangen, dass jeder Nutzer sein eigenes Konto löschen
-    # kann. Die Aktion löscht ausschließlich das aktuell angemeldete Mitglied und
-    # darf daher nicht von einer Verwaltungsrolle abhängen.
-    if pfad == "/einstellungen/konto-loeschen":
+    # oder eine Löschanfrage stellen kann. Diese Aktionen dürfen nicht von einer
+    # Team-/Verwaltungsrolle abhängen.
+    if pfad in {"/einstellungen/konto-loeschen", "/konto-loeschen/anfragen"}:
         return True
 
     rolle = mitglied.rolle
