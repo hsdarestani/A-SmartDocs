@@ -20,7 +20,6 @@ function android() {
 
   const manifest = path.join(root, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
   replaceFile(manifest, text => {
-    // SmartDocs benötigt keine Kontakte-, Standort-, Kamera-, Mikrofon- oder Speicherberechtigung.
     text = text.replace(/\s*<uses-permission[^>]+android:name="android\.permission\.(READ_EXTERNAL_STORAGE|WRITE_EXTERNAL_STORAGE|READ_MEDIA_IMAGES|READ_MEDIA_VIDEO|CAMERA|RECORD_AUDIO|ACCESS_FINE_LOCATION|ACCESS_COARSE_LOCATION|READ_CONTACTS|POST_NOTIFICATIONS)"[^>]*\/>/g, '');
     if (!/android\.permission\.INTERNET/.test(text)) {
       text = text.replace('<application', '<uses-permission android:name="android.permission.INTERNET" />\n    <application');
@@ -56,9 +55,8 @@ function ios() {
     return text;
   });
 
-  // Manifest wird im iOS-Workflow mittels xcodeproj dem App-Target hinzugefügt.
   const privacy = path.join(root, 'ios', 'App', 'App', 'PrivacyInfo.xcprivacy');
-  fs.writeFileSync(privacy, `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict>\n<key>NSPrivacyTracking</key><false/>\n<key>NSPrivacyTrackingDomains</key><array/>\n<key>NSPrivacyCollectedDataTypes</key><array/>\n<key>NSPrivacyAccessedAPITypes</key><array/>\n</dict></plist>\n`);
+  fs.writeFileSync(privacy, `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict>\n<key>NSPrivacyTracking</key><false/>\n<key>NSPrivacyTrackingDomains</key><array/>\n<key>NSPrivacyAccessedAPITypes</key><array/>\n</dict></plist>\n`);
 }
 
 if (platform === 'android') android();
