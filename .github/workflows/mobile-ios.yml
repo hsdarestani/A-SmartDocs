@@ -45,6 +45,8 @@ jobs:
           node scripts/configure-native.mjs ios
           npx cap sync ios
           node scripts/configure-native.mjs ios
+          npm run assets:ios
+          test -s ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png
 
       - name: Privacy Manifest dem App-Target hinzufügen
         working-directory: mobile
