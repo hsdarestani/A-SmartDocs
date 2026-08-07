@@ -8,7 +8,9 @@
     "ios:init": "npx cap add ios && node scripts/configure-native.mjs ios",
     "sync": "npx cap sync",
     "sync:android": "npx cap sync android && node scripts/configure-native.mjs android",
-    "sync:ios": "npx cap sync ios && node scripts/configure-native.mjs ios"
+    "sync:ios": "npx cap sync ios && node scripts/configure-native.mjs ios",
+    "assets:android": "npx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#071c2e' --iconBackgroundColorDark '#071c2e' --splashBackgroundColor '#071c2e' --splashBackgroundColorDark '#071c2e'",
+    "assets:ios": "npx @capacitor/assets generate --ios --assetPath assets --iconBackgroundColor '#071c2e' --iconBackgroundColorDark '#071c2e' --splashBackgroundColor '#071c2e' --splashBackgroundColorDark '#071c2e'"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
@@ -19,6 +21,7 @@
     "@capacitor/share": "^8.0.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.0.0",
     "typescript": "^5.9.0"
   }
