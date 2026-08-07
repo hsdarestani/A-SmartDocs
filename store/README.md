@@ -48,3 +48,5 @@ Create the App ID / Bundle ID `de.aplussolution.smartdocs`, an App Store Distrib
 - No advertising SDK, advertising ID, cross-app tracking, location, contacts, microphone, camera or broad storage access is required by the mobile shell.
 - Account deletion is available in-app and through the public web URL.
 - Privacy, support and deletion URLs must stay reachable without authentication for Store review.
+
+The native release workflows are manual (`workflow_dispatch`) and therefore do not publish a Store build until the required credentials have been configured.
