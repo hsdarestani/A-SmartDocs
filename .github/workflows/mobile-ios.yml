@@ -68,13 +68,53 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          RAW_P12="$RUNNER_TEMP/distribution-input.p12"
+          PEM="$RUNNER_TEMP/distribution.pem"
+          COMPAT_P12="$RUNNER_TEMP/distribution-compatible.p12"
           KEYCHAIN="$RUNNER_TEMP/smartdocs-build.keychain-db"
           KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
-          printf '%s' "$IOS_DISTRIBUTION_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/distribution.p12"
+
+          printf '%s' "$IOS_DISTRIBUTION_CERT_P12_BASE64" | base64 --decode > "$RAW_P12"
+          test -s "$RAW_P12" || { echo "Das Distribution-P12 ist leer oder Base64 ist ungültig." >&2; exit 1; }
+
+          echo "Prüfe PKCS#12 und Passwort ..."
+          if ! openssl pkcs12 \
+              -in "$RAW_P12" \
+              -passin env:IOS_DISTRIBUTION_CERT_PASSWORD \
+              -nodes \
+              -out "$PEM"; then
+            echo "Das P12 konnte nicht mit IOS_DISTRIBUTION_CERT_PASSWORD geöffnet werden. Bitte P12 und Passwort als zusammengehöriges Paar in GitHub Secrets aktualisieren." >&2
+            exit 1
+          fi
+
+          echo "Erzeuge ein macOS-Keychain-kompatibles PKCS#12 ..."
+          if ! openssl pkcs12 \
+              -export \
+              -in "$PEM" \
+              -out "$COMPAT_P12" \
+              -name "Apple Distribution: A+ Solution GmbH" \
+              -passout env:IOS_DISTRIBUTION_CERT_PASSWORD \
+              -legacy; then
+            echo "Legacy-Modus nicht verfügbar; versuche explizite Apple-kompatible Algorithmen ..."
+            openssl pkcs12 \
+              -export \
+              -in "$PEM" \
+              -out "$COMPAT_P12" \
+              -name "Apple Distribution: A+ Solution GmbH" \
+              -passout env:IOS_DISTRIBUTION_CERT_PASSWORD \
+              -keypbe PBE-SHA1-3DES \
+              -certpbe PBE-SHA1-3DES \
+              -macalg sha1
+          fi
+
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
           security set-keychain-settings -lut 21600 "$KEYCHAIN"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
-          security import "$RUNNER_TEMP/distribution.p12" -k "$KEYCHAIN" -P "$IOS_DISTRIBUTION_CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security import "$COMPAT_P12" \
+            -k "$KEYCHAIN" \
+            -P "$IOS_DISTRIBUTION_CERT_PASSWORD" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/security
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
           security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
           security find-identity -v -p codesigning "$KEYCHAIN"
