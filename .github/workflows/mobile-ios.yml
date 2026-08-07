@@ -140,8 +140,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ -d "ios/App/App.xcworkspace" ]; then
+            echo "Baue über Xcode Workspace."
+            XCODE_CONTAINER=(-workspace ios/App/App.xcworkspace)
+          elif [ -d "ios/App/App.xcodeproj" ]; then
+            echo "Baue über Xcode Project (Capacitor 8 / Swift Package Manager)."
+            XCODE_CONTAINER=(-project ios/App/App.xcodeproj)
+          else
+            echo "Weder ios/App/App.xcworkspace noch ios/App/App.xcodeproj wurde erzeugt." >&2
+            find ios -maxdepth 4 -print || true
+            exit 1
+          fi
+
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            "${XCODE_CONTAINER[@]}" \
             -scheme App \
             -configuration Release \
             -destination 'generic/platform=iOS' \
