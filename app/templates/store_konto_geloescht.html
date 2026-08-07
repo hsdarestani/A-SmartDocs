@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block titel %}Konto gelöscht – A+ SmartDocs{% endblock %}
+{% block inhalt %}{% endblock %}
+{% block oeffentlicher_inhalt %}
+<section class="store-legal store-delete"><span class="uebertitel">Kontolöschung abgeschlossen</span><h1>Ihr Konto wurde gelöscht.</h1><p class="store-lead">Die aktive Sitzung wurde beendet. {% if typ == 'organisation' %}Das zugehörige Firmenkonto und seine Arbeitsdateien wurden ebenfalls aus A+ SmartDocs entfernt.{% else %}Ihr persönliches Konto wurde aus dem Firmenkonto entfernt.{% endif %}</p><p>Gesetzlich zwingend aufzubewahrende Nachweise können ausschließlich für die vorgeschriebene Dauer getrennt gespeichert bleiben.</p><div class="store-actions"><a class="schaltflaeche primaer" href="/">Zur Startseite</a><a class="schaltflaeche sekundaer" href="/datenschutz-app">Datenschutz</a></div></section>
+{% endblock %}

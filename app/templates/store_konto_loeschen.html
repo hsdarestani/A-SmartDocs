@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titel %}Konto löschen – A+ SmartDocs{% endblock %}
+{% block inhalt %}{% endblock %}
+{% block oeffentlicher_inhalt %}
+<section class="store-legal store-delete"><a class="store-legal-back" href="/">← A+ SmartDocs</a><span class="uebertitel">Kontolöschung</span><h1>A+ SmartDocs Konto und Daten löschen</h1><p class="store-lead">Sie können die Löschung Ihres A+ SmartDocs Kontos jederzeit anstoßen. In der App ist die direkte Löschung unter Einstellungen verfügbar.</p>
+{% if erfolg %}<div class="store-success"><strong>Löschanfrage eingegangen.</strong><p>Wir prüfen die Zuordnung zum angegebenen Konto und bearbeiten die Anfrage. Falls eine Identitätsprüfung erforderlich ist, melden wir uns über die Konto-E-Mail-Adresse.</p></div>{% else %}
+{% if fehler %}<div class="store-error">{{ fehler }}</div>{% endif %}
+<article><h2>Löschung ohne App-Zugriff anfragen</h2><form method="post" action="/konto-loeschen/anfragen" class="store-delete-form"><label><span>E-Mail-Adresse des Kontos</span><input type="email" name="email" value="{{ email or '' }}" autocomplete="email" required></label><label class="store-check"><input type="checkbox" name="bestaetigung" value="ja" required><span>Ich beantrage die endgültige Löschung meines Kontos und der damit verbundenen personenbezogenen Daten.</span></label><button class="schaltflaeche primaer" type="submit">Löschung anfragen</button></form></article>{% endif %}
+<article><h2>Was wird gelöscht?</h2><p>Das persönliche Konto, Profil- und Anmeldedaten sowie zugehörige personenbezogene Daten werden gelöscht. Wenn Sie alleiniger Inhaber eines Firmenkontos sind, werden auch dessen Arbeitsdokumente und Ausgaben entfernt. Bei einem Firmenkonto mit weiteren Mitgliedern bleiben geschäftliche Dokumente des Unternehmens erhalten; Ihr persönlicher Bezug als Ersteller wird daraus entfernt und die Inhaberrolle wird übertragen.</p></article>
+<article><h2>Was kann aufbewahrt werden?</h2><p>Daten, die wir aufgrund gesetzlicher Pflichten – etwa steuer- oder handelsrechtlicher Aufbewahrung – weiter speichern müssen, können für die gesetzlich vorgeschriebene Dauer getrennt aufbewahrt werden und werden nicht für andere Zwecke verwendet.</p></article>
+<p>Fragen zur Löschung: <a href="mailto:{{ support_email }}">{{ support_email }}</a></p></section>
+{% endblock %}
