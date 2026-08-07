@@ -25,6 +25,37 @@ def test_store_rechtsseiten_sind_oeffentlich(client):
         assert text in antwort.text
 
 
+def test_store_rechtsseiten_bleiben_nach_login_sichtbar(client):
+    login = client.post(
+        "/anmelden",
+        data={"email": "demo@smartdocs.de", "passwort": "Aplus-Kunde-7Qm!26", "weiter": "/arbeitsbereich"},
+        follow_redirects=False,
+    )
+    assert login.status_code == 303
+    for pfad, text in (
+        ("/datenschutz-app", "Datenschutzhinweise für A+ SmartDocs"),
+        ("/nutzungsbedingungen", "Nutzungsbedingungen"),
+        ("/support", "Hilfe zu A+ SmartDocs"),
+        ("/konto-loeschen", "Konto und Daten löschen"),
+    ):
+        antwort = client.get(pfad)
+        assert antwort.status_code == 200
+        assert text in antwort.text
+
+
+def test_datenschutz_deckt_store_kernthemen_ab(client):
+    text = client.get("/datenschutz-app").text
+    for erwartung in (
+        "A+ Solution GmbH",
+        "PDF- und KI-Verarbeitung",
+        "Berechtigungen auf Mobilgeräten",
+        "Konto- und Datenlöschung",
+        "keine Werbenetzwerke",
+        "de.aplussolution.smartdocs",
+    ):
+        assert erwartung in text
+
+
 def test_externe_kontoloeschanfrage_funktioniert_ohne_login(client):
     email = f"delete-{uuid.uuid4().hex}@example.invalid"
     antwort = client.post(
@@ -114,8 +145,12 @@ def test_mobile_store_builddateien_sind_vorhanden():
     ios = Path(".github/workflows/mobile-ios.yml").read_text(encoding="utf-8")
     capacitor = Path("mobile/capacitor.config.ts").read_text(encoding="utf-8")
     native = Path("mobile/scripts/configure-native.mjs").read_text(encoding="utf-8")
+    shell = Path("app/static/native-shell.js").read_text(encoding="utf-8")
     assert "de.aplussolution.smartdocs" in capacitor
     assert "targetSdkVersion = 36" in native
     assert "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64" in android
     assert "IOS_PROVISIONING_PROFILE_BASE64" in ios
     assert "ASC_PRIVATE_KEY_BASE64" in ios
+    assert "nativeSalesPaths" in shell
+    assert "'/preise'" in shell and "'/registrieren'" in shell
+    assert "window.location.replace('/anmelden')" in shell

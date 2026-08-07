@@ -1,18 +1,87 @@
 {% extends "base.html" %}
 {% block titel %}Datenschutz – A+ SmartDocs{% endblock %}
-{% block inhalt %}{% endblock %}
-{% block oeffentlicher_inhalt %}
-<section class="store-legal"><a class="store-legal-back" href="/">← A+ SmartDocs</a><span class="uebertitel">Datenschutz</span><h1>Datenschutzhinweise für A+ SmartDocs</h1><p class="store-lead">Diese Hinweise beschreiben die Datenverarbeitung in der Web-, Android- und iOS-Version von A+ SmartDocs.</p>
-  <article><h2>Verantwortlicher und Kontakt</h2><p>A+ Solution GmbH betreibt A+ SmartDocs. Datenschutz- und Supportanfragen können an <a href="mailto:{{ support_email }}">{{ support_email }}</a> gerichtet werden.</p></article>
-  <article><h2>Welche Daten werden verarbeitet?</h2><p>Wir verarbeiten nur Daten, die für die Bereitstellung des Dienstes erforderlich sind. Dazu gehören Kontodaten wie Name und E-Mail-Adresse, Unternehmens- und Teamdaten, hochgeladene PDF-Dokumente, von Ihnen eingegebene Änderungen und Chat-Anweisungen, erzeugte PDF-Ausgaben sowie technische Nutzungs- und Sicherheitsdaten.</p></article>
-  <article><h2>PDF- und KI-Verarbeitung</h2><p>Direkte Klick-, Text-, Checkbox- und Formatänderungen werden ohne KI verarbeitet, soweit die Zielstelle eindeutig ist. Wenn Sie eine KI-gestützte oder mehrdeutige Anweisung verwenden, können die hierfür erforderlichen Textausschnitte und Ihre Anweisung an einen von uns eingesetzten KI-Dienstleister als Auftragsverarbeiter übermittelt werden. Es werden nur die für die gewünschte Funktion erforderlichen Inhalte übertragen.</p></article>
-  <article><h2>Zwecke</h2><p>Die Daten werden zur Anmeldung, Zusammenarbeit im Firmenkonto, Bearbeitung und Ausgabe von Dokumenten, Bereitstellung der KI-Funktionen, Missbrauchs- und Sicherheitsprävention, Fehlerdiagnose, Support und – soweit relevant – Abrechnung verarbeitet.</p></article>
-  <article><h2>Weitergabe und Verkauf</h2><p>Wir verkaufen keine personenbezogenen Daten und verwenden A+ SmartDocs nicht für werbeübergreifendes Tracking. Daten werden nur an Dienstleister weitergegeben, die für Hosting, Infrastruktur, E-Mail oder die vom Nutzer angeforderte KI-Verarbeitung erforderlich sind, oder wenn eine gesetzliche Pflicht besteht.</p></article>
-  <article><h2>Berechtigungen auf Mobilgeräten</h2><p>Die App verwendet für den Kernablauf die systemeigenen Datei-Auswahl- und Teilen-Funktionen. Sie fordert keinen dauerhaften Zugriff auf Kontakte, Standort, Mikrofon oder die gesamte Fotobibliothek an. Berechtigungen werden nur angefragt, wenn sie für eine vom Nutzer gestartete Funktion tatsächlich erforderlich sind.</p></article>
-  <article><h2>Speicherdauer und Löschung</h2><p>Kontodaten und Arbeitsdokumente werden solange gespeichert, wie sie für das aktive Konto und den Dienst benötigt werden. Nutzer können ihr Konto innerhalb der App unter Einstellungen endgültig löschen. Zusätzlich steht unter <a href="/konto-loeschen">{{ basis_url }}/konto-loeschen</a> eine öffentliche Löschanfrage zur Verfügung. Bei einer Kontolöschung werden die zugehörigen personenbezogenen Daten gelöscht, soweit keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Gesetzlich aufzubewahrende Abrechnungs- oder Nachweisdaten können für die vorgeschriebene Dauer getrennt weiter gespeichert werden.</p></article>
-  <article><h2>Sicherheit</h2><p>Dateien und Kontobereiche werden nur authentifizierten Nutzern des jeweiligen Unternehmens bereitgestellt. Wir setzen Zugriffstrennung, rollenbasierte Berechtigungen, HTTPS und technische Schutzmaßnahmen für gespeicherte Inhalte ein.</p></article>
-  <article><h2>Ihre Rechte</h2><p>Sie können Auskunft, Berichtigung, Löschung, Einschränkung oder – soweit anwendbar – Datenübertragbarkeit verlangen und eine erteilte Einwilligung widerrufen. Kontakt: <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p></article>
-  <article><h2>Kinder</h2><p>A+ SmartDocs ist ein Produkt für geschäftliche Dokumentenarbeit und richtet sich nicht gezielt an Kinder.</p></article>
-  <p class="store-legal-meta">Stand: August 2026</p>
+{% macro datenschutz_inhalt() -%}
+<section class="store-legal">
+  <a class="store-legal-back" href="/">← A+ SmartDocs</a>
+  <span class="uebertitel">Datenschutz</span>
+  <h1>Datenschutzhinweise für A+ SmartDocs</h1>
+  <p class="store-lead">Diese Datenschutzhinweise gelten für die Web-, Android- und iOS-Version von A+ SmartDocs. A+ SmartDocs ist ein geschäftlicher Dokumentendienst der A+ Solution GmbH.</p>
+
+  <article>
+    <h2>1. Verantwortlicher und Kontakt</h2>
+    <p>Verantwortlicher für die Datenverarbeitung ist die A+ Solution GmbH, Deutschland. Datenschutz-, Auskunfts-, Lösch- und Supportanfragen können an <a href="mailto:{{ support_email }}">{{ support_email }}</a> gerichtet werden.</p>
+  </article>
+
+  <article>
+    <h2>2. Welche Daten werden verarbeitet?</h2>
+    <p>Je nach Nutzung verarbeiten wir insbesondere folgende Kategorien:</p>
+    <ul>
+      <li><strong>Konto- und Profildaten:</strong> Name, E-Mail-Adresse, Rolle und Anmeldeinformationen.</li>
+      <li><strong>Unternehmensdaten:</strong> Firmenname, Branche, Anschrift, Kontaktangaben, Teamzuordnung und Rollen.</li>
+      <li><strong>Dateien und Dokumentinhalte:</strong> hochgeladene PDF-, Bild- und Dokumentdateien, erkannte Felder, Bearbeitungen, Vorlagen und erzeugte PDF-Ausgaben.</li>
+      <li><strong>Nutzereingaben:</strong> Chat-, Bearbeitungs- und Korrekturanweisungen, die Sie selbst an A+ SmartDocs übermitteln.</li>
+      <li><strong>Vertrags- und Abrechnungsdaten:</strong> Tarif, Freischaltungsstatus, Rechnungsstatus und für die Kontoverwaltung erforderliche Nachweise. Die mobile App verarbeitet keine Kreditkarten- oder Bankkartendaten.</li>
+      <li><strong>Technische Sicherheitsdaten:</strong> für Betrieb, Schutz und Fehlerdiagnose erforderliche technische Ereignisse und Verbindungsinformationen.</li>
+    </ul>
+  </article>
+
+  <article>
+    <h2>3. Zwecke und Rechtsgrundlagen</h2>
+    <p>Wir verarbeiten Daten zur Bereitstellung und Absicherung des Nutzerkontos, zur Bearbeitung und Ausgabe von Dokumenten, zur Teamzusammenarbeit, zur Bereitstellung angeforderter KI-Funktionen, zur Fehlerdiagnose, zum Support sowie zur Vertrags- und Abrechnungsverwaltung. Soweit die DSGVO anwendbar ist, erfolgt die Verarbeitung insbesondere zur Vertragserfüllung bzw. Durchführung vorvertraglicher Maßnahmen (Art. 6 Abs. 1 lit. b DSGVO), zur Erfüllung gesetzlicher Pflichten (Art. 6 Abs. 1 lit. c DSGVO) und zur Wahrung berechtigter Interessen an einem sicheren und zuverlässigen Betrieb (Art. 6 Abs. 1 lit. f DSGVO). Eine Einwilligung wird nur dort verwendet, wo sie rechtlich erforderlich ist.</p>
+  </article>
+
+  <article>
+    <h2>4. PDF- und KI-Verarbeitung</h2>
+    <p>Direkte Klick-, Text-, Checkbox- und Formatänderungen werden soweit möglich ohne KI verarbeitet. Wenn Sie eine KI-gestützte oder mehrdeutige Anweisung verwenden, können die für diese Funktion erforderlichen Textausschnitte und Ihre Anweisung an einen von uns eingesetzten technischen KI-Dienstleister als Auftragsverarbeiter übermittelt werden. Wir beschränken die Übermittlung auf die Inhalte, die für die vom Nutzer gestartete Funktion erforderlich sind.</p>
+  </article>
+
+  <article>
+    <h2>5. Empfänger und Dienstleister</h2>
+    <p>Daten können im erforderlichen Umfang an technische Dienstleister für Hosting/Infrastruktur, E-Mail und Support sowie für ausdrücklich angeforderte KI-Verarbeitung übermittelt werden. Diese Dienstleister werden für die Bereitstellung des Dienstes eingesetzt. Wir verkaufen keine personenbezogenen Daten, verwenden A+ SmartDocs nicht für werbeübergreifendes Tracking und integrieren keine Werbenetzwerke.</p>
+  </article>
+
+  <article>
+    <h2>6. Verarbeitung außerhalb des EWR</h2>
+    <p>Soweit ein für die Bereitstellung erforderlicher Dienstleister Daten außerhalb der Europäischen Union bzw. des Europäischen Wirtschaftsraums verarbeitet, erfolgt die Übermittlung nur unter Beachtung der anwendbaren Datenschutzvorgaben und erforderlichen Schutzmechanismen.</p>
+  </article>
+
+  <article>
+    <h2>7. Berechtigungen auf Mobilgeräten</h2>
+    <p>Die Android- und iOS-App verwendet für den Kernablauf die systemeigenen Datei-Auswahl- und Teilen-Funktionen sowie die Internetverbindung zum SmartDocs-Dienst. Für die Kernfunktionen werden kein Standort, keine Kontakte, kein Mikrofon, keine Werbe-ID und kein dauerhafter Zugriff auf die gesamte Fotobibliothek benötigt. Eine Dateiauswahl erfolgt ausschließlich durch eine Aktion des Nutzers.</p>
+  </article>
+
+  <article>
+    <h2>8. Speicherdauer</h2>
+    <p>Kontodaten, Arbeitsdokumente, Vorlagen und Ausgaben werden nur so lange gespeichert, wie sie für das aktive Firmenkonto, die vom Nutzer gewünschte Dokumentverwaltung oder gesetzliche Pflichten benötigt werden. Gelöschte Konten und zugehörige personenbezogene Daten werden entfernt, soweit keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Gesetzlich aufzubewahrende Abrechnungs- oder Nachweisdaten können für die vorgeschriebene Dauer getrennt weiter gespeichert werden.</p>
+  </article>
+
+  <article>
+    <h2>9. Konto- und Datenlöschung</h2>
+    <p>Angemeldete Nutzer können ihr eigenes Konto innerhalb der App unter <strong>Einstellungen → Konto endgültig löschen</strong> löschen. Zusätzlich steht eine öffentliche Löschmöglichkeit unter <a href="/konto-loeschen">{{ basis_url }}/konto-loeschen</a> zur Verfügung. Bei einem alleinigen Firmeninhaber werden auch die zugehörigen Arbeitsdateien des Firmenkontos gelöscht. In einem Firmenkonto mit weiteren Mitgliedern bleiben betriebliche Dokumente des Unternehmens bestehen; der persönliche Bezug des gelöschten Nutzers wird entfernt.</p>
+  </article>
+
+  <article>
+    <h2>10. Sicherheit</h2>
+    <p>Die Übertragung erfolgt über HTTPS. Konten, Vorlagen und Dokumente werden organisationsbezogen getrennt und durch Anmeldung sowie rollenbasierte Berechtigungen geschützt. Originaldateien und Ausgaben werden nicht als öffentliche Dateien ausgeliefert.</p>
+  </article>
+
+  <article>
+    <h2>11. Ihre Datenschutzrechte</h2>
+    <p>Nach Maßgabe des anwendbaren Datenschutzrechts können Sie insbesondere Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenübertragbarkeit verlangen sowie einer Verarbeitung widersprechen. Eine erteilte Einwilligung kann mit Wirkung für die Zukunft widerrufen werden. Sie haben außerdem das Recht, sich bei einer zuständigen Datenschutzaufsichtsbehörde zu beschweren.</p>
+  </article>
+
+  <article>
+    <h2>12. Kinder und Zielgruppe</h2>
+    <p>A+ SmartDocs richtet sich an Unternehmen und volljährige geschäftliche Nutzer. Der Dienst ist nicht für Kinder konzipiert und wird nicht gezielt an Kinder vermarktet.</p>
+  </article>
+
+  <article>
+    <h2>13. Änderungen dieser Hinweise</h2>
+    <p>Wir aktualisieren diese Hinweise, wenn sich Funktionen, Dienstleister oder rechtliche Anforderungen wesentlich ändern. Die jeweils aktuelle Fassung ist dauerhaft unter dieser URL öffentlich erreichbar.</p>
+  </article>
+
+  <p class="store-legal-meta">Stand: 7. August 2026 · A+ SmartDocs · Paketkennung de.aplussolution.smartdocs</p>
 </section>
-{% endblock %}
+{%- endmacro %}
+{% block inhalt %}{{ datenschutz_inhalt() }}{% endblock %}
+{% block oeffentlicher_inhalt %}{{ datenschutz_inhalt() }}{% endblock %}

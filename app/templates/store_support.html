@@ -1,8 +1,21 @@
 {% extends "base.html" %}
 {% block titel %}Support – A+ SmartDocs{% endblock %}
-{% block inhalt %}{% endblock %}
-{% block oeffentlicher_inhalt %}
-<section class="store-legal store-support"><a class="store-legal-back" href="/">← A+ SmartDocs</a><span class="uebertitel">Support</span><h1>Hilfe zu A+ SmartDocs</h1><p class="store-lead">Bei Problemen mit Anmeldung, Dokumenten, Export oder Kontoverwaltung helfen wir weiter.</p>
-<div class="store-support-grid"><article><h2>Support kontaktieren</h2><p>Schreiben Sie an <a href="mailto:{{ support_email }}">{{ support_email }}</a>. Bitte nennen Sie, wenn möglich, Gerät, Betriebssystem und eine kurze Beschreibung des Problems. Senden Sie keine vertraulichen Dokumentinhalte per E-Mail, wenn dies nicht erforderlich ist.</p></article><article><h2>Konto löschen</h2><p>Angemeldete Nutzer können ihr Konto direkt unter Einstellungen löschen. Ohne App-Zugriff können Sie die öffentliche <a href="/konto-loeschen">Kontolöschseite</a> verwenden.</p></article><article><h2>Datenschutz</h2><p>Informationen zu verarbeiteten Daten, KI-Verarbeitung, Berechtigungen und Aufbewahrung finden Sie unter <a href="/datenschutz-app">Datenschutz</a>.</p></article><article><h2>Status und Dateien</h2><p>Für Upload und Export verwendet die App die systemeigenen Dateifunktionen. Bei einem fehlgeschlagenen Export bleibt das Originaldokument unverändert und kann erneut bearbeitet werden.</p></article></div>
+{% macro support_inhalt() -%}
+<section class="store-legal store-support">
+  <a class="store-legal-back" href="/">← A+ SmartDocs</a>
+  <span class="uebertitel">Support</span>
+  <h1>Hilfe zu A+ SmartDocs</h1>
+  <p class="store-lead">Bei Problemen mit Anmeldung, Dokumenten, Export oder Kontoverwaltung helfen wir weiter.</p>
+  <div class="store-support-grid">
+    <article><h2>Support kontaktieren</h2><p>Schreiben Sie an <a href="mailto:{{ support_email }}">{{ support_email }}</a>. Bitte nennen Sie, wenn möglich, Gerät, Betriebssystem, App-Version und eine kurze Beschreibung des Problems. Senden Sie keine vertraulichen Dokumentinhalte per E-Mail, wenn dies nicht erforderlich ist.</p></article>
+    <article><h2>Anmeldung und Firmenkonto</h2><p>Die mobile App ist für bereits freigeschaltete Firmenkonten vorgesehen. Wenn Ihr Konto noch nicht freigeschaltet ist oder Ihre Zugangsdaten nicht funktionieren, wenden Sie sich bitte an den Support bzw. den zuständigen Ansprechpartner Ihres Unternehmens.</p></article>
+    <article><h2>Konto löschen</h2><p>Angemeldete Nutzer können ihr eigenes Konto direkt unter <strong>Einstellungen → Konto endgültig löschen</strong> entfernen. Ohne App-Zugriff können Sie die öffentliche <a href="/konto-loeschen">Kontolöschseite</a> verwenden.</p></article>
+    <article><h2>Datenschutz</h2><p>Informationen zu verarbeiteten Daten, KI-Verarbeitung, Berechtigungen, Aufbewahrung und Löschung finden Sie unter <a href="/datenschutz-app">Datenschutz</a>.</p></article>
+    <article><h2>Dateien und Export</h2><p>Für Upload und Export verwendet die App die systemeigenen Dateifunktionen. Bei einem fehlgeschlagenen Export bleibt das Originaldokument unverändert und kann erneut bearbeitet werden.</p></article>
+    <article><h2>Sicherheit</h2><p>Bitte teilen Sie Ihr Passwort nicht mit anderen Personen. Wenn Sie einen unberechtigten Zugriff vermuten, kontaktieren Sie den Support und lassen Sie den Zugang Ihres Firmenkontos prüfen.</p></article>
+  </div>
+  <p class="store-legal-meta">Support für Web, Android und iOS · {{ support_email }}</p>
 </section>
-{% endblock %}
+{%- endmacro %}
+{% block inhalt %}{{ support_inhalt() }}{% endblock %}
+{% block oeffentlicher_inhalt %}{{ support_inhalt() }}{% endblock %}

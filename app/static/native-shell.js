@@ -4,6 +4,7 @@
   const cap = () => window.Capacitor;
   const isNative = () => Boolean(cap()?.isNativePlatform?.());
   const plugins = () => cap()?.Plugins || {};
+  const nativeSalesPaths = new Set(['/preise', '/registrieren']);
 
   async function json(url, options = {}) {
     const response = await fetch(url, { credentials: 'same-origin', ...options });
@@ -19,6 +20,36 @@
       reader.onload = () => resolve(String(reader.result || '').split(',')[1] || '');
       reader.readAsDataURL(blob);
     });
+  }
+
+  function normalisierterPfad(href) {
+    try {
+      const url = new URL(href, window.location.href);
+      if (url.origin !== window.location.origin) return null;
+      return url.pathname.replace(/\/+$/, '') || '/';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function nativeConsumptionOnly() {
+    if (!isNative()) return false;
+    document.documentElement.classList.add('native-app');
+
+    const aktuellerPfad = window.location.pathname.replace(/\/+$/, '') || '/';
+    if (aktuellerPfad === '/' || nativeSalesPaths.has(aktuellerPfad)) {
+      window.location.replace('/anmelden');
+      return true;
+    }
+
+    // Die Store-Version ist bewusst "consumption only": bestehende Firmenkonten
+    // melden sich an und nutzen den Dienst. Tarif-/Registrierungs-CTAs bleiben im
+    // öffentlichen Webauftritt, werden aber nicht in Android/iOS angeboten.
+    document.querySelectorAll('a[href^="/preise"], a[href^="/registrieren"]').forEach(link => link.remove());
+    document.querySelectorAll('.oeffentliche-aktionen').forEach(container => {
+      container.querySelectorAll('a[href^="/registrieren"]').forEach(link => link.remove());
+    });
+    return false;
   }
 
   async function nativePdfTeilen(button) {
@@ -58,6 +89,18 @@
 
   document.addEventListener('click', async event => {
     if (!isNative()) return;
+
+    const link = event.target.closest?.('a[href]');
+    if (link) {
+      const pfad = normalisierterPfad(link.getAttribute('href'));
+      if (pfad && nativeSalesPaths.has(pfad)) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.location.assign('/anmelden');
+        return;
+      }
+    }
+
     const exportButton = event.target.closest?.('#liveExport');
     if (!exportButton) return;
     const Filesystem = plugins().Filesystem;
@@ -75,7 +118,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     if (!isNative()) return;
-    document.documentElement.classList.add('native-app');
+    if (nativeConsumptionOnly()) return;
     const App = plugins().App;
     App?.addListener?.('backButton', () => {
       if (history.length > 1) history.back();
