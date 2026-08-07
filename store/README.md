@@ -24,7 +24,7 @@ Required repository secrets:
 - `ANDROID_KEY_PASSWORD`
 - `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64`
 
-The first Google Play app record for package `de.aplussolution.smartdocs` must be created in Play Console once before API uploads. The workflow publishes signed AAB builds to **Internal testing**.
+The first Google Play app record for package `de.aplussolution.smartdocs` must be created in Play Console once before API uploads. The workflow publishes signed AAB builds to **Internal testing** and targets Android API 36.
 
 ## Apple
 
@@ -47,3 +47,4 @@ Create the App ID / Bundle ID `de.aplussolution.smartdocs`, an App Store Distrib
 - Apple App Privacy working notes: `store/apple/app-privacy.md`
 - No advertising SDK, advertising ID, cross-app tracking, location, contacts, microphone, camera or broad storage access is required by the mobile shell.
 - Account deletion is available in-app and through the public web URL.
+- Privacy, support and deletion URLs must stay reachable without authentication for Store review.
