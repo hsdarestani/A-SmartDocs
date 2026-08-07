@@ -32,5 +32,9 @@ from . import partial_line_renderer as _partial_line_renderer  # noqa: E402,F401
 # freie Einfügungen sowie die optionale Dokumentschrift verwendet.
 from . import font_engine as _font_engine  # noqa: E402,F401
 
+# Öffentliche Datenschutz-, Support- und Kontolöschrouten sind Teil der Store-
+# Konformität und werden auf Web, Android und iOS identisch angeboten.
+from . import store_compliance as _store_compliance  # noqa: E402,F401
+
 
 __all__ = ["app"]
