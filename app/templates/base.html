@@ -2,8 +2,11 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#071c2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>{% block titel %}A+ SmartDocs{% endblock %}</title>
   <meta name="description" content="PDF hochladen, direkt bearbeiten und fertig exportieren.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +23,7 @@
   <link rel="stylesheet" href="{{ url_for('statisch', path='/field-live-preview.css') }}?v=20260729-1">
   <link rel="stylesheet" href="{{ url_for('statisch', path='/live-workspace.css') }}?v=20260801-1">
   <link rel="stylesheet" href="{{ url_for('statisch', path='/live-interaction-fix.css') }}?v=20260731-4&partial=20260801-1">
+  <link rel="stylesheet" href="{{ url_for('statisch', path='/store-compliance.css') }}?v=20260807-1">
 </head>
 <body class="bereich-{{ bereich|default('start') }} {% if mitglied %}angemeldet{% endif %} {% if hauptfluss %}hauptfluss{% endif %}">
   {% if mitglied %}
@@ -30,14 +34,15 @@
       <span class="navigationsgruppe">Unternehmen</span><a href="/team" class="{% if bereich == 'team' %}aktiv{% endif %}"><i>05</i><span>Team und Rollen</span></a><a href="/abrechnung" class="{% if bereich == 'abrechnung' %}aktiv{% endif %}"><i>06</i><span>Tarif und Abrechnung</span></a><a href="/einstellungen" class="{% if bereich == 'einstellungen' %}aktiv{% endif %}"><i>07</i><span>Einstellungen</span></a>
       {% if mitglied.ist_superadmin %}<span class="navigationsgruppe">A+ Verwaltung</span><a href="/verwaltung" class="{% if bereich == 'verwaltung' %}aktiv{% endif %}"><i>A+</i><span>Verwaltungszentrale</span></a>{% endif %}
     </nav>
-    <div class="seitenleisten-fuss"><div class="konto-mini"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ organisation.name }}</small></div></div><form action="/abmelden" method="post"><button type="submit" class="abmelden-knopf" title="Abmelden">↗</button></form></div>
+    <div class="seitenleisten-fuss"><div class="konto-mini"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ organisation.name }}</small></div></div><form action="/abmelden" method="post"><button type="submit" class="abmelden-knopf" title="Abmelden">↗</button></form><div class="store-legal-links"><a href="/datenschutz-app">Datenschutz</a><a href="/nutzungsbedingungen">Bedingungen</a><a href="/support">Support</a></div></div>
   </aside>
   <header class="app-kopfzeile"><button class="menueknopf" id="menueknopf" aria-label="Navigation öffnen">☰</button><div class="kopf-suche"><span>⌕</span><input type="search" placeholder="Vorlagen und Dokumente durchsuchen …"><kbd>⌘ K</kbd></div><a class="kopf-neu" href="/arbeitsbereich">＋ Neues Dokument</a><button class="symbolknopf" aria-label="Benachrichtigungen">□<i></i></button><a class="profilchip" href="/einstellungen"><span>{{ mitglied.name[:2]|upper }}</span><div><strong>{{ mitglied.name }}</strong><small>{{ mitglied.rolle.value|capitalize }}</small></div></a></header>
   {% if rueckkehr_admin %}<div class="ansichtsleiste"><span>Sie sehen das Produkt aus Kundensicht: <strong>{{ organisation.name }}</strong></span><form action="/verwaltung/zurueck" method="post"><button type="submit">Zur A+ Verwaltung zurückkehren</button></form></div>{% endif %}
   <main class="app-inhalt">{% block inhalt %}{% endblock %}</main>
   {% else %}
-  <header class="oeffentliche-kopfzeile"><a class="marke" href="/"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span></a><nav><a href="/#funktion">Arbeitsweise</a><a href="/preise" class="{% if bereich == 'preise' %}aktiv{% endif %}">Tarife</a><a href="/#sicherheit">Datenschutz</a></nav><div class="oeffentliche-aktionen"><a href="/anmelden">Anmelden</a><a href="/registrieren" class="schaltflaeche primaer klein">Kostenlos testen</a></div></header>
+  <header class="oeffentliche-kopfzeile"><a class="marke" href="/"><span class="marken-symbol">A+</span><span class="marken-text"><strong>SmartDocs</strong><small>von A+ Solution</small></span></a><nav><a href="/#funktion">Arbeitsweise</a><a href="/preise" class="{% if bereich == 'preise' %}aktiv{% endif %}">Tarife</a><a href="/datenschutz-app">Datenschutz</a></nav><div class="oeffentliche-aktionen"><a href="/anmelden">Anmelden</a><a href="/registrieren" class="schaltflaeche primaer klein">Kostenlos testen</a></div></header>
   <main>{% block oeffentlicher_inhalt %}{% endblock %}</main>
+  <footer class="public-store-footer"><span>© A+ Solution GmbH · A+ SmartDocs</span><div class="store-legal-links"><a href="/datenschutz-app">Datenschutz</a><a href="/nutzungsbedingungen">Nutzungsbedingungen</a><a href="/support">Support</a><a href="/konto-loeschen">Konto löschen</a></div></footer>
   {% endif %}
   {% if hinweis %}<div id="serverHinweis" class="meldung sichtbar {{ hinweis.art }}">{{ hinweis.text }}</div>{% endif %}<div id="meldung" class="meldung" role="status" aria-live="polite"></div>
   <script src="{{ url_for('statisch', path='/simple-flow.js') }}?v=20260728-2" defer></script>
