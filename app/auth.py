@@ -55,6 +55,12 @@ def _schreibzugriff_erlaubt(request: Request, mitglied: Mitglied) -> bool:
     if mitglied.ist_superadmin:
         return True
 
+    # Store-Richtlinien verlangen, dass jeder Nutzer sein eigenes Konto löschen
+    # kann. Die Aktion löscht ausschließlich das aktuell angemeldete Mitglied und
+    # darf daher nicht von einer Verwaltungsrolle abhängen.
+    if pfad == "/einstellungen/konto-loeschen":
+        return True
+
     rolle = mitglied.rolle
     if rolle == Kontorolle.LESEN:
         return False
