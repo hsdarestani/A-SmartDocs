@@ -2,6 +2,12 @@ name: SmartDocs Android → Google Play
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mobile/assets/**'
+      - '.github/workflows/mobile-android.yml'
 
 permissions:
   contents: read
