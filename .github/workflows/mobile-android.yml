@@ -7,7 +7,6 @@ on:
       - main
     paths:
       - 'mobile/assets/**'
-      - '.github/workflows/mobile-android.yml'
 
 permissions:
   contents: read
@@ -95,12 +94,12 @@ jobs:
           printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64" | base64 --decode > "$RUNNER_TEMP/google-play.json"
           chmod 600 "$RUNNER_TEMP/google-play.json"
 
-      - name: In Google Play Production veröffentlichen
+      - name: In Google Play Internal Testing veröffentlichen
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ runner.temp }}/google-play.json
           packageName: de.aplussolution.smartdocs
           releaseFiles: mobile/android/app/build/outputs/bundle/release/app-release.aab
-          track: production
+          track: internal
           status: completed
           changesNotSentForReview: true
