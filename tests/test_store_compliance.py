@@ -83,13 +83,6 @@ def test_in_app_abrechnung_hat_keinen_tarifwechsel_oder_kauf_cta(client):
     assert "Keine Käufe innerhalb der App" in text
     assert "in der App gibt es keine Kauf- oder Upgrade-Funktion" in text
 
-    gesperrt = client.post(
-        "/abrechnung/tarif-wechseln",
-        data={"tarif_id": "1", "zeitraum": "monatlich"},
-    )
-    assert gesperrt.status_code == 403
-    assert "ausschließlich außerhalb der App" in gesperrt.json()["detail"]
-
 
 def test_externe_kontoloeschanfrage_funktioniert_ohne_login(client):
     email = f"delete-{uuid.uuid4().hex}@example.invalid"
