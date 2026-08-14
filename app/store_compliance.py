@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import delete, select, update
 
 from .auth import passwort_pruefen
-from .database import datenbank_sitzung
+from .database import Sitzung, datenbank_sitzung
 from .main import app, aktuelles_mitglied, cfg, grundkontext, muss_angemeldet_sein, vorlagen
 from .models import (
     Arbeitsausgabe,
@@ -19,9 +19,29 @@ from .models import (
     Mitglied,
     Nutzungsereignis,
     Organisation,
+    Tarif,
 )
 
 SUPPORT_EMAIL = "app@aplus-solution.de"
+
+
+@app.on_event("startup")
+def enterprise_tarifbeschreibungen_sicherstellen() -> None:
+    """Entfernt auch in bestehenden Datenbanken jede Consumer-Positionierung der Tarife."""
+    beschreibungen = {
+        "Start": "Für kleine Unternehmen und Organisationsteams mit wiederkehrenden Geschäftsdokumenten.",
+        "Unternehmen": "Für wachsende Unternehmen mit mehreren Mitarbeitenden und regelmäßigem Dokumentenaufkommen.",
+        "Professionell": "Für Organisationen mit hohem Volumen, individuellen Kontingenten und erweiterten Verwaltungsanforderungen.",
+    }
+    with Sitzung() as db:
+        geaendert = False
+        for name, beschreibung in beschreibungen.items():
+            tarif = db.scalar(select(Tarif).where(Tarif.name == name))
+            if tarif and tarif.beschreibung != beschreibung:
+                tarif.beschreibung = beschreibung
+                geaendert = True
+        if geaendert:
+            db.commit()
 
 
 def _public_context(request: Request, db, bereich: str) -> dict:
