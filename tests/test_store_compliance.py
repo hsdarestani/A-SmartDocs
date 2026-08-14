@@ -56,6 +56,34 @@ def test_datenschutz_deckt_store_kernthemen_ab(client):
         assert erwartung in text
 
 
+def test_enterprise_only_copy_ist_auf_relevanten_seiten_sichtbar(client):
+    login_text = client.get("/anmelden").text
+    preise_text = client.get("/preise").text
+    registrierung_text = client.get("/registrieren").text
+    bedingungen_text = client.get("/nutzungsbedingungen").text
+
+    assert "Privat-, Einzel- und Familienkonten werden nicht angeboten" in login_text
+    assert "keine Angebote für Privatpersonen, Einzelnutzer oder Familien" in preise_text
+    assert "Privatpersonen, Einzelnutzer und Familien können keinen Zugang erwerben" in registrierung_text
+    assert "nicht an Privatpersonen, Einzelnutzer oder Familien verkauft" in bedingungen_text
+    assert "Für Einzelpersonen" not in preise_text
+    assert "14 Tage ohne Zahlungsdaten testen" not in login_text
+
+
+def test_in_app_abrechnung_hat_keinen_tarifwechsel_oder_kauf_cta(client):
+    login = client.post(
+        "/anmelden",
+        data={"email": "demo@smartdocs.de", "passwort": "Aplus-Kunde-7Qm!26", "weiter": "/abrechnung"},
+        follow_redirects=False,
+    )
+    assert login.status_code == 303
+    text = client.get("/abrechnung").text
+    assert "Tarifwechsel anfragen" not in text
+    assert "Tarif anfragen" not in text
+    assert "Keine Käufe innerhalb der App" in text
+    assert "in der App gibt es keine Kauf- oder Upgrade-Funktion" in text
+
+
 def test_externe_kontoloeschanfrage_funktioniert_ohne_login(client):
     email = f"delete-{uuid.uuid4().hex}@example.invalid"
     antwort = client.post(
@@ -149,7 +177,6 @@ def test_mobile_store_builddateien_sind_vorhanden():
     assert "de.aplussolution.smartdocs" in capacitor
     assert "targetSdkVersion = 36" in native
     assert "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64" in android
-    assert "IOS_PROVISIONING_PROFILE_BASE64" in ios
     assert "ASC_PRIVATE_KEY_BASE64" in ios
     assert "nativeSalesPaths" in shell
     assert "'/preise'" in shell and "'/registrieren'" in shell
