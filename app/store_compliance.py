@@ -25,26 +25,6 @@ from .models import (
 SUPPORT_EMAIL = "app@aplus-solution.de"
 
 
-def _alte_tarifwechselroute(route) -> bool:
-    return (
-        getattr(route, "path", None) == "/abrechnung/tarif-wechseln"
-        and "POST" in (getattr(route, "methods", set()) or set())
-    )
-
-
-# Die Store-Version darf keinen versteckten oder nur per URL erreichbaren Upgrade-Pfad behalten.
-# Die ältere Route aus main.py wird deshalb vollständig aus dem Router entfernt.
-app.router.routes[:] = [route for route in app.router.routes if not _alte_tarifwechselroute(route)]
-
-
-@app.post("/abrechnung/tarif-wechseln")
-def enterprise_tarifwechsel_gesperrt():
-    raise HTTPException(
-        status_code=403,
-        detail="Vertrags- und Kontingentänderungen werden ausschließlich außerhalb der App direkt mit A+ Solution verwaltet.",
-    )
-
-
 @app.on_event("startup")
 def enterprise_tarifbeschreibungen_sicherstellen() -> None:
     """Entfernt auch in bestehenden Datenbanken jede Consumer-Positionierung der Tarife."""
