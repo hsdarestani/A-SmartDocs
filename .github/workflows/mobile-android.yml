@@ -52,14 +52,43 @@ jobs:
 
       - name: Capacitor Android erzeugen
         working-directory: mobile
+        shell: bash
         run: |
+          set -euo pipefail
           npm install --no-audit --no-fund
           npx cap add android
           node scripts/configure-native.mjs android
           npx cap sync android
           node scripts/configure-native.mjs android
+
+          # `cap add android` ships Capacitor's own adaptive launcher icon.
+          # Remove every template launcher resource before generating ours so a
+          # stale Capacitor foreground can never survive on Android 8+ devices.
+          find android/app/src/main/res -type f \
+            \( -name 'ic_launcher*' -o -name 'ic_launcher_background*' \) \
+            -print -delete
+
           npm run assets:android
-          find android/app/src/main/res -path '*mipmap*' -name 'ic_launcher*' -print | grep -q .
+
+          # Fail the build unless both legacy and adaptive A+ SmartDocs icons
+          # were regenerated. This prevents another Play submission with a
+          # correct legacy icon but the default Capacitor adaptive icon.
+          required_icons=(
+            android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+            android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
+            android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+            android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          )
+          for icon in "${required_icons[@]}"; do
+            if [ ! -s "$icon" ]; then
+              echo "Fehlendes generiertes Launcher-Asset: $icon" >&2
+              exit 1
+            fi
+          done
+
+          sha256sum \
+            android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png \
+            android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
 
       - name: Release-Signatur einrichten
         working-directory: mobile/android
