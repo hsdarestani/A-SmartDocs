@@ -2,6 +2,12 @@ name: SmartDocs Android → Google Play
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_to_play:
+        description: 'Upload the built AAB to Google Play Internal Testing'
+        required: false
+        default: false
+        type: boolean
   push:
     branches:
       - main
@@ -21,6 +27,7 @@ jobs:
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
+      PUBLISH_TO_PLAY: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_to_play && 'true' || 'false' }}
     steps:
       - name: Quelltext laden
         uses: actions/checkout@v4
@@ -41,25 +48,58 @@ jobs:
       - name: Android SDK einrichten
         uses: android-actions/setup-android@v3
 
-      - name: Store-Konfiguration prüfen
+      - name: Build-Konfiguration prüfen
         shell: bash
         run: |
           set -euo pipefail
-          for name in SMARTDOCS_APP_URL ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64; do
+          for name in SMARTDOCS_APP_URL ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
             if [ -z "${!name:-}" ]; then echo "Fehlende Actions-Konfiguration: $name" >&2; exit 1; fi
           done
+          if [ "$PUBLISH_TO_PLAY" = "true" ] && [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64:-}" ]; then
+            echo "Fehlende Actions-Konfiguration: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64" >&2
+            exit 1
+          fi
           sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Capacitor Android erzeugen
         working-directory: mobile
+        shell: bash
         run: |
+          set -euo pipefail
           npm install --no-audit --no-fund
           npx cap add android
           node scripts/configure-native.mjs android
           npx cap sync android
           node scripts/configure-native.mjs android
+
+          # `cap add android` ships Capacitor's own adaptive launcher icon.
+          # Remove every template launcher resource before generating ours so a
+          # stale Capacitor foreground can never survive on Android 8+ devices.
+          find android/app/src/main/res -type f \
+            \( -name 'ic_launcher*' -o -name 'ic_launcher_background*' \) \
+            -print -delete
+
           npm run assets:android
-          find android/app/src/main/res -path '*mipmap*' -name 'ic_launcher*' -print | grep -q .
+
+          # Fail the build unless both legacy and adaptive A+ SmartDocs icons
+          # were regenerated. This prevents another Play submission with a
+          # correct legacy icon but the default Capacitor adaptive icon.
+          required_icons=(
+            android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+            android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
+            android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+            android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          )
+          for icon in "${required_icons[@]}"; do
+            if [ ! -s "$icon" ]; then
+              echo "Fehlendes generiertes Launcher-Asset: $icon" >&2
+              exit 1
+            fi
+          done
+
+          sha256sum \
+            android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png \
+            android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
 
       - name: Release-Signatur einrichten
         working-directory: mobile/android
@@ -89,12 +129,14 @@ jobs:
           if-no-files-found: error
 
       - name: Google-Play-Schlüssel vorbereiten
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_to_play }}
         shell: bash
         run: |
           printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64" | base64 --decode > "$RUNNER_TEMP/google-play.json"
           chmod 600 "$RUNNER_TEMP/google-play.json"
 
       - name: In Google Play Internal Testing veröffentlichen
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_to_play }}
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ runner.temp }}/google-play.json
